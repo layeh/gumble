@@ -25,7 +25,7 @@ const (
 )
 
 type Client struct {
-	listeners EventMux
+	listeners eventMux
 
 	state  State
 	self   *User

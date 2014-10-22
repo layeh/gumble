@@ -5,7 +5,7 @@ type DetachableListener interface {
 }
 
 type listenerMuxItem struct {
-	mux        *EventMux
+	mux        *eventMux
 	prev, next *listenerMuxItem
 	listener   EventListener
 }
@@ -23,11 +23,11 @@ func (lmi *listenerMuxItem) DetachListener() {
 	}
 }
 
-type EventMux struct {
+type eventMux struct {
 	head, tail *listenerMuxItem
 }
 
-func (em *EventMux) Attach(listener EventListener) DetachableListener {
+func (em *eventMux) Attach(listener EventListener) DetachableListener {
 	item := &listenerMuxItem{
 		mux:      em,
 		prev:     em.tail,
@@ -42,31 +42,31 @@ func (em *EventMux) Attach(listener EventListener) DetachableListener {
 	return item
 }
 
-func (em *EventMux) OnConnect(event *ConnectEvent) {
+func (em *eventMux) OnConnect(event *ConnectEvent) {
 	for item := em.head; item != nil; item = item.next {
 		item.listener.OnConnect(event)
 	}
 }
 
-func (em *EventMux) OnDisconnect(event *DisconnectEvent) {
+func (em *eventMux) OnDisconnect(event *DisconnectEvent) {
 	for item := em.head; item != nil; item = item.next {
 		item.listener.OnDisconnect(event)
 	}
 }
 
-func (em *EventMux) OnTextMessage(event *TextMessageEvent) {
+func (em *eventMux) OnTextMessage(event *TextMessageEvent) {
 	for item := em.head; item != nil; item = item.next {
 		item.listener.OnTextMessage(event)
 	}
 }
 
-func (em *EventMux) OnUserChange(event *UserChangeEvent) {
+func (em *eventMux) OnUserChange(event *UserChangeEvent) {
 	for item := em.head; item != nil; item = item.next {
 		item.listener.OnUserChange(event)
 	}
 }
 
-func (em *EventMux) OnChannelChange(event *ChannelChangeEvent) {
+func (em *eventMux) OnChannelChange(event *ChannelChangeEvent) {
 	for item := em.head; item != nil; item = item.next {
 		item.listener.OnChannelChange(event)
 	}
