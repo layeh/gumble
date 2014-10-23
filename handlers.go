@@ -113,8 +113,31 @@ func handleServerSync(client *Client, buffer []byte) error {
 }
 
 func handleChannelRemove(client *Client, buffer []byte) error {
-	// TODO
-	return errUnimplementedHandler
+	var packet MumbleProto.ChannelRemove
+	if err := proto.Unmarshal(buffer, &packet); err != nil {
+		return err
+	}
+
+	if packet.ChannelId == nil {
+		return errIncompleteProtobuf
+	}
+	var channel *Channel
+	{
+		channelId := uint(*packet.ChannelId)
+		channel = client.channels.ById(channelId)
+		if channel == nil {
+			return errInvalidProtobuf
+		}
+		client.channels.Delete(channelId)
+	}
+
+	if client.state == Synced {
+		event := &ChannelChangeEvent{
+			Channel: channel,
+		}
+		client.listeners.OnChannelChange(event)
+	}
+	return nil
 }
 
 func handleChannelState(client *Client, buffer []byte) error {
