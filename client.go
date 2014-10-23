@@ -117,6 +117,9 @@ func (c *Client) Close() {
 	c.connection.Close()
 	c.connection = nil
 	c.state = Disconnected
+	c.users = nil
+	c.channels = nil
+	c.self = nil
 
 	// TODO: include disconnect reason/source
 	event := &DisconnectEvent{}
