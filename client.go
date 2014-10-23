@@ -47,9 +47,7 @@ type Client struct {
 // NewClient creates a new gumble client.
 func NewClient() *Client {
 	client := &Client{
-		users:    Users{},
-		channels: Channels{},
-		state:    Disconnected,
+		state: Disconnected,
 	}
 	return client
 }
@@ -71,6 +69,8 @@ func (c *Client) DialWithDialer(dialer *net.Dialer, username, password, address 
 	if c.connection, err = tls.DialWithDialer(dialer, "tcp", address, &c.tls); err != nil {
 		return err
 	}
+	c.users = Users{}
+	c.channels = Channels{}
 	c.state = Connected
 
 	// Channels and event loops
