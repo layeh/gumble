@@ -2,6 +2,7 @@ package gumble
 
 import (
 	"crypto/tls"
+	"errors"
 	"net"
 	"runtime"
 	"sync"
@@ -22,6 +23,10 @@ const (
 	Disconnected State = iota
 	Connected
 	Synced
+)
+
+var (
+	ErrConnected = errors.New("client is already connected to a server")
 )
 
 type Client struct {
@@ -65,6 +70,9 @@ func (c *Client) Dial(username, password, address string) error {
 // Username and password can be empty if they are not required to access the
 // server.
 func (c *Client) DialWithDialer(dialer *net.Dialer, username, password, address string) error {
+	if c.connection != nil {
+		return ErrConnected
+	}
 	var err error
 	if c.connection, err = tls.DialWithDialer(dialer, "tcp", address, &c.tls); err != nil {
 		return err
