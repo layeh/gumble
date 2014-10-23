@@ -166,6 +166,17 @@ func (c *Client) Self() *User {
 	return c.self
 }
 
+// Users returns a collection containing the users currently connected to the
+// server.
+func (c *Client) Users() Users {
+	return c.users
+}
+
+// Channels returns a collection containing the server's channels.
+func (c *Client) Channels() Channels {
+	return c.channels
+}
+
 // Send will send a text message.
 func (c *Client) Send(message *TextMessage) {
 	packet := MumbleProto.TextMessage{
