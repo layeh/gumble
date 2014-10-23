@@ -191,8 +191,31 @@ func handleChannelState(client *Client, buffer []byte) error {
 }
 
 func handleUserRemove(client *Client, buffer []byte) error {
-	// TODO
-	return errUnimplementedHandler
+	var packet MumbleProto.UserRemove
+	if err := proto.Unmarshal(buffer, &packet); err != nil {
+		return err
+	}
+
+	if packet.Session == nil {
+		return errIncompleteProtobuf
+	}
+	var user *User
+	{
+		session := uint(*packet.Session)
+		user = client.users.BySession(session)
+		if user == nil {
+			return errInvalidProtobuf
+		}
+		client.users.Delete(session)
+	}
+
+	if client.state == Synced {
+		event := &UserChangeEvent{
+			User: user,
+		}
+		client.listeners.OnUserChange(event)
+	}
+	return nil
 }
 
 func handleUserState(client *Client, buffer []byte) error {
