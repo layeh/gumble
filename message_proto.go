@@ -30,6 +30,8 @@ func (pm protoMessage) WriteTo(w io.Writer) (n int64, err error) {
 		protoType = 2
 	case *MumbleProto.Ping:
 		protoType = 3
+	case *MumbleProto.ChannelRemove:
+		protoType = 6
 	case *MumbleProto.ChannelState:
 		protoType = 7
 	case *MumbleProto.UserRemove:
