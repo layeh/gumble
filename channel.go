@@ -2,7 +2,7 @@ package gumble
 
 import (
 	"code.google.com/p/goprotobuf/proto"
-	"github.com/bontibon/gumble/proto"
+	"github.com/bontibon/gumble/MumbleProto"
 )
 
 type Channel struct {
