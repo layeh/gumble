@@ -185,24 +185,9 @@ func (c *Client) Channels() Channels {
 	return c.channels
 }
 
-// Send will send a text message.
-func (c *Client) Send(message *TextMessage) {
-	packet := MumbleProto.TextMessage{
-		Message: &message.Message,
-	}
-	if message.Users != nil {
-		packet.Session = make([]uint32, len(message.Users))
-		for i, user := range message.Users {
-			packet.Session[i] = user.session
-		}
-	}
-	if message.Channels != nil {
-		packet.ChannelId = make([]uint32, len(message.Channels))
-		for i, channel := range message.Channels {
-			packet.ChannelId[i] = channel.id
-		}
-	}
-	c.outgoing <- protoMessage{&packet}
+// Send will send a message to the server.
+func (c *Client) Send(message Message) {
+	c.outgoing <- message
 }
 
 // clientOutgoing writes protobuf messages to the server.
