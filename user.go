@@ -115,7 +115,7 @@ func (u *User) Register() {
 		Session: &u.session,
 		UserId:  proto.Uint32(0),
 	}
-	u.client.outgoing <- &packet
+	u.client.outgoing <- protoMessage{&packet}
 }
 
 // SetComment will set the user's comment to the given string. The user's
@@ -125,7 +125,7 @@ func (u *User) SetComment(comment string) {
 		Session: &u.session,
 		Comment: &comment,
 	}
-	u.client.outgoing <- &packet
+	u.client.outgoing <- protoMessage{&packet}
 }
 
 // Move will move the user to the given channel.
@@ -134,7 +134,7 @@ func (u *User) Move(channel *Channel) {
 		Session:   &u.session,
 		ChannelId: &channel.id,
 	}
-	u.client.outgoing <- &packet
+	u.client.outgoing <- protoMessage{&packet}
 }
 
 // Kick will kick the user from the server.
@@ -143,7 +143,7 @@ func (u *User) Kick(reason string) {
 		Session: &u.session,
 		Reason:  &reason,
 	}
-	u.client.outgoing <- &packet
+	u.client.outgoing <- protoMessage{&packet}
 }
 
 // Ban will ban the user from the server.
@@ -153,5 +153,5 @@ func (u *User) Ban(reason string) {
 		Reason:  &reason,
 		Ban:     proto.Bool(true),
 	}
-	u.client.outgoing <- &packet
+	u.client.outgoing <- protoMessage{&packet}
 }

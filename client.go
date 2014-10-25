@@ -46,7 +46,7 @@ type Client struct {
 
 	end        chan bool
 	closeMutex sync.Mutex
-	outgoing   chan proto.Message
+	outgoing   chan Message
 }
 
 // NewClient creates a new gumble client.
@@ -83,7 +83,7 @@ func (c *Client) DialWithDialer(dialer *net.Dialer, username, password, address 
 
 	// Channels and event loops
 	c.end = make(chan bool)
-	c.outgoing = make(chan proto.Message, 2)
+	c.outgoing = make(chan Message, 2)
 
 	go clientOutgoing(c)
 	go clientIncoming(c)
@@ -107,8 +107,8 @@ func (c *Client) DialWithDialer(dialer *net.Dialer, username, password, address 
 		Password: proto.String(password),
 		Opus:     proto.Bool(true),
 	}
-	c.outgoing <- &versionPacket
-	c.outgoing <- &authenticationPacket
+	c.outgoing <- protoMessage{&versionPacket}
+	c.outgoing <- protoMessage{&authenticationPacket}
 	return nil
 }
 
@@ -202,7 +202,7 @@ func (c *Client) Send(message *TextMessage) {
 			packet.ChannelId[i] = channel.id
 		}
 	}
-	c.outgoing <- &packet
+	c.outgoing <- protoMessage{&packet}
 }
 
 // clientOutgoing writes protobuf messages to the server.
@@ -213,6 +213,7 @@ func clientOutgoing(client *Client) {
 	pingPacket := MumbleProto.Ping{
 		Timestamp: proto.Uint64(0),
 	}
+	pingProto := protoMessage{&pingPacket}
 	defer pingTicker.Stop()
 
 	conn := client.connection
@@ -223,32 +224,13 @@ func clientOutgoing(client *Client) {
 			return
 		case time := <-pingTicker.C:
 			*pingPacket.Timestamp = uint64(time.Unix())
-			client.outgoing <- &pingPacket
+			client.outgoing <- pingProto
 		case message, ok := <-client.outgoing:
 			if !ok {
 				return
 			} else {
-				if err := writeProto(conn, message); err != nil {
+				if _, err := message.WriteTo(conn); err != nil {
 					return
-				}
-			}
-		}
-	}
-}
-
-// serverIncoming reads protobuffer messages from the server.
-func clientIncoming(client *Client) {
-	defer client.Close()
-
-	conn := client.connection
-
-	for {
-		if packet, err := readPacket(conn); err != nil {
-			return
-		} else {
-			if handle, ok := handlers[packet.Type]; ok {
-				if err := handle(client, packet.Data); err != nil {
-					// TODO: log error?
 				}
 			}
 		}
