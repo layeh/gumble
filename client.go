@@ -148,7 +148,7 @@ func (c *Client) LocalAddr() net.Addr {
 }
 
 // Attach adds an event listener.
-func (c *Client) Attach(listener EventListener) DetachableListener {
+func (c *Client) Attach(listener EventListener) Detachable {
 	return c.listeners.Attach(listener)
 }
 

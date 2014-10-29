@@ -1,16 +1,12 @@
 package gumble
 
-type DetachableListener interface {
-	DetachListener()
-}
-
 type listenerMuxItem struct {
 	mux        *eventMux
 	prev, next *listenerMuxItem
 	listener   EventListener
 }
 
-func (lmi *listenerMuxItem) DetachListener() {
+func (lmi *listenerMuxItem) Detach() {
 	if lmi.prev == nil {
 		lmi.mux.head = lmi.next
 	} else {
@@ -27,7 +23,7 @@ type eventMux struct {
 	head, tail *listenerMuxItem
 }
 
-func (em *eventMux) Attach(listener EventListener) DetachableListener {
+func (em *eventMux) Attach(listener EventListener) Detachable {
 	item := &listenerMuxItem{
 		mux:      em,
 		prev:     em.tail,
