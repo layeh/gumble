@@ -18,7 +18,7 @@ type protoMessage struct {
 	proto proto.Message
 }
 
-func (pm protoMessage) WriteTo(w io.Writer) (n int64, err error) {
+func (pm protoMessage) WriteTo(w io.Writer) (int64, error) {
 	if pm.proto == nil {
 		return 0, errNilMessage
 	}
