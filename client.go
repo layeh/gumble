@@ -39,6 +39,8 @@ type Client struct {
 	users    Users
 	channels Channels
 
+	audio *audioImpl
+
 	end        chan bool
 	closeMutex sync.Mutex
 	outgoing   chan Message
@@ -150,6 +152,35 @@ func (c *Client) LocalAddr() net.Addr {
 // Attach adds an event listener.
 func (c *Client) Attach(listener EventListener) Detachable {
 	return c.listeners.Attach(listener)
+}
+
+// AttachAudio will attach an AudioStream to the client.
+//
+// Only one AudioStream can be attached at a time. If one is already attached,
+// it will be detached before the new stream is attached.
+func (c *Client) AttachAudio(stream AudioStream, flags AudioFlag) (Audio, error) {
+	if c.audio != nil {
+		c.audio.Detach()
+	}
+
+	audio := &audioImpl{
+		client: c,
+		stream: stream,
+		flags:  flags,
+	}
+	if err := stream.OnAttach(); err != nil {
+		return nil, err
+	}
+	if (flags & AudioSource) != 0 {
+		audio.outgoing = make(chan []int16)
+		go audioOutgoing(audio)
+		if err := stream.OnAttachSource(audio.outgoing); err != nil {
+			close(audio.outgoing)
+			return nil, err
+		}
+	}
+	c.audio = audio
+	return audio, nil
 }
 
 // State returns the current state of the client.
