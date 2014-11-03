@@ -2,19 +2,10 @@ package gumble
 
 import (
 	"encoding/binary"
-	"errors"
 	"io"
 )
 
 const maximumPacketLength = 1024 * 1024 * 10 // 10 megabytes
-
-var (
-	errInvalidArgument  = errors.New("invalid argument passed to function")
-	errPacketReadType   = errors.New("could not read packet type")
-	errPacketReadLength = errors.New("could not read packet length")
-	errPacketLength     = errors.New("packet data is too large")
-	errPacketRead       = errors.New("packet read error")
-)
 
 // serverIncoming reads protobuffer messages from the server.
 func clientIncoming(client *Client) {
