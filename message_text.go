@@ -13,7 +13,7 @@ type TextMessage struct {
 	Message  string     // Chat message.
 }
 
-func (pm *TextMessage) WriteTo(w io.Writer) (n int64, err error) {
+func (pm *TextMessage) WriteTo(w io.Writer) (int64, error) {
 	packet := MumbleProto.TextMessage{
 		Message: &pm.Message,
 	}
