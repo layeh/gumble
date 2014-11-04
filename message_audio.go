@@ -3,8 +3,9 @@ package gumble
 import (
 	"bytes"
 	"encoding/binary"
-	"errors"
 	"io"
+
+	"github.com/bontibon/gumble/varint"
 )
 
 type audioFormat byte
@@ -34,10 +35,10 @@ func (am *audioMessage) WriteTo(w io.Writer) (int64, error) {
 	if err := header.WriteByte(formatTarget); err != nil {
 		return 0, err
 	}
-	if _, err := writeVarint(int64(am.sequence), &header); err != nil {
+	if _, err := varint.WriteTo(&header, int64(am.sequence)); err != nil {
 		return 0, err
 	}
-	if _, err := writeVarint(int64(len(am.opus)), &header); err != nil {
+	if _, err := varint.WriteTo(&header, int64(len(am.opus))); err != nil {
 		return 0, err
 	}
 
@@ -69,28 +70,6 @@ func (am *audioMessage) WriteTo(w io.Writer) (int64, error) {
 		written += int64(n)
 	}
 	return written, nil
-}
-
-func writeVarint(value int64, w io.Writer) (int64, error) {
-	var buff []byte
-	if value <= 0x7F {
-		buff = []byte{
-			byte(value),
-		}
-	} else if value <= 0x3FFF {
-		buff = []byte{
-			byte(((value >> 8) & 0x3F) | 0x80),
-			byte(value & 0xFF),
-		}
-	}
-	if buff != nil {
-		if n, err := w.Write(buff); err != nil {
-			return int64(n), err
-		} else {
-			return int64(n), nil
-		}
-	}
-	return 0, errors.New("out of range")
 }
 
 func (am *audioMessage) gumbleMessage() {
