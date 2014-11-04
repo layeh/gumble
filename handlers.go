@@ -105,7 +105,6 @@ func handleServerSync(client *Client, buffer []byte) error {
 	if packet.WelcomeText != nil {
 		event.WelcomeMessage = *packet.WelcomeText
 	}
-	// TODO: bandwidth, permissions
 	client.state = Synced
 
 	client.listeners.OnConnect(event)
@@ -179,7 +178,6 @@ func handleChannelState(client *Client, buffer []byte) error {
 		channel.descriptionHash = packet.DescriptionHash
 		channel.description = ""
 	}
-	// TODO: channel links
 
 	if client.state == Synced {
 		event := &ChannelChangeEvent{
@@ -336,7 +334,6 @@ func handleTextMessage(client *Client, buffer []byte) error {
 	if packet.Message != nil {
 		event.Message = *packet.Message
 	}
-	// TODO: trees
 
 	client.listeners.OnTextMessage(event)
 	return nil

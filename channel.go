@@ -8,9 +8,8 @@ import (
 type Channel struct {
 	client *Client
 
-	id     uint32
-	parent *Channel
-	// TODO: keep track of sub-channels
+	id              uint32
+	parent          *Channel
 	name            string
 	description     string
 	descriptionHash []byte

@@ -129,7 +129,6 @@ func (c *Client) Close() {
 	c.channels = nil
 	c.self = nil
 
-	// TODO: include disconnect reason/source
 	event := &DisconnectEvent{}
 	c.listeners.OnDisconnect(event)
 }
