@@ -1,14 +1,14 @@
 package varint
 
 import (
-	"errors"
 	"io"
 )
 
-var (
-	ErrOutOfRange = errors.New("out of range")
-)
-
+// WriteTo writes the given value to the given io.Writer as a varint encoded
+// byte array.
+//
+// On success, the function returns the number of bytes written to the writer,
+// and nil.
 func WriteTo(w io.Writer, value int64) (int64, error) {
 	var buff []byte
 	if value <= 0x7F {
