@@ -32,7 +32,7 @@ const responseTemplate = `
     </tr>
 </table>`
 
-const linkPattern = `https?://(?:www\.)?(?:youtube\.com/watch\?v=|youtu.be/|youtube.com/v/|youtube.com/v/)([[:alnum:]_\-]+)`
+const linkPattern = `https?://(?:www\.)?(?:youtube\.com/watch\?v=|youtu\.be/|youtube\.com/v/|youtube\.com/v/)([[:alnum:]_\-]+)`
 
 type plugin struct {
 	client    *gumble.Client
@@ -56,6 +56,7 @@ func (p *plugin) OnConnect(e *gumble.ConnectEvent) {
 }
 
 func (p *plugin) OnDisconnect(e *gumble.DisconnectEvent) {
+	p.keepAlive <- true
 }
 
 func (p *plugin) OnTextMessage(e *gumble.TextMessageEvent) {
@@ -66,7 +67,7 @@ func (p *plugin) OnTextMessage(e *gumble.TextMessageEvent) {
 	if len(matches) != 2 {
 		return
 	}
-	go fetchYoutubeInfo(p, matches[1])
+	go p.fetchYoutubeInfo(matches[1])
 }
 
 type videoInfo struct {
@@ -80,7 +81,7 @@ type videoInfo struct {
 	}
 }
 
-func fetchYoutubeInfo(p *plugin, id string) {
+func (p *plugin) fetchYoutubeInfo(id string) {
 	var info videoInfo
 
 	// Fetch + parse video info
