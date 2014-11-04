@@ -35,6 +35,7 @@ const responseTemplate = `
 const linkPattern = `https?://(?:www\.)?(?:youtube\.com/watch\?v=|youtu\.be/|youtube\.com/v/|youtube\.com/v/)([[:alnum:]_\-]+)`
 
 type plugin struct {
+	config    gumble.Config
 	client    *gumble.Client
 	keepAlive chan bool
 	pattern   *regexp.Regexp
@@ -132,12 +133,15 @@ func main() {
 	}
 
 	// client
-	p.client = gumble.NewClient()
+	p.client = gumble.NewClient(&p.config)
+	p.config.Username = *username
+	p.config.Password = *password
+	p.config.Address = *server
 	if *insecure {
-		p.client.TlsConfig().InsecureSkipVerify = true
+		p.config.TlsConfig.InsecureSkipVerify = true
 	}
 	p.client.Attach(&p)
-	if err := p.client.Dial(*username, *password, *server); err != nil {
+	if err := p.client.Connect(); err != nil {
 		fmt.Printf("%s\n", err)
 		os.Exit(1)
 	}
