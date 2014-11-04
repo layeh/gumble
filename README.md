@@ -1,6 +1,7 @@
 # gumble
 
-gumble is a [Go](https://golang.org/) client for the [Mumble](http://mumble.info) voice chat software.
+gumble is a [Go](https://golang.org/) client library for the
+[Mumble](http://mumble.info) voice chat software.
 
 ## Documentation
 
