@@ -25,6 +25,8 @@ var (
 )
 
 type Client struct {
+	config *Config
+
 	listeners eventMux
 
 	state  State
@@ -47,32 +49,23 @@ type Client struct {
 }
 
 // NewClient creates a new gumble client.
-func NewClient() *Client {
+func NewClient(config *Config) *Client {
 	client := &Client{
-		state: Disconnected,
+		config: config,
+		state:  Disconnected,
 	}
 	return client
 }
 
-// Dial connects to the server at the given address.
-//
-// Username and password can be empty if they are not required to access the
-// server.
-func (c *Client) Dial(username, password, address string) error {
-	return c.DialWithDialer(new(net.Dialer), username, password, address)
-}
-
-// Dial connects to the server at the given address, using the given dialer.
-//
-// Username and password can be empty if they are not required to access the
-// server.
-func (c *Client) DialWithDialer(dialer *net.Dialer, username, password, address string) error {
-	if c.connection != nil {
+// Connect connects to the server.
+func (c *Client) Connect() error {
+	if c.state != Disconnected {
 		return ErrConnected
 	}
-	var err error
-	if c.connection, err = tls.DialWithDialer(dialer, "tcp", address, &c.tls); err != nil {
+	if conn, err := tls.DialWithDialer(&c.config.Dialer, "tcp", c.config.Address, &c.config.TlsConfig); err != nil {
 		return err
+	} else {
+		c.connection = conn
 	}
 	c.users = Users{}
 	c.channels = Channels{}
@@ -100,8 +93,8 @@ func (c *Client) DialWithDialer(dialer *net.Dialer, username, password, address 
 		OsVersion: &version.osVersion,
 	}
 	authenticationPacket := MumbleProto.Authenticate{
-		Username: proto.String(username),
-		Password: proto.String(password),
+		Username: &c.config.Username,
+		Password: &c.config.Password,
 		Opus:     proto.Bool(true),
 	}
 	c.outgoing <- protoMessage{&versionPacket}
@@ -188,12 +181,6 @@ func (c *Client) AttachAudio(stream AudioStream, flags AudioFlag) (*Audio, error
 // State returns the current state of the client.
 func (c *Client) State() State {
 	return c.state
-}
-
-// TlsConfig returns a pointer to the tls.Config struct used when connecting to
-// a server.
-func (c *Client) TlsConfig() *tls.Config {
-	return &c.tls
 }
 
 // Self returns a pointer to the User associated with the client. The function
