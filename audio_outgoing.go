@@ -1,7 +1,7 @@
 package gumble
 
 import (
-	"github.com/bontibon/gumble/gopus"
+	"github.com/bontibon/gopus"
 )
 
 func audioOutgoing(audio *Audio) {
