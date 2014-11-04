@@ -4,7 +4,7 @@ import (
 	"github.com/bontibon/gumble/gopus"
 )
 
-func audioOutgoing(audio *audioImpl) {
+func audioOutgoing(audio *Audio) {
 	outgoing := audio.outgoing
 	message := audioMessage{
 		Format: audioOpus,

@@ -12,18 +12,14 @@ type AudioStream interface {
 	OnDetach()
 }
 
-type Audio interface {
-	Detachable
-}
-
-type audioImpl struct {
+type Audio struct {
 	client   *Client
 	stream   AudioStream
 	flags    AudioFlag
 	outgoing chan []int16
 }
 
-func (a *audioImpl) Detach() {
+func (a *Audio) Detach() {
 	if a.client.audio != a {
 		return
 	}

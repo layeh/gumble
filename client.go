@@ -39,7 +39,7 @@ type Client struct {
 	users    Users
 	channels Channels
 
-	audio *audioImpl
+	audio *Audio
 
 	end        chan bool
 	closeMutex sync.Mutex
@@ -158,12 +158,12 @@ func (c *Client) Attach(listener EventListener) Detachable {
 //
 // Only one AudioStream can be attached at a time. If one is already attached,
 // it will be detached before the new stream is attached.
-func (c *Client) AttachAudio(stream AudioStream, flags AudioFlag) (Audio, error) {
+func (c *Client) AttachAudio(stream AudioStream, flags AudioFlag) (*Audio, error) {
 	if c.audio != nil {
 		c.audio.Detach()
 	}
 
-	audio := &audioImpl{
+	audio := &Audio{
 		client: c,
 		stream: stream,
 		flags:  flags,
