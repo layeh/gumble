@@ -117,6 +117,9 @@ func (c *Client) Close() {
 	if c.connection == nil {
 		return
 	}
+	if c.audio != nil {
+		c.audio.Detach()
+	}
 	close(c.end)
 	close(c.outgoing)
 	c.connection.Close()
