@@ -10,7 +10,7 @@ func audioOutgoing(audio *Audio) {
 		Format: audioOpus,
 		Target: audioNormal,
 	}
-	encoder, _ := opus.NewEncoder(48000, 1, opus.Voip)
+	encoder, _ := gopus.NewEncoder(48000, 1, gopus.Voip)
 	encoder.SetVbr(false)
 	encoder.SetBitrate(40000)
 	for {
