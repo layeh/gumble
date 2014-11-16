@@ -191,13 +191,13 @@ func (c *Client) Self() *User {
 
 // Users returns a collection containing the users currently connected to the
 // server.
-func (c *Client) Users() Users {
-	return c.users
+func (c *Client) Users() *Users {
+	return &c.users
 }
 
 // Channels returns a collection containing the server's channels.
-func (c *Client) Channels() Channels {
-	return c.channels
+func (c *Client) Channels() *Channels {
+	return &c.channels
 }
 
 // Send will send a message to the server.
