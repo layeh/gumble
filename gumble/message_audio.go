@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"io"
 
-	"github.com/bontibon/gumble/varint"
+	"github.com/bontibon/gumble/gumble/varint"
 )
 
 type audioFormat byte

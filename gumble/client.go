@@ -8,7 +8,7 @@ import (
 	"sync"
 
 	"code.google.com/p/goprotobuf/proto"
-	"github.com/bontibon/gumble/MumbleProto"
+	"github.com/bontibon/gumble/gumble/MumbleProto"
 )
 
 // State is the current state of the client's connection to the server.

@@ -3,7 +3,7 @@ package gumble
 import (
 	"io"
 
-	"github.com/bontibon/gumble/MumbleProto"
+	"github.com/bontibon/gumble/gumble/MumbleProto"
 )
 
 type TextMessage struct {

@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"code.google.com/p/goprotobuf/proto"
-	"github.com/bontibon/gumble/MumbleProto"
+	"github.com/bontibon/gumble/gumble/MumbleProto"
 )
 
 // PingInterval is the interval at which ping packets are be sent by the client

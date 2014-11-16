@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"code.google.com/p/goprotobuf/proto"
-	"github.com/bontibon/gumble/MumbleProto"
+	"github.com/bontibon/gumble/gumble/MumbleProto"
 )
 
 type handlerFunc func(*Client, []byte) error
