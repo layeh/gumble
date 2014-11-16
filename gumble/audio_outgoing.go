@@ -17,7 +17,7 @@ func audioOutgoing(audio *Audio) {
 		if buf, ok := <-outgoing; !ok {
 			return
 		} else {
-			if opusBuf, err := encoder.Encode(buf, 480, 1024); err == nil {
+			if opusBuf, err := encoder.Encode(buf.Pcm, 480, 1024); err == nil {
 				audio.client.outgoing <- &message
 				message.sequence = (message.sequence + 1) % 10000
 				message.opus = opusBuf

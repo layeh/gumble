@@ -8,7 +8,7 @@ const (
 
 type AudioStream interface {
 	OnAttach() error
-	OnAttachSource(chan<- []int16) error
+	OnAttachSource(chan<- AudioPacket) error
 	OnDetach()
 }
 
@@ -16,7 +16,7 @@ type Audio struct {
 	client   *Client
 	stream   AudioStream
 	flags    AudioFlag
-	outgoing chan []int16
+	outgoing chan AudioPacket
 }
 
 func (a *Audio) Detach() {
@@ -26,4 +26,9 @@ func (a *Audio) Detach() {
 	a.client.audio = nil
 	a.stream.OnDetach()
 	close(a.outgoing)
+}
+
+type AudioPacket struct {
+	Sender *User
+	Pcm    []int16
 }

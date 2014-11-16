@@ -167,7 +167,7 @@ func (c *Client) AttachAudio(stream AudioStream, flags AudioFlag) (*Audio, error
 		return nil, err
 	}
 	if (flags & AudioSource) != 0 {
-		audio.outgoing = make(chan []int16)
+		audio.outgoing = make(chan AudioPacket)
 		go audioOutgoing(audio)
 		if err := stream.OnAttachSource(audio.outgoing); err != nil {
 			close(audio.outgoing)
