@@ -98,3 +98,8 @@ func (c *Channel) SetDescription(description string) {
 	}
 	c.client.outgoing <- protoMessage{&packet}
 }
+
+// TODO: implement me
+func (c *Channel) Find(names ...string) *Channel {
+	return nil
+}

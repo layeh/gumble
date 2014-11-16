@@ -28,3 +28,12 @@ func (c *Channels) Exists(id uint) bool {
 func (c *Channels) Delete(id uint) {
 	delete(*c, id)
 }
+
+// TODO: document me
+func (c *Channels) Find(names ...string) *Channel {
+	root := (*c)[0]
+	if names == nil || root == nil {
+		return nil
+	}
+	return root.Find(names...)
+}
