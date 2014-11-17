@@ -29,7 +29,7 @@ func (s *Stream) OnAttach() error {
 }
 
 func (s *Stream) OnAttachSource(outgoing chan<- gumble.AudioPacket) error {
-	s.deviceSource = openal.CaptureOpenDevice("", 48000, openal.FormatMono16, 480)
+	s.deviceSource = openal.CaptureOpenDevice("", gumble.SampleRate, openal.FormatMono16, gumble.SampleRate/100)
 	s.outgoing = outgoing
 	return nil
 }

@@ -183,7 +183,7 @@ func (c *Client) AttachAudio(stream AudioStream, flags AudioFlag) (*Audio, error
 		} else {
 			audio.incoming = incoming
 		}
-		if decoder, err := gopus.NewDecoder(48000, 1); err != nil {
+		if decoder, err := gopus.NewDecoder(SampleRate, 1); err != nil {
 			return nil, err
 		} else {
 			audio.decoder = decoder

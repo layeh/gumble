@@ -11,6 +11,10 @@ const (
 	AudioSink                         // An audio stream that processes incoming audio
 )
 
+const (
+	SampleRate = 48000
+)
+
 type AudioStream interface {
 	OnAttach() error
 	OnAttachSource(chan<- AudioPacket) error
