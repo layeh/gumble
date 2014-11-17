@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"code.google.com/p/goprotobuf/proto"
+	"github.com/bontibon/gopus"
 	"github.com/bontibon/gumble/gumble/MumbleProto"
 )
 
@@ -112,6 +113,7 @@ func (c *Client) Close() {
 	}
 	if c.audio != nil {
 		c.audio.Detach()
+		c.audio = nil
 	}
 	close(c.end)
 	close(c.outgoing)
@@ -166,12 +168,25 @@ func (c *Client) AttachAudio(stream AudioStream, flags AudioFlag) (*Audio, error
 	if err := stream.OnAttach(); err != nil {
 		return nil, err
 	}
-	if (flags & AudioSource) != 0 {
+	if audio.IsSource() {
 		audio.outgoing = make(chan AudioPacket)
 		go audioOutgoing(audio)
 		if err := stream.OnAttachSource(audio.outgoing); err != nil {
 			close(audio.outgoing)
 			return nil, err
+		}
+	}
+	if audio.IsSink() {
+		if incoming, err := stream.OnAttachSink(); err != nil {
+			close(audio.outgoing)
+			return nil, err
+		} else {
+			audio.incoming = incoming
+		}
+		if decoder, err := gopus.NewDecoder(48000, 1); err != nil {
+			return nil, err
+		} else {
+			audio.decoder = decoder
 		}
 	}
 	c.audio = audio

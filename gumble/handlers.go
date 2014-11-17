@@ -1,10 +1,12 @@
 package gumble
 
 import (
+	"bytes"
 	"errors"
 
 	"code.google.com/p/goprotobuf/proto"
 	"github.com/bontibon/gumble/gumble/MumbleProto"
+	"github.com/bontibon/gumble/gumble/varint"
 )
 
 type handlerFunc func(*Client, []byte) error
@@ -73,8 +75,75 @@ func handleVersion(client *Client, buffer []byte) error {
 }
 
 func handleUdpTunnel(client *Client, buffer []byte) error {
-	// TODO
-	return errUnimplementedHandler
+	if client.audio == nil || !client.audio.IsSink() {
+		return nil
+	}
+
+	reader := bytes.NewReader(buffer)
+	var bytesRead int64
+
+	var audioType byte
+	var audioTarget byte
+	var sequence int64
+	var user *User
+	var audioLength int
+
+	// Header byte
+	if typeTarget, err := varint.ReadByte(reader); err != nil {
+		return err
+	} else {
+		audioType = (typeTarget >> 5) & 0x7
+		audioTarget = typeTarget & 0x1F
+		// Opus only
+		if audioType != 4 {
+			return errInvalidProtobuf
+		}
+		bytesRead += 1
+	}
+
+	// Session
+	if session, n, err := varint.ReadFrom(reader); err != nil {
+		return err
+	} else {
+		user = client.users[uint(session)]
+		if user == nil {
+			return errInvalidProtobuf
+		}
+		bytesRead += n
+	}
+
+	// Sequence
+	if seq, n, err := varint.ReadFrom(reader); err != nil {
+		return err
+	} else {
+		sequence = seq
+		bytesRead += n
+	}
+
+	// Length
+	if length, n, err := varint.ReadFrom(reader); err != nil {
+		return err
+	} else {
+		audioLength = int(length)
+		if audioLength > reader.Len() {
+			return errInvalidProtobuf
+		}
+		bytesRead += n
+	}
+
+	opus := buffer[bytesRead : bytesRead+int64(audioLength)]
+	if pcm, err := client.audio.decoder.Decode(opus, 1920, false); err != nil {
+		return err
+	} else {
+		_ = audioTarget
+		packet := AudioPacket{
+			Sender:   user,
+			Sequence: int(sequence),
+			Pcm:      pcm,
+		}
+		client.audio.incoming <- packet
+	}
+	return nil
 }
 
 func handleAuthenticate(client *Client, buffer []byte) error {
