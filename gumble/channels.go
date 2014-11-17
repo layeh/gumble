@@ -33,7 +33,7 @@ func (c *Channels) Delete(id uint) {
 func (c *Channels) Find(names ...string) *Channel {
 	root := (*c)[0]
 	if names == nil || root == nil {
-		return nil
+		return root
 	}
 	return root.Find(names...)
 }
