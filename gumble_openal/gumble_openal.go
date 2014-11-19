@@ -131,7 +131,7 @@ func (s *Stream) sourceRoutine() {
 	packet := gumble.AudioPacket{}
 	outgoing := s.outgoing
 	stop := s.sourceStop
-	int16Buffer := make([]int16, 480)
+	int16Buffer := make([]int16, gumble.SampleRate/100)
 	ticker := time.NewTicker(10 * time.Millisecond)
 	defer ticker.Stop()
 
@@ -140,8 +140,8 @@ func (s *Stream) sourceRoutine() {
 		case <-stop:
 			return
 		case <-ticker.C:
-			buff := s.deviceSource.CaptureSamples(480)
-			if len(buff) != 480*2 {
+			buff := s.deviceSource.CaptureSamples(gumble.SampleRate/100)
+			if len(buff) != gumble.SampleRate/100*2 {
 				continue
 			}
 			for i := range int16Buffer {
