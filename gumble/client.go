@@ -8,7 +8,6 @@ import (
 	"sync"
 
 	"code.google.com/p/goprotobuf/proto"
-	"github.com/bontibon/gopus"
 	"github.com/bontibon/gumble/gumble/MumbleProto"
 )
 
@@ -182,11 +181,6 @@ func (c *Client) AttachAudio(stream AudioStream, flags AudioFlag) (*Audio, error
 			return nil, err
 		} else {
 			audio.incoming = incoming
-		}
-		if decoder, err := gopus.NewDecoder(SampleRate, 1); err != nil {
-			return nil, err
-		} else {
-			audio.decoder = decoder
 		}
 	}
 	c.audio = audio

@@ -2,11 +2,13 @@ package gumble
 
 import (
 	"code.google.com/p/goprotobuf/proto"
+	"github.com/bontibon/gopus"
 	"github.com/bontibon/gumble/gumble/MumbleProto"
 )
 
 type User struct {
-	client *Client
+	client  *Client
+	decoder *gopus.Decoder
 
 	session, userId                          uint32
 	name                                     string

@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"code.google.com/p/goprotobuf/proto"
+	"github.com/bontibon/gopus"
 	"github.com/bontibon/gumble/gumble/MumbleProto"
 	"github.com/bontibon/gumble/gumble/varint"
 )
@@ -132,7 +133,7 @@ func handleUdpTunnel(client *Client, buffer []byte) error {
 	}
 
 	opus := buffer[bytesRead : bytesRead+int64(audioLength)]
-	if pcm, err := client.audio.decoder.Decode(opus, 1920, false); err != nil {
+	if pcm, err := user.decoder.Decode(opus, 1920, false); err != nil {
 		return err
 	} else {
 		_ = audioTarget
@@ -301,6 +302,9 @@ func handleUserState(client *Client, buffer []byte) error {
 			user = client.users.Create(session)
 			user.channel = client.channels.ById(0)
 			user.client = client
+
+			decoder, _ := gopus.NewDecoder(SampleRate, 1)
+			user.decoder = decoder
 		} else {
 			user = client.users.BySession(session)
 		}

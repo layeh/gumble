@@ -1,9 +1,5 @@
 package gumble
 
-import (
-	"github.com/bontibon/gopus"
-)
-
 type AudioFlag int
 
 const (
@@ -28,7 +24,6 @@ type Audio struct {
 	flags    AudioFlag
 	outgoing chan AudioPacket
 	incoming chan<- AudioPacket
-	decoder  *gopus.Decoder
 }
 
 func (a *Audio) Detach() {
