@@ -9,20 +9,25 @@ type EventListener interface {
 }
 
 type ConnectEvent struct {
+	Client         *Client
 	WelcomeMessage string
 }
 
 type DisconnectEvent struct {
+	Client *Client
 }
 
 type TextMessageEvent struct {
+	Client *Client
 	TextMessage
 }
 
 type UserChangeEvent struct {
-	User *User
+	Client *Client
+	User   *User
 }
 
 type ChannelChangeEvent struct {
+	Client  *Client
 	Channel *Channel
 }

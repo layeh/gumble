@@ -167,7 +167,9 @@ func handleServerSync(client *Client, buffer []byte) error {
 	if err := proto.Unmarshal(buffer, &packet); err != nil {
 		return err
 	}
-	event := &ConnectEvent{}
+	event := &ConnectEvent{
+		Client: client,
+	}
 
 	if packet.Session != nil {
 		client.self = client.users.BySession(uint(*packet.Session))
@@ -202,6 +204,7 @@ func handleChannelRemove(client *Client, buffer []byte) error {
 
 	if client.state == Synced {
 		event := &ChannelChangeEvent{
+			Client:  client,
 			Channel: channel,
 		}
 		client.listeners.OnChannelChange(event)
@@ -251,6 +254,7 @@ func handleChannelState(client *Client, buffer []byte) error {
 
 	if client.state == Synced {
 		event := &ChannelChangeEvent{
+			Client:  client,
 			Channel: channel,
 		}
 		client.listeners.OnChannelChange(event)
@@ -279,7 +283,8 @@ func handleUserRemove(client *Client, buffer []byte) error {
 
 	if client.state == Synced {
 		event := &UserChangeEvent{
-			User: user,
+			Client: client,
+			User:   user,
 		}
 		client.listeners.OnUserChange(event)
 	}
@@ -367,7 +372,8 @@ func handleUserState(client *Client, buffer []byte) error {
 
 	if client.state == Synced {
 		event := &UserChangeEvent{
-			User: user,
+			Client: client,
+			User:   user,
 		}
 		client.listeners.OnUserChange(event)
 	}
@@ -385,7 +391,9 @@ func handleTextMessage(client *Client, buffer []byte) error {
 		return err
 	}
 
-	event := &TextMessageEvent{}
+	event := &TextMessageEvent{
+		Client: client,
+	}
 	if packet.Actor != nil {
 		event.Sender = client.users.BySession(uint(*packet.Actor))
 		// TODO: ensure non-nil
