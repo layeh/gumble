@@ -25,6 +25,8 @@ type TextMessageEvent struct {
 type UserChangeEvent struct {
 	Client *Client
 	User   *User
+	Actor  *User
+
 	Connected      bool
 	Disconnected   bool
 	NameChanged    bool

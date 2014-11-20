@@ -333,6 +333,7 @@ func handleUserState(client *Client, buffer []byte) error {
 		if actor == nil {
 			return errInvalidProtobuf
 		}
+		event.Actor = actor
 	}
 	if packet.Name != nil {
 		newName := *packet.Name
