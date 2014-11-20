@@ -37,4 +37,10 @@ type UserChangeEvent struct {
 type ChannelChangeEvent struct {
 	Client  *Client
 	Channel *Channel
+
+	Created            bool
+	Removed            bool
+	Moved              bool
+	NameChanged        bool
+	DescriptionChanged bool
 }
