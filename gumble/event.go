@@ -25,6 +25,11 @@ type TextMessageEvent struct {
 type UserChangeEvent struct {
 	Client *Client
 	User   *User
+	Connected      bool
+	Disconnected   bool
+	NameChanged    bool
+	ChannelChanged bool
+	CommentChanged bool
 }
 
 type ChannelChangeEvent struct {

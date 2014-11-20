@@ -290,8 +290,9 @@ func handleUserRemove(client *Client, buffer []byte) error {
 
 	if client.state == Synced {
 		event := &UserChangeEvent{
-			Client: client,
-			User:   user,
+			Client:       client,
+			User:         user,
+			Disconnected: true,
 		}
 		client.listeners.OnUserChange(event)
 	}
@@ -307,6 +308,9 @@ func handleUserState(client *Client, buffer []byte) error {
 	if packet.Session == nil {
 		return errIncompleteProtobuf
 	}
+	event := &UserChangeEvent{
+		Client: client,
+	}
 	var user, actor *User
 	{
 		session := uint(*packet.Session)
@@ -317,10 +321,13 @@ func handleUserState(client *Client, buffer []byte) error {
 
 			decoder, _ := gopus.NewDecoder(SampleRate, 1)
 			user.decoder = decoder
+
+			event.Connected = true
 		} else {
 			user = client.users.BySession(session)
 		}
 	}
+	event.User = user
 	if packet.Actor != nil {
 		actor = client.users.BySession(uint(*packet.Actor))
 		if actor == nil {
@@ -328,13 +335,21 @@ func handleUserState(client *Client, buffer []byte) error {
 		}
 	}
 	if packet.Name != nil {
-		user.name = *packet.Name
+		newName := *packet.Name
+		if newName != user.name {
+			event.NameChanged = true
+		}
+		user.name = newName
 	}
 	if packet.UserId != nil {
 		user.userId = *packet.UserId
 	}
 	if packet.ChannelId != nil {
-		user.channel = client.channels.ById(uint(*packet.ChannelId))
+		newChannel := client.channels.ById(uint(*packet.ChannelId))
+		if newChannel != user.channel {
+			event.ChannelChanged = true
+		}
+		user.channel = newChannel
 	}
 	if packet.Mute != nil {
 		user.mute = *packet.Mute
@@ -356,7 +371,11 @@ func handleUserState(client *Client, buffer []byte) error {
 		user.textureHash = nil
 	}
 	if packet.Comment != nil {
-		user.comment = *packet.Comment
+		newComment := *packet.Comment
+		if newComment != user.comment {
+			event.CommentChanged = true
+		}
+		user.comment = newComment
 		user.commentHash = nil
 	}
 	if packet.Hash != nil {
@@ -378,10 +397,6 @@ func handleUserState(client *Client, buffer []byte) error {
 	}
 
 	if client.state == Synced {
-		event := &UserChangeEvent{
-			Client: client,
-			User:   user,
-		}
 		client.listeners.OnUserChange(event)
 	}
 	return nil
