@@ -106,7 +106,16 @@ func (c *Channel) Children() Channels {
 	return c.children
 }
 
-// TODO: implement me
+// Find returns a channel pointer whose path (by channel name) from the current
+// channel is equal to the arguments passed.
 func (c *Channel) Find(names ...string) *Channel {
+	if names == nil || len(names) == 0 {
+		return c
+	}
+	for _, child := range c.children {
+		if child.name == names[0] {
+			return child.Find(names[1:]...)
+		}
+	}
 	return nil
 }
