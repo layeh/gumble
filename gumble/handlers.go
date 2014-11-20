@@ -200,6 +200,9 @@ func handleChannelRemove(client *Client, buffer []byte) error {
 			return errInvalidProtobuf
 		}
 		client.channels.Delete(channelId)
+		if parent := channel.parent; parent != nil {
+			channel.parent.children.Delete(uint(channel.id))
+		}
 	}
 
 	if client.state == Synced {
@@ -222,17 +225,21 @@ func handleChannelState(client *Client, buffer []byte) error {
 		return errIncompleteProtobuf
 	}
 	var channel *Channel
-	{
-		channelId := uint(*packet.ChannelId)
-		if !client.channels.Exists(channelId) {
-			channel = client.channels.Create(channelId)
-			channel.client = client
-		} else {
-			channel = client.channels.ById(channelId)
-		}
+	channelId := uint(*packet.ChannelId)
+	if !client.channels.Exists(channelId) {
+		channel = client.channels.Create(channelId)
+		channel.client = client
+	} else {
+		channel = client.channels.ById(channelId)
 	}
 	if packet.Parent != nil {
+		if channel.parent != nil {
+			channel.parent.children.Delete(channelId)
+		}
 		channel.parent = client.channels.ById(uint(*packet.Parent))
+		if channel.parent != nil {
+			channel.parent.children[uint(channel.id)] = channel
+		}
 	}
 	if packet.Name != nil {
 		channel.name = *packet.Name

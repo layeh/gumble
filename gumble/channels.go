@@ -7,6 +7,7 @@ type Channels map[uint]*Channel
 func (c Channels) Create(id uint) *Channel {
 	channel := &Channel{
 		id:       uint32(id),
+		children: Channels{},
 	}
 	c[id] = channel
 	return channel

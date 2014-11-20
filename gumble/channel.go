@@ -10,6 +10,7 @@ type Channel struct {
 
 	id              uint32
 	parent          *Channel
+	children        Channels
 	name            string
 	description     string
 	descriptionHash []byte
@@ -97,6 +98,12 @@ func (c *Channel) SetDescription(description string) {
 		Description: &description,
 	}
 	c.client.outgoing <- protoMessage{&packet}
+}
+
+// Children returns a container containing the channels directly underneath the
+// current channel.
+func (c *Channel) Children() Channels {
+	return c.children
 }
 
 // TODO: implement me
