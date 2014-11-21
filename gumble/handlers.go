@@ -450,6 +450,12 @@ func handleTextMessage(client *Client, buffer []byte) error {
 			// TODO: ensure non-nil
 		}
 	}
+	if packet.TreeId != nil {
+		event.Trees = make([]*Channel, len(packet.TreeId))
+		for i, id := range packet.TreeId {
+			event.Trees[i] = client.channels.ById(uint(id))
+		}
+	}
 	if packet.Message != nil {
 		event.Message = *packet.Message
 	}
