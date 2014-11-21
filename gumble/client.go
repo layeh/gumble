@@ -105,6 +105,7 @@ func (c *Client) Connect() error {
 		Username: &c.config.Username,
 		Password: &c.config.Password,
 		Opus:     proto.Bool(true),
+		Tokens:   c.config.Tokens,
 	}
 	c.Send(protoMessage{&versionPacket})
 	c.Send(protoMessage{&authenticationPacket})
@@ -272,6 +273,14 @@ func (c *Client) Users() Users {
 // Channels returns a collection containing the server's channels.
 func (c *Client) Channels() Channels {
 	return c.channels
+}
+
+// Reauthenticate will resend the tokens from the connection config.
+func (c *Client) Reauthenticate() {
+	authenticationPacket := MumbleProto.Authenticate{
+		Tokens: c.config.Tokens,
+	}
+	c.Send(protoMessage{&authenticationPacket})
 }
 
 // Send will send a message to the server.
