@@ -103,12 +103,12 @@ func (c *Client) Connect() error {
 }
 
 // Close disconnects the client from the server.
-func (c *Client) Close() {
+func (c *Client) Close() error {
 	c.closeMutex.Lock()
 	defer c.closeMutex.Unlock()
 
 	if c.connection == nil {
-		return
+		return nil
 	}
 	if c.audio != nil {
 		c.audio.Detach()
@@ -125,6 +125,7 @@ func (c *Client) Close() {
 
 	event := &DisconnectEvent{}
 	c.listeners.OnDisconnect(event)
+	return nil
 }
 
 // RemoteAddr returns the remote network address. Returns nil if the client is
