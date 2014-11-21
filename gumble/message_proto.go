@@ -30,14 +30,50 @@ func (pm protoMessage) WriteTo(w io.Writer) (int64, error) {
 		protoType = 2
 	case *MumbleProto.Ping:
 		protoType = 3
+	case *MumbleProto.Reject:
+		protoType = 4
+	case *MumbleProto.ServerSync:
+		protoType = 5
 	case *MumbleProto.ChannelRemove:
 		protoType = 6
 	case *MumbleProto.ChannelState:
 		protoType = 7
 	case *MumbleProto.UserRemove:
 		protoType = 8
+	case *MumbleProto.UserState:
+		protoType = 9
+	case *MumbleProto.BanList:
+		protoType = 10
 	case *MumbleProto.TextMessage:
 		protoType = 11
+	case *MumbleProto.PermissionDenied:
+		protoType = 12
+	case *MumbleProto.ACL:
+		protoType = 13
+	case *MumbleProto.QueryUsers:
+		protoType = 14
+	case *MumbleProto.CryptSetup:
+		protoType = 15
+	case *MumbleProto.ContextActionModify:
+		protoType = 16
+	case *MumbleProto.ContextAction:
+		protoType = 17
+	case *MumbleProto.UserList:
+		protoType = 18
+	case *MumbleProto.VoiceTarget:
+		protoType = 19
+	case *MumbleProto.PermissionQuery:
+		protoType = 20
+	case *MumbleProto.CodecVersion:
+		protoType = 21
+	case *MumbleProto.UserStats:
+		protoType = 22
+	case *MumbleProto.RequestBlob:
+		protoType = 23
+	case *MumbleProto.ServerConfig:
+		protoType = 24
+	case *MumbleProto.SuggestConfig:
+		protoType = 25
 	default:
 		return 0, errUnknownMessage
 	}
