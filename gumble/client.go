@@ -6,6 +6,7 @@ import (
 	"net"
 	"runtime"
 	"sync"
+	"time"
 
 	"code.google.com/p/goprotobuf/proto"
 	"github.com/bontibon/gumble/gumble/MumbleProto"
@@ -19,6 +20,10 @@ const (
 	Connected
 	Synced
 )
+
+// PingInterval is the interval at which ping packets are be sent by the client
+// to the server.
+const pingInterval time.Duration = time.Second * 10
 
 var (
 	ErrConnected = errors.New("client is already connected to a server")
@@ -45,7 +50,7 @@ type Client struct {
 
 	end        chan bool
 	closeMutex sync.Mutex
-	outgoing   chan Message
+	sendMutex  sync.Mutex
 }
 
 // NewClient creates a new gumble client.
@@ -71,12 +76,10 @@ func (c *Client) Connect() error {
 	c.channels = Channels{}
 	c.state = Connected
 
-	// Channels and event loops
+	// Channels and goroutines
 	c.end = make(chan bool)
-	c.outgoing = make(chan Message, 2)
-
-	go clientOutgoing(c)
 	go clientIncoming(c)
+	go c.pingRoutine()
 
 	// Initial packets
 	version := Version{
@@ -97,9 +100,30 @@ func (c *Client) Connect() error {
 		Password: &c.config.Password,
 		Opus:     proto.Bool(true),
 	}
-	c.outgoing <- protoMessage{&versionPacket}
-	c.outgoing <- protoMessage{&authenticationPacket}
+	c.Send(protoMessage{&versionPacket})
+	c.Send(protoMessage{&authenticationPacket})
 	return nil
+}
+
+// pingRoutine sends ping packets to the server at regular intervals.
+func (c *Client) pingRoutine() {
+	ticker := time.NewTicker(pingInterval)
+	defer ticker.Stop()
+
+	pingPacket := MumbleProto.Ping{
+		Timestamp: proto.Uint64(0),
+	}
+	pingProto := protoMessage{&pingPacket}
+
+	for {
+		select {
+		case <-c.end:
+			return
+		case time := <-ticker.C:
+			*pingPacket.Timestamp = uint64(time.Unix())
+			c.Send(pingProto)
+		}
+	}
 }
 
 // Close disconnects the client from the server.
@@ -114,8 +138,7 @@ func (c *Client) Close() error {
 		c.audio.Detach()
 		c.audio = nil
 	}
-	close(c.end)
-	close(c.outgoing)
+	c.end <- true
 	c.connection.Close()
 	c.connection = nil
 	c.state = Disconnected
@@ -211,6 +234,12 @@ func (c *Client) Channels() Channels {
 }
 
 // Send will send a message to the server.
-func (c *Client) Send(message Message) {
-	c.outgoing <- message
+func (c *Client) Send(message Message) error {
+	c.sendMutex.Lock()
+	defer c.sendMutex.Unlock()
+
+	if _, err := message.WriteTo(c.connection); err != nil {
+		return err
+	}
+	return nil
 }

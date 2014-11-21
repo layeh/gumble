@@ -117,7 +117,7 @@ func (u *User) Register() {
 		Session: &u.session,
 		UserId:  proto.Uint32(0),
 	}
-	u.client.outgoing <- protoMessage{&packet}
+	u.client.Send(protoMessage{&packet})
 }
 
 // SetComment will set the user's comment to the given string. The user's
@@ -127,7 +127,7 @@ func (u *User) SetComment(comment string) {
 		Session: &u.session,
 		Comment: &comment,
 	}
-	u.client.outgoing <- protoMessage{&packet}
+	u.client.Send(protoMessage{&packet})
 }
 
 // Move will move the user to the given channel.
@@ -136,7 +136,7 @@ func (u *User) Move(channel *Channel) {
 		Session:   &u.session,
 		ChannelId: &channel.id,
 	}
-	u.client.outgoing <- protoMessage{&packet}
+	u.client.Send(protoMessage{&packet})
 }
 
 // Kick will kick the user from the server.
@@ -145,7 +145,7 @@ func (u *User) Kick(reason string) {
 		Session: &u.session,
 		Reason:  &reason,
 	}
-	u.client.outgoing <- protoMessage{&packet}
+	u.client.Send(protoMessage{&packet})
 }
 
 // Ban will ban the user from the server.
@@ -155,7 +155,7 @@ func (u *User) Ban(reason string) {
 		Reason:  &reason,
 		Ban:     proto.Bool(true),
 	}
-	u.client.outgoing <- protoMessage{&packet}
+	u.client.Send(protoMessage{&packet})
 }
 
 // SetMuted sets whether the user can transmit audio or not.
@@ -164,7 +164,7 @@ func (u *User) SetMuted(muted bool) {
 		Session: &u.session,
 		Mute:    proto.Bool(muted),
 	}
-	u.client.outgoing <- protoMessage{&packet}
+	u.client.Send(protoMessage{&packet})
 }
 
 // SetDeafened sets whether the user can receive audio or not.
@@ -173,7 +173,7 @@ func (u *User) SetDeafened(muted bool) {
 		Session: &u.session,
 		Deaf:    proto.Bool(muted),
 	}
-	u.client.outgoing <- protoMessage{&packet}
+	u.client.Send(protoMessage{&packet})
 }
 
 // SetSelfMuted sets whether the user can transmit audio or not.
@@ -184,7 +184,7 @@ func (u *User) SetSelfMuted(muted bool) {
 		Session:  &u.session,
 		SelfMute: proto.Bool(muted),
 	}
-	u.client.outgoing <- protoMessage{&packet}
+	u.client.Send(protoMessage{&packet})
 }
 
 // SetSelfDeafened sets whether the user can receive audio or not.
@@ -195,5 +195,5 @@ func (u *User) SetSelfDeafened(muted bool) {
 		Session:  &u.session,
 		SelfDeaf: proto.Bool(muted),
 	}
-	u.client.outgoing <- protoMessage{&packet}
+	u.client.Send(protoMessage{&packet})
 }

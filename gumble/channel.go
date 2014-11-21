@@ -59,7 +59,7 @@ func (c *Channel) Add(name string, temporary bool) {
 		Name:      &name,
 		Temporary: proto.Bool(temporary),
 	}
-	c.client.outgoing <- protoMessage{&packet}
+	c.client.Send(protoMessage{&packet})
 }
 
 // Remove will remove the given channel and all sub-channels from the server's
@@ -68,7 +68,7 @@ func (c *Channel) Remove() {
 	packet := MumbleProto.ChannelRemove{
 		ChannelId: &c.id,
 	}
-	c.client.outgoing <- protoMessage{&packet}
+	c.client.Send(protoMessage{&packet})
 }
 
 // Name returns the channel name.
@@ -83,7 +83,7 @@ func (c *Channel) SetName(name string) {
 		ChannelId: &c.id,
 		Name:      &name,
 	}
-	c.client.outgoing <- protoMessage{&packet}
+	c.client.Send(protoMessage{&packet})
 }
 
 // Description returns the channel's description.
@@ -97,7 +97,7 @@ func (c *Channel) SetDescription(description string) {
 		ChannelId:   &c.id,
 		Description: &description,
 	}
-	c.client.outgoing <- protoMessage{&packet}
+	c.client.Send(protoMessage{&packet})
 }
 
 // Children returns a container containing the channels directly underneath the
