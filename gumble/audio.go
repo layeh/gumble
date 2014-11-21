@@ -62,9 +62,9 @@ func (a *Audio) outgoingRoutine() {
 			return
 		} else {
 			if opusBuf, err := encoder.Encode(buf.Pcm, SampleRate/100, 1024); err == nil {
-				a.client.Send(&message)
 				message.sequence = (message.sequence + 1) % 10000
 				message.opus = opusBuf
+				a.client.Send(&message)
 			}
 		}
 	}
