@@ -207,10 +207,12 @@ func (u *User) Stats() (UserStats, bool) {
 	return u.stats, u.statsFetched
 }
 
-// RequestStats requests user stats of the given user.
-func (u *User) RequestStats() {
-	packet := MumbleProto.UserStats{
-		Session: &u.session,
+// Request requests user information that has not yet been sent to the client.
+func (u *User) Request(request Request) {
+	if (request & RequestStats) != 0 {
+		packet := MumbleProto.UserStats{
+			Session: &u.session,
+		}
+		u.client.Send(protoMessage{&packet})
 	}
-	u.client.Send(protoMessage{&packet})
 }
