@@ -119,3 +119,14 @@ func (c *Channel) Find(names ...string) *Channel {
 	}
 	return nil
 }
+
+// Request requests channel information that has not yet been sent to the
+// client.
+func (c *Channel) Request(request Request) {
+	if (request & RequestComment) != 0 {
+		packet := MumbleProto.RequestBlob{
+			ChannelDescription: []uint32{c.id},
+		}
+		c.client.Send(protoMessage{&packet})
+	}
+}

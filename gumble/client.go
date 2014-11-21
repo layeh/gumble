@@ -23,11 +23,12 @@ const (
 	Synced
 )
 
-// Request is a mask of items that the client can asks the server to send it.
+// Request is a mask of items that the client can ask the server to send.
 type Request int
 
 const (
 	RequestDescription Request = 1 << iota
+	RequestComment
 	RequestTexture
 	RequestStats
 )

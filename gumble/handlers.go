@@ -278,6 +278,7 @@ func handleChannelState(client *Client, buffer []byte) error {
 		channel.position = *packet.Position
 	}
 	if packet.DescriptionHash != nil {
+		event.DescriptionChanged = true
 		channel.descriptionHash = packet.DescriptionHash
 		channel.description = ""
 	}
@@ -402,6 +403,7 @@ func handleUserState(client *Client, buffer []byte) error {
 		user.hash = *packet.Hash
 	}
 	if packet.CommentHash != nil {
+		event.CommentChanged = true
 		user.commentHash = packet.CommentHash
 		user.comment = ""
 	}

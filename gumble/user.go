@@ -215,4 +215,15 @@ func (u *User) Request(request Request) {
 		}
 		u.client.Send(protoMessage{&packet})
 	}
+
+	packet := MumbleProto.RequestBlob{}
+	if (request & RequestTexture) != 0 {
+		packet.SessionTexture = []uint32{u.session}
+	}
+	if (request & RequestComment) != 0 {
+		packet.SessionComment = []uint32{u.session}
+	}
+	if packet.SessionTexture != nil || packet.SessionComment != nil {
+		u.client.Send(protoMessage{&packet})
+	}
 }
