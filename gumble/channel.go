@@ -106,8 +106,8 @@ func (c *Channel) Children() Channels {
 	return c.children
 }
 
-// Find returns a channel pointer whose path (by channel name) from the current
-// channel is equal to the arguments passed.
+// Find returns a channel whose path (by channel name) from the current channel
+// is equal to the arguments passed.
 func (c *Channel) Find(names ...string) *Channel {
 	if names == nil || len(names) == 0 {
 		return c

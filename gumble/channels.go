@@ -29,3 +29,14 @@ func (c Channels) Exists(id uint) bool {
 func (c Channels) Delete(id uint) {
 	delete(c, id)
 }
+
+// Find returns a channel whose path (by channel name) from the server root
+// channel is equal to the arguments passed. If the root channel does not
+// exist, nil is returned.
+func (c Channels) Find(names ...string) *Channel {
+	root := c[0]
+	if names == nil || root == nil {
+		return root
+	}
+	return root.Find(names...)
+}
