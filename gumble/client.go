@@ -2,7 +2,9 @@ package gumble
 
 import (
 	"crypto/tls"
+	"encoding/binary"
 	"errors"
+	"io"
 	"net"
 	"runtime"
 	"sync"
@@ -24,6 +26,10 @@ const (
 // PingInterval is the interval at which ping packets are be sent by the client
 // to the server.
 const pingInterval time.Duration = time.Second * 10
+
+// maximumPacketLength is the maximum byte length of a packet that will be
+// accepted from the server.
+const maximumPacketLength = 1024 * 1024 * 10 // 10 megabytes
 
 var (
 	ErrConnected = errors.New("client is already connected to a server")
@@ -78,7 +84,7 @@ func (c *Client) Connect() error {
 
 	// Channels and goroutines
 	c.end = make(chan bool)
-	go clientIncoming(c)
+	go c.readRoutine()
 	go c.pingRoutine()
 
 	// Initial packets
@@ -122,6 +128,41 @@ func (c *Client) pingRoutine() {
 		case time := <-ticker.C:
 			*pingPacket.Timestamp = uint64(time.Unix())
 			c.Send(pingProto)
+		}
+	}
+}
+
+// readRoutine reads protocol buffer messages from the server.
+func (c *Client) readRoutine() {
+	defer c.Close()
+
+	conn := c.connection
+	data := make([]byte, 1024)
+
+	for {
+		var pType uint16
+		var pLength uint32
+
+		if err := binary.Read(conn, binary.BigEndian, &pType); err != nil {
+			return
+		}
+		if err := binary.Read(conn, binary.BigEndian, &pLength); err != nil {
+			return
+		}
+		pLengthInt := int(pLength)
+		if pLengthInt > maximumPacketLength {
+			return
+		}
+		if pLengthInt > cap(data) {
+			data = make([]byte, pLengthInt)
+		}
+		if _, err := io.ReadFull(conn, data[:pLengthInt]); err != nil {
+			return
+		}
+		if handle, ok := handlers[pType]; ok {
+			if err := handle(c, data[:pLengthInt]); err != nil {
+				// TODO: log error?
+			}
 		}
 	}
 }
