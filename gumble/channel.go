@@ -123,7 +123,7 @@ func (c *Channel) Find(names ...string) *Channel {
 // Request requests channel information that has not yet been sent to the
 // client.
 func (c *Channel) Request(request Request) {
-	if (request & RequestComment) != 0 {
+	if (request & RequestDescription) != 0 {
 		packet := MumbleProto.RequestBlob{
 			ChannelDescription: []uint32{c.id},
 		}
