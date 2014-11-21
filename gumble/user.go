@@ -157,3 +157,43 @@ func (u *User) Ban(reason string) {
 	}
 	u.client.outgoing <- protoMessage{&packet}
 }
+
+// SetMuted sets whether the user can transmit audio or not.
+func (u *User) SetMuted(muted bool) {
+	packet := MumbleProto.UserState{
+		Session: &u.session,
+		Mute:    proto.Bool(muted),
+	}
+	u.client.outgoing <- protoMessage{&packet}
+}
+
+// SetDeafened sets whether the user can receive audio or not.
+func (u *User) SetDeafened(muted bool) {
+	packet := MumbleProto.UserState{
+		Session: &u.session,
+		Deaf:    proto.Bool(muted),
+	}
+	u.client.outgoing <- protoMessage{&packet}
+}
+
+// SetSelfMuted sets whether the user can transmit audio or not.
+//
+// This method should only be called on Client.Self().
+func (u *User) SetSelfMuted(muted bool) {
+	packet := MumbleProto.UserState{
+		Session:  &u.session,
+		SelfMute: proto.Bool(muted),
+	}
+	u.client.outgoing <- protoMessage{&packet}
+}
+
+// SetSelfDeafened sets whether the user can receive audio or not.
+//
+// This method should only be called on Client.Self().
+func (u *User) SetSelfDeafened(muted bool) {
+	packet := MumbleProto.UserState{
+		Session:  &u.session,
+		SelfDeaf: proto.Bool(muted),
+	}
+	u.client.outgoing <- protoMessage{&packet}
+}
