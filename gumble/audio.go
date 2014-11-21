@@ -15,6 +15,12 @@ const (
 	SampleRate = 48000
 )
 
+type AudioPacket struct {
+	Sender   *User
+	Sequence int
+	Pcm      []int16
+}
+
 type AudioStream interface {
 	OnAttach() error
 	OnAttachSource(chan<- AudioPacket) error
@@ -68,10 +74,4 @@ func (a *Audio) outgoingRoutine() {
 			}
 		}
 	}
-}
-
-type AudioPacket struct {
-	Sender   *User
-	Sequence int
-	Pcm      []int16
 }
