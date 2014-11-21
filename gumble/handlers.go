@@ -133,7 +133,7 @@ func handleUdpTunnel(client *Client, buffer []byte) error {
 	}
 
 	opus := buffer[bytesRead : bytesRead+int64(audioLength)]
-	if pcm, err := user.decoder.Decode(opus, 1920, false); err != nil {
+	if pcm, err := user.decoder.Decode(opus, 4800, false); err != nil {
 		return err
 	} else {
 		_ = audioTarget
