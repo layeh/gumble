@@ -10,19 +10,18 @@ import (
 // On success, the function returns the number of bytes written to the writer,
 // and nil.
 func WriteTo(w io.Writer, value int64) (int64, error) {
-	var buff []byte
+	var length int
+	var buff [2]byte
 	if value <= 0x7F {
-		buff = []byte{
-			byte(value),
-		}
+		buff[0] = byte(value)
+		length = 1
 	} else if value <= 0x3FFF {
-		buff = []byte{
-			byte(((value >> 8) & 0x3F) | 0x80),
-			byte(value & 0xFF),
-		}
+		buff[0] = byte(((value >> 8) & 0x3F) | 0x80)
+		buff[1] = byte(value & 0xFF)
+		length = 2
 	}
-	if buff != nil {
-		if n, err := w.Write(buff); err != nil {
+	if length > 0 {
+		if n, err := w.Write(buff[:length]); err != nil {
 			return int64(n), err
 		} else {
 			return int64(n), nil
