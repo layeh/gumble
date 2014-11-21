@@ -20,6 +20,9 @@ type User struct {
 	texture, textureHash                     []byte
 	prioritySpeaker                          bool
 	recording                                bool
+
+	statsFetched bool
+	stats        UserStats
 }
 
 // Session returns the user's session Id.
@@ -194,6 +197,20 @@ func (u *User) SetSelfDeafened(muted bool) {
 	packet := MumbleProto.UserState{
 		Session:  &u.session,
 		SelfDeaf: proto.Bool(muted),
+	}
+	u.client.Send(protoMessage{&packet})
+}
+
+// Stats returns the user's stats, and a boolean value specifying if the stats
+// are valid or not.
+func (u *User) Stats() (UserStats, bool) {
+	return u.stats, u.statsFetched
+}
+
+// RequestStats requests user stats of the given user.
+func (u *User) RequestStats() {
+	packet := MumbleProto.UserStats{
+		Session: &u.session,
 	}
 	u.client.Send(protoMessage{&packet})
 }

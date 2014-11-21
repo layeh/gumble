@@ -32,6 +32,7 @@ type UserChangeEvent struct {
 	NameChanged    bool
 	ChannelChanged bool
 	CommentChanged bool
+	StatsChanged   bool
 }
 
 type ChannelChangeEvent struct {

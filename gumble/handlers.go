@@ -3,6 +3,7 @@ package gumble
 import (
 	"bytes"
 	"errors"
+	"time"
 
 	"code.google.com/p/goprotobuf/proto"
 	"github.com/bontibon/gopus"
@@ -51,12 +52,7 @@ func init() {
 	}
 }
 
-func handleVersion(client *Client, buffer []byte) error {
-	var packet MumbleProto.Version
-	if err := proto.Unmarshal(buffer, &packet); err != nil {
-		return err
-	}
-
+func parseVersion(packet *MumbleProto.Version) Version {
 	var version Version
 	if packet.Version != nil {
 		version.version = *packet.Version
@@ -70,8 +66,16 @@ func handleVersion(client *Client, buffer []byte) error {
 	if packet.OsVersion != nil {
 		version.osVersion = *packet.OsVersion
 	}
-	client.server.version = version
+	return version
+}
 
+func handleVersion(client *Client, buffer []byte) error {
+	var packet MumbleProto.Version
+	if err := proto.Unmarshal(buffer, &packet); err != nil {
+		return err
+	}
+
+	client.server.version = parseVersion(&packet)
 	return nil
 }
 
@@ -515,8 +519,38 @@ func handleCodecVersion(client *Client, buffer []byte) error {
 }
 
 func handleUserStats(client *Client, buffer []byte) error {
-	// TODO
-	return errUnimplementedHandler
+	var packet MumbleProto.UserStats
+	if err := proto.Unmarshal(buffer, &packet); err != nil {
+		return err
+	}
+
+	if packet.Session == nil {
+		return errIncompleteProtobuf
+	}
+	user := client.users.BySession(uint(*packet.Session))
+	if user == nil {
+		return errInvalidProtobuf
+	}
+
+	if packet.Version != nil {
+		user.stats.version = parseVersion(packet.Version)
+	}
+	if packet.Onlinesecs != nil {
+		user.stats.connected = time.Now().Add(time.Duration(*packet.Onlinesecs) * -time.Second)
+	}
+	if packet.Idlesecs != nil {
+		user.stats.idle = time.Duration(*packet.Idlesecs) * time.Second
+	}
+
+	user.statsFetched = true
+
+	event := &UserChangeEvent{
+		Client:       client,
+		User:         user,
+		StatsChanged: true,
+	}
+	client.listeners.OnUserChange(event)
+	return nil
 }
 
 func handleRequestBlob(client *Client, buffer []byte) error {
