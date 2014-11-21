@@ -32,7 +32,7 @@ const pingInterval time.Duration = time.Second * 10
 const maximumPacketLength = 1024 * 1024 * 10 // 10 megabytes
 
 var (
-	ErrConnected = errors.New("client is already connected to a server")
+	ErrState = errors.New("client is in an invalid state")
 )
 
 type Client struct {
@@ -71,7 +71,7 @@ func NewClient(config *Config) *Client {
 // Connect connects to the server.
 func (c *Client) Connect() error {
 	if c.state != Disconnected {
-		return ErrConnected
+		return ErrState
 	}
 	if conn, err := tls.DialWithDialer(&c.config.Dialer, "tcp", c.config.Address, &c.config.TlsConfig); err != nil {
 		return err
@@ -173,7 +173,7 @@ func (c *Client) Close() error {
 	defer c.closeMutex.Unlock()
 
 	if c.connection == nil {
-		return nil
+		return ErrState
 	}
 	if c.audio != nil {
 		c.audio.Detach()
