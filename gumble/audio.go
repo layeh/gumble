@@ -1,5 +1,9 @@
 package gumble
 
+import (
+	"github.com/bontibon/gopus"
+)
+
 type AudioFlag int
 
 const (
@@ -32,7 +36,9 @@ func (a *Audio) Detach() {
 	}
 	a.client.audio = nil
 	a.stream.OnDetach()
-	close(a.outgoing)
+	if a.IsSource() {
+		close(a.outgoing)
+	}
 }
 
 func (a *Audio) IsSource() bool {
@@ -41,6 +47,27 @@ func (a *Audio) IsSource() bool {
 
 func (a *Audio) IsSink() bool {
 	return (a.flags & AudioSink) != 0
+}
+
+func (a *Audio) outgoingRoutine() {
+	message := audioMessage{
+		Format: audioOpus,
+		Target: audioNormal,
+	}
+	encoder, _ := gopus.NewEncoder(SampleRate, 1, gopus.Voip)
+	encoder.SetVbr(false)
+	encoder.SetBitrate(40000)
+	for {
+		if buf, ok := <-a.outgoing; !ok {
+			return
+		} else {
+			if opusBuf, err := encoder.Encode(buf.Pcm, SampleRate/100, 1024); err == nil {
+				a.client.Send(&message)
+				message.sequence = (message.sequence + 1) % 10000
+				message.opus = opusBuf
+			}
+		}
+	}
 }
 
 type AudioPacket struct {

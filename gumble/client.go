@@ -234,7 +234,7 @@ func (c *Client) AttachAudio(stream AudioStream, flags AudioFlag) (*Audio, error
 	}
 	if audio.IsSource() {
 		audio.outgoing = make(chan AudioPacket)
-		go audioOutgoing(audio)
+		go audio.outgoingRoutine()
 		if err := stream.OnAttachSource(audio.outgoing); err != nil {
 			close(audio.outgoing)
 			return nil, err
