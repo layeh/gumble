@@ -35,7 +35,7 @@ func ReadFrom(r io.Reader) (int64, int64, error) {
 			return int64(b&0xF)<<8 | int64(buffer[0])<<8 | int64(buffer[1])<<8 | int64(buffer[2]), 4, nil
 		}
 	}
-	return 0, 0, ErrOutOfRange
+	return 0, 1, ErrOutOfRange
 }
 
 // ReadBytes reads a single byte from the given io.Reader.
