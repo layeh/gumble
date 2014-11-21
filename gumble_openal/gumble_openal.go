@@ -104,7 +104,7 @@ func (s *Stream) sinkRoutine() {
 		var source openal.Source
 		if userSource, ok := s.userStreams[packet.Sender.Session()]; !ok {
 			source = openal.NewSource()
-			s.userStreams[packet.Sender.Session()] = openal.NewSource()
+			s.userStreams[packet.Sender.Session()] = source
 		} else {
 			source = userSource
 		}
