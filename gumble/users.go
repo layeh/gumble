@@ -29,3 +29,14 @@ func (u Users) Exists(session uint) bool {
 func (u Users) Delete(session uint) {
 	delete(u, session)
 }
+
+// Find returns the user with the given name. Nil is returned if no user exists
+// with the given name.
+func (u Users) Find(name string) *User {
+	for _, user := range u {
+		if user.name == name {
+			return user
+		}
+	}
+	return nil
+}
