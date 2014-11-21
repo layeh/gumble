@@ -12,6 +12,7 @@ func clientIncoming(client *Client) {
 	defer client.Close()
 
 	conn := client.connection
+	data := make([]byte, 1024)
 
 	for {
 		var pType uint16
@@ -27,12 +28,14 @@ func clientIncoming(client *Client) {
 		if pLengthInt > maximumPacketLength {
 			return
 		}
-		data := make([]byte, pLengthInt)
-		if _, err := io.ReadFull(conn, data); err != nil {
+		if pLengthInt > cap(data) {
+			data = make([]byte, pLengthInt)
+		}
+		if _, err := io.ReadFull(conn, data[:pLengthInt]); err != nil {
 			return
 		}
 		if handle, ok := handlers[pType]; ok {
-			if err := handle(client, data); err != nil {
+			if err := handle(client, data[:pLengthInt]); err != nil {
 				// TODO: log error?
 			}
 		}
