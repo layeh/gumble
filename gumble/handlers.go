@@ -146,7 +146,7 @@ func handleUdpTunnel(client *Client, buffer []byte) error {
 			Sequence: int(sequence),
 			Pcm:      pcm,
 		}
-		client.audio.incoming <- packet
+		client.audio.incoming(&packet)
 	}
 	return nil
 }

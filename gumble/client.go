@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"code.google.com/p/goprotobuf/proto"
+	"github.com/bontibon/gopus"
 	"github.com/bontibon/gumble/gumble/MumbleProto"
 )
 
@@ -62,7 +63,9 @@ type Client struct {
 	users    Users
 	channels Channels
 
-	audio *Audio
+	audio         *Audio
+	audioEncoder  *gopus.Encoder
+	audioSequence int
 
 	end        chan bool
 	closeMutex sync.Mutex
@@ -83,7 +86,16 @@ func (c *Client) Connect() error {
 	if c.state != Disconnected {
 		return ErrState
 	}
+	if encoder, err := gopus.NewEncoder(SampleRate, 1, gopus.Voip); err != nil {
+		return err
+	} else {
+		encoder.SetVbr(false)
+		encoder.SetBitrate(40000)
+		c.audioEncoder = encoder
+		c.audioSequence = 0
+	}
 	if conn, err := tls.DialWithDialer(&c.config.Dialer, "tcp", c.config.Address, &c.config.TlsConfig); err != nil {
+		c.audioEncoder = nil
 		return err
 	} else {
 		c.connection = conn
@@ -197,6 +209,7 @@ func (c *Client) Close() error {
 	c.users = nil
 	c.channels = nil
 	c.self = nil
+	c.audioEncoder = nil
 
 	event := &DisconnectEvent{}
 	c.listeners.OnDisconnect(event)
@@ -244,16 +257,12 @@ func (c *Client) AttachAudio(stream AudioStream, flags AudioFlag) (*Audio, error
 		return nil, err
 	}
 	if audio.IsSource() {
-		audio.outgoing = make(chan AudioPacket)
-		go audio.outgoingRoutine()
-		if err := stream.OnAttachSource(audio.outgoing); err != nil {
-			close(audio.outgoing)
+		if err := stream.OnAttachSource(c.sendAudio); err != nil {
 			return nil, err
 		}
 	}
 	if audio.IsSink() {
 		if incoming, err := stream.OnAttachSink(); err != nil {
-			close(audio.outgoing)
 			return nil, err
 		} else {
 			audio.incoming = incoming
@@ -300,6 +309,22 @@ func (c *Client) Send(message Message) error {
 
 	if _, err := message.WriteTo(c.connection); err != nil {
 		return err
+	}
+	return nil
+}
+
+func (c *Client) sendAudio(packet *AudioPacket) error {
+	message := audioMessage{
+		Format: audioOpus,
+		Target: audioNormal,
+	}
+	if opusBuffer, err := c.audioEncoder.Encode(packet.Pcm, SampleRate/100, 1024); err != nil {
+		return err
+	} else {
+		c.audioSequence = (c.audioSequence + 1) % 10000
+		message.sequence = c.audioSequence
+		message.opus = opusBuffer
+		c.Send(&message)
 	}
 	return nil
 }
