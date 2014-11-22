@@ -258,13 +258,13 @@ func (c *Client) AttachAudio(stream AudioStream, flags AudioFlag) (*Audio, error
 	}
 	if audio.IsSource() {
 		if err := stream.OnAttachSource(c.sendAudio); err != nil {
-			stream.OnDetach();
+			stream.OnDetach()
 			return nil, err
 		}
 	}
 	if audio.IsSink() {
 		if incoming, err := stream.OnAttachSink(); err != nil {
-			stream.OnDetach();
+			stream.OnDetach()
 			return nil, err
 		} else {
 			audio.incoming = incoming
