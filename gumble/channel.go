@@ -41,8 +41,8 @@ func (c *Channel) Position() int {
 	return int(c.position)
 }
 
-// Temporary returns true if the channel is temporary.
-func (c *Channel) Temporary() bool {
+// IsTemporary returns true if the channel is temporary.
+func (c *Channel) IsTemporary() bool {
 	return c.temporary
 }
 
