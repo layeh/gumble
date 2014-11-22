@@ -227,3 +227,12 @@ func (u *User) Request(request Request) {
 		u.client.Send(protoMessage{&packet})
 	}
 }
+
+// Send will send a text message to the user.
+func (u *User) Send(message string) {
+	textMessage := TextMessage{
+		Users:   []*User{u},
+		Message: message,
+	}
+	u.client.Send(&textMessage)
+}

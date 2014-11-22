@@ -130,3 +130,16 @@ func (c *Channel) Request(request Request) {
 		c.client.Send(protoMessage{&packet})
 	}
 }
+
+// Send will send a text message to the channel.
+func (c *Channel) Send(message string, recursive bool) {
+	textMessage := TextMessage{
+		Message: message,
+	}
+	if recursive {
+		textMessage.Trees = []*Channel{c}
+	} else {
+		textMessage.Channels = []*Channel{c}
+	}
+	c.client.Send(&textMessage)
+}
