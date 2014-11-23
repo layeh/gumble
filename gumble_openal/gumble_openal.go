@@ -21,7 +21,7 @@ type Stream struct {
 	deviceSink  *openal.Device
 	contextSink *openal.Context
 	userStreams map[uint]openal.Source
-	buffer  []byte
+	buffer      []byte
 }
 
 func New() (*Stream, error) {
@@ -36,7 +36,7 @@ func (s *Stream) OnAttach() error {
 }
 
 func (s *Stream) OnAttachSource(outgoing gumble.AudioCallback) error {
-	s.deviceSource = openal.CaptureOpenDevice("", gumble.SampleRate, openal.FormatMono16, gumble.SampleRate/100)
+	s.deviceSource = openal.CaptureOpenDevice("", gumble.SampleRate, openal.FormatMono16, gumble.DefaultFrameSize)
 	s.outgoing = outgoing
 	return nil
 }
@@ -45,12 +45,12 @@ func (s *Stream) OnAttachSink() (gumble.AudioCallback, error) {
 	s.deviceSink = openal.OpenDevice("")
 	s.contextSink = s.deviceSink.CreateContext()
 	s.contextSink.Activate()
-	s.buffer = make([]byte, 9600) // Supports up to a 100ms buffer
+	s.buffer = make([]byte, gumble.MaximumFrameSize)
 	return s.sinkCallback, nil
 }
 
 func (s *Stream) OnDetach() {
-	if s.outgoing != nil {
+	if s.deviceSource != nil {
 		s.StopSource()
 		s.deviceSource.CaptureCloseDevice()
 		s.deviceSource = nil
@@ -122,15 +122,15 @@ func (s *Stream) sourceRoutine() {
 	packet := gumble.AudioPacket{}
 	outgoing := s.outgoing
 	stop := s.sourceStop
-	int16Buffer := make([]int16, gumble.SampleRate/100)
+	int16Buffer := make([]int16, gumble.DefaultFrameSize)
 
 	for {
 		select {
 		case <-stop:
 			return
 		case <-ticker.C:
-			buff := s.deviceSource.CaptureSamples(gumble.SampleRate/100)
-			if len(buff) != gumble.SampleRate/100*2 {
+			buff := s.deviceSource.CaptureSamples(gumble.DefaultFrameSize)
+			if len(buff) != gumble.DefaultFrameSize*2 {
 				continue
 			}
 			for i := range int16Buffer {

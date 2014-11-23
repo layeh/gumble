@@ -8,7 +8,9 @@ const (
 )
 
 const (
-	SampleRate = 48000
+	SampleRate       = 48000
+	DefaultFrameSize = SampleRate / 100
+	MaximumFrameSize = DefaultFrameSize * 10
 )
 
 type AudioCallback func(packet *AudioPacket) error

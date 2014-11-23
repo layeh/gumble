@@ -38,9 +38,9 @@ const (
 // to the server.
 const pingInterval time.Duration = time.Second * 10
 
-// maximumPacketLength is the maximum byte length of a packet that will be
+// maximumPacketSize is the maximum length in bytes of a packet that will be
 // accepted from the server.
-const maximumPacketLength = 1024 * 1024 * 10 // 10 megabytes
+const maximumPacketSize = 1024 * 1024 * 10 // 10 megabytes
 
 var (
 	ErrState = errors.New("client is in an invalid state")
@@ -173,7 +173,7 @@ func (c *Client) readRoutine() {
 			return
 		}
 		pLengthInt := int(pLength)
-		if pLengthInt > maximumPacketLength {
+		if pLengthInt > maximumPacketSize {
 			return
 		}
 		if pLengthInt > cap(data) {
@@ -309,7 +309,7 @@ func (c *Client) sendAudio(packet *AudioPacket) error {
 		Format: audioOpus,
 		Target: audioNormal,
 	}
-	if opusBuffer, err := c.audioEncoder.Encode(packet.Pcm, SampleRate/100, 1024); err != nil {
+	if opusBuffer, err := c.audioEncoder.Encode(packet.Pcm, DefaultFrameSize, MaximumFrameSize); err != nil {
 		return err
 	} else {
 		c.audioSequence = (c.audioSequence + 1) % 10000
