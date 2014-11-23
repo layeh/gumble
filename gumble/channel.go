@@ -11,6 +11,7 @@ type Channel struct {
 	id              uint32
 	parent          *Channel
 	children        Channels
+	users           Users
 	name            string
 	description     string
 	descriptionHash []byte
@@ -142,4 +143,9 @@ func (c *Channel) Send(message string, recursive bool) {
 		textMessage.Channels = []*Channel{c}
 	}
 	c.client.Send(&textMessage)
+}
+
+// Users returns the users currently in the channel.
+func (c *Channel) Users() Users {
+	return c.users
 }

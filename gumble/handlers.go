@@ -302,6 +302,9 @@ func handleUserRemove(client *Client, buffer []byte) error {
 		if user == nil {
 			return errInvalidProtobuf
 		}
+		if user.channel != nil {
+			user.channel.users.Delete(session)
+		}
 		client.users.Delete(session)
 	}
 
@@ -363,11 +366,15 @@ func handleUserState(client *Client, buffer []byte) error {
 		user.userId = *packet.UserId
 	}
 	if packet.ChannelId != nil {
+		if user.channel != nil {
+			user.channel.users.Delete(user.Session())
+		}
 		newChannel := client.channels.ById(uint(*packet.ChannelId))
 		if newChannel != user.channel {
 			event.ChannelChanged = true
 		}
 		user.channel = newChannel
+		user.channel.users[user.Session()] = user
 	}
 	if packet.Mute != nil {
 		user.mute = *packet.Mute

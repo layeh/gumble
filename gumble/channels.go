@@ -8,6 +8,7 @@ func (c Channels) Create(id uint) *Channel {
 	channel := &Channel{
 		id:       uint32(id),
 		children: Channels{},
+		users:    Users{},
 	}
 	c[id] = channel
 	return channel
