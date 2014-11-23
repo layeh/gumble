@@ -82,17 +82,10 @@ func (pm protoMessage) WriteTo(w io.Writer) (int64, error) {
 		return 0, err
 	} else {
 		var written int64 = 0
-		wireType := uint16(protoType)
-		wireLength := uint32(len(data))
-		if err := binary.Write(w, binary.BigEndian, wireType); err != nil {
-			return 0, err
+		if n, err := writeTcpHeader(w, protoType, len(data)); err != nil {
+			return n, err
 		} else {
-			written += 2
-		}
-		if err := binary.Write(w, binary.BigEndian, wireLength); err != nil {
-			return written, err
-		} else {
-			written += 4
+			written += n
 		}
 		if n, err := w.Write(data); err != nil {
 			return (written + int64(n)), err
@@ -101,6 +94,23 @@ func (pm protoMessage) WriteTo(w io.Writer) (int64, error) {
 		}
 		return written, nil
 	}
+}
+
+func writeTcpHeader(w io.Writer, packetType, packetLength int) (int64, error) {
+	var written int64 = 0
+	wireType := uint16(packetType)
+	wireLength := uint32(packetLength)
+	if err := binary.Write(w, binary.BigEndian, wireType); err != nil {
+		return 0, err
+	} else {
+		written += 2
+	}
+	if err := binary.Write(w, binary.BigEndian, wireLength); err != nil {
+		return written, err
+	} else {
+		written += 4
+	}
+	return written, nil
 }
 
 func (pm protoMessage) gumbleMessage() {

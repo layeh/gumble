@@ -2,7 +2,6 @@ package gumble
 
 import (
 	"bytes"
-	"encoding/binary"
 	"io"
 
 	"github.com/bontibon/gumble/gumble/varint"
@@ -43,17 +42,10 @@ func (am *audioMessage) WriteTo(w io.Writer) (int64, error) {
 	}
 
 	// Write packet header
-	wireType := uint16(1)
-	wireLength := uint32(header.Len() + len(am.opus))
-	if err := binary.Write(w, binary.BigEndian, wireType); err != nil {
-		return written, err
+	if n, err := writeTcpHeader(w, 1, header.Len()+len(am.opus)); err != nil {
+		return n, err
 	} else {
-		written += 2
-	}
-	if err := binary.Write(w, binary.BigEndian, wireLength); err != nil {
-		return written, err
-	} else {
-		written += 4
+		written += n
 	}
 
 	// Write audio header
