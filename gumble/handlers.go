@@ -152,17 +152,14 @@ func handleUdpTunnel(client *Client, buffer []byte) error {
 }
 
 func handleAuthenticate(client *Client, buffer []byte) error {
-	// TODO
 	return errUnimplementedHandler
 }
 
 func handlePing(client *Client, buffer []byte) error {
-	// TODO
 	return errUnimplementedHandler
 }
 
 func handleReject(client *Client, buffer []byte) error {
-	// TODO
 	return errUnimplementedHandler
 }
 
@@ -425,7 +422,6 @@ func handleUserState(client *Client, buffer []byte) error {
 }
 
 func handleBanList(client *Client, buffer []byte) error {
-	// TODO
 	return errUnimplementedHandler
 }
 
@@ -440,26 +436,29 @@ func handleTextMessage(client *Client, buffer []byte) error {
 	}
 	if packet.Actor != nil {
 		event.Sender = client.users.BySession(uint(*packet.Actor))
-		// TODO: ensure non-nil
 	}
 	if packet.Session != nil {
-		event.Users = make([]*User, len(packet.Session))
-		for i, session := range packet.Session {
-			event.Users[i] = client.users.BySession(uint(session))
-			// TODO: ensure non-nil
+		event.Users = make([]*User, 0, len(packet.Session))
+		for _, session := range packet.Session {
+			if user := client.users.BySession(uint(session)); user != nil {
+				event.Users = append(event.Users, user)
+			}
 		}
 	}
 	if packet.ChannelId != nil {
-		event.Channels = make([]*Channel, len(packet.ChannelId))
-		for i, id := range packet.ChannelId {
-			event.Channels[i] = client.channels.ById(uint(id))
-			// TODO: ensure non-nil
+		event.Channels = make([]*Channel, 0, len(packet.ChannelId))
+		for _, id := range packet.ChannelId {
+			if channel := client.channels.ById(uint(id)); channel != nil {
+				event.Channels = append(event.Channels, channel)
+			}
 		}
 	}
 	if packet.TreeId != nil {
 		event.Trees = make([]*Channel, len(packet.TreeId))
-		for i, id := range packet.TreeId {
-			event.Trees[i] = client.channels.ById(uint(id))
+		for _, id := range packet.TreeId {
+			if channel := client.channels.ById(uint(id)); channel != nil {
+				event.Trees = append(event.Trees, channel)
+			}
 		}
 	}
 	if packet.Message != nil {
@@ -471,52 +470,42 @@ func handleTextMessage(client *Client, buffer []byte) error {
 }
 
 func handlePermissionDenied(client *Client, buffer []byte) error {
-	// TODO
 	return errUnimplementedHandler
 }
 
 func handleAcl(client *Client, buffer []byte) error {
-	// TODO
 	return errUnimplementedHandler
 }
 
 func handleQueryUsers(client *Client, buffer []byte) error {
-	// TODO
 	return errUnimplementedHandler
 }
 
 func handleCryptSetup(client *Client, buffer []byte) error {
-	// TODO
 	return errUnimplementedHandler
 }
 
 func handleContextActionModify(client *Client, buffer []byte) error {
-	// TODO
 	return errUnimplementedHandler
 }
 
 func handleContextAction(client *Client, buffer []byte) error {
-	// TODO
 	return errUnimplementedHandler
 }
 
 func handleUserList(client *Client, buffer []byte) error {
-	// TODO
 	return errUnimplementedHandler
 }
 
 func handleVoiceTarget(client *Client, buffer []byte) error {
-	// TODO
 	return errUnimplementedHandler
 }
 
 func handlePermissionQuery(client *Client, buffer []byte) error {
-	// TODO
 	return errUnimplementedHandler
 }
 
 func handleCodecVersion(client *Client, buffer []byte) error {
-	// TODO
 	return errUnimplementedHandler
 }
 
@@ -556,16 +545,13 @@ func handleUserStats(client *Client, buffer []byte) error {
 }
 
 func handleRequestBlob(client *Client, buffer []byte) error {
-	// TODO
 	return errUnimplementedHandler
 }
 
 func handleServerConfig(client *Client, buffer []byte) error {
-	// TODO
 	return errUnimplementedHandler
 }
 
 func handleSuggestConfig(client *Client, buffer []byte) error {
-	// TODO
 	return errUnimplementedHandler
 }

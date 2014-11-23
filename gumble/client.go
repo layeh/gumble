@@ -183,9 +183,7 @@ func (c *Client) readRoutine() {
 			return
 		}
 		if handle, ok := handlers[pType]; ok {
-			if err := handle(c, data[:pLengthInt]); err != nil {
-				// TODO: log error?
-			}
+			handle(c, data[:pLengthInt])
 		}
 	}
 }
