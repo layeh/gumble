@@ -216,22 +216,13 @@ func (c *Client) Close() error {
 	return nil
 }
 
-// RemoteAddr returns the remote network address. Returns nil if the client is
-// disconnected.
-func (c *Client) RemoteAddr() net.Addr {
+// Conn returns the underlying net.Conn to the server. Returns nil if the
+// client is disconnected.
+func (c *Client) Conn() net.Conn {
 	if c.state == Disconnected {
 		return nil
 	}
-	return c.connection.RemoteAddr()
-}
-
-// LocalAddr returns the local network address. Returns nil if the client is
-// disconnected.
-func (c *Client) LocalAddr() net.Addr {
-	if c.state == Disconnected {
-		return nil
-	}
-	return c.connection.LocalAddr()
+	return c.connection
 }
 
 // Attach adds an event listener.
