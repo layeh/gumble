@@ -454,7 +454,7 @@ func handleTextMessage(client *Client, buffer []byte) error {
 		}
 	}
 	if packet.TreeId != nil {
-		event.Trees = make([]*Channel, len(packet.TreeId))
+		event.Trees = make([]*Channel, 0, len(packet.TreeId))
 		for _, id := range packet.TreeId {
 			if channel := client.channels.ById(uint(id)); channel != nil {
 				event.Trees = append(event.Trees, channel)
