@@ -342,6 +342,9 @@ func handleUserState(client *Client, buffer []byte) error {
 			decoder, _ := gopus.NewDecoder(SampleRate, 1)
 			user.decoder = decoder
 
+			if user.channel == nil {
+				return errInvalidProtobuf
+			}
 			event.ChannelChanged = true
 			user.channel.users[session] = user
 
