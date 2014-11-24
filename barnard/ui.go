@@ -69,6 +69,26 @@ func (b *Barnard) OnClearPress(ui *uiterm.Ui, key uiterm.Key) {
 	b.Ui.Refresh()
 }
 
+func (b *Barnard) OnScrollOutputUp(ui *uiterm.Ui, key uiterm.Key) {
+	b.UiOutput.ScrollUp()
+	b.Ui.Refresh()
+}
+
+func (b *Barnard) OnScrollOutputDown(ui *uiterm.Ui, key uiterm.Key) {
+	b.UiOutput.ScrollDown()
+	b.Ui.Refresh()
+}
+
+func (b *Barnard) OnScrollOutputTop(ui *uiterm.Ui, key uiterm.Key) {
+	b.UiOutput.ScrollTop()
+	b.Ui.Refresh()
+}
+
+func (b *Barnard) OnScrollOutputBottom(ui *uiterm.Ui, key uiterm.Key) {
+	b.UiOutput.ScrollBottom()
+	b.Ui.Refresh()
+}
+
 func (b *Barnard) OnFocusPress(ui *uiterm.Ui, key uiterm.Key) {
 	active := b.Ui.Active()
 	if active == &b.UiInput {
@@ -138,6 +158,10 @@ func (b *Barnard) OnUiInitialize(ui *uiterm.Ui) {
 	b.Ui.AddKeyListener(b.OnVoiceToggle, uiterm.KeyF1)
 	b.Ui.AddKeyListener(b.OnQuitPress, uiterm.KeyF10)
 	b.Ui.AddKeyListener(b.OnClearPress, uiterm.KeyCtrlL)
+	b.Ui.AddKeyListener(b.OnScrollOutputUp, uiterm.KeyPgup)
+	b.Ui.AddKeyListener(b.OnScrollOutputDown, uiterm.KeyPgdn)
+	b.Ui.AddKeyListener(b.OnScrollOutputTop, uiterm.KeyHome)
+	b.Ui.AddKeyListener(b.OnScrollOutputBottom, uiterm.KeyEnd)
 }
 
 func (b *Barnard) OnUiResize(ui *uiterm.Ui, width, height int) {
