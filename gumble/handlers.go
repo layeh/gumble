@@ -342,6 +342,9 @@ func handleUserState(client *Client, buffer []byte) error {
 			decoder, _ := gopus.NewDecoder(SampleRate, 1)
 			user.decoder = decoder
 
+			event.ChannelChanged = true
+			user.channel.users[session] = user
+
 			event.Connected = true
 		} else {
 			user = client.users.BySession(session)
@@ -370,11 +373,14 @@ func handleUserState(client *Client, buffer []byte) error {
 			user.channel.users.Delete(user.Session())
 		}
 		newChannel := client.channels.ById(uint(*packet.ChannelId))
+		if newChannel == nil {
+			return errInvalidProtobuf
+		}
 		if newChannel != user.channel {
 			event.ChannelChanged = true
+			user.channel = newChannel
+			user.channel.users[user.Session()] = user
 		}
-		user.channel = newChannel
-		user.channel.users[user.Session()] = user
 	}
 	if packet.Mute != nil {
 		user.mute = *packet.Mute
