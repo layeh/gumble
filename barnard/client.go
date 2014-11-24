@@ -1,0 +1,41 @@
+package barnard
+
+import (
+	"fmt"
+
+	"github.com/bontibon/gumble/gumble"
+)
+
+func (b *Barnard) OnConnect(e *gumble.ConnectEvent) {
+	b.Ui.SetActive(uiViewInput)
+	b.UiTree.Rebuild()
+	b.Ui.Refresh()
+
+	b.AddOutputLine(fmt.Sprintf("Connected to %s", b.Client.Conn().RemoteAddr()))
+	if e.WelcomeMessage != "" {
+		b.AddOutputLine(fmt.Sprintf("Welcome message: %s", esc(e.WelcomeMessage)))
+	}
+}
+
+func (b *Barnard) OnDisconnect(e *gumble.DisconnectEvent) {
+	b.AddOutputLine("Disconnected")
+	b.UiTree.Rebuild()
+	b.Ui.Refresh()
+}
+
+func (b *Barnard) OnTextMessage(e *gumble.TextMessageEvent) {
+	b.AddOutputMessage(e.Sender, e.Message)
+}
+
+func (b *Barnard) OnUserChange(e *gumble.UserChangeEvent) {
+	if e.ChannelChanged && e.User == b.Client.Self() {
+		b.UiInputStatus.Text = fmt.Sprintf("To: %s", e.User.Channel().Name())
+	}
+	b.UiTree.Rebuild()
+	b.Ui.Refresh()
+}
+
+func (b *Barnard) OnChannelChange(e *gumble.ChannelChangeEvent) {
+	b.UiTree.Rebuild()
+	b.Ui.Refresh()
+}
