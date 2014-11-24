@@ -24,6 +24,12 @@ func esc(str string) string {
 	return sanitize.HTML(str)
 }
 
+func (b *Barnard) UpdateInputStatus(status string) {
+	b.UiInputStatus.Text = status
+	b.UiTree.Rebuild()
+	b.Ui.Refresh()
+}
+
 func (b *Barnard) AddOutputLine(line string) {
 	now := time.Now()
 	b.UiOutput.AddLine(fmt.Sprintf("[%02d:%02d:%02d] %s", now.Hour(), now.Minute(), now.Second(), line))

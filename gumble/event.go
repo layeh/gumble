@@ -1,5 +1,7 @@
 package gumble
 
+// EventListener is the interface that must be implemented by a type if it
+// wishes to be notified of Client events.
 type EventListener interface {
 	OnConnect(e *ConnectEvent)
 	OnDisconnect(e *DisconnectEvent)
