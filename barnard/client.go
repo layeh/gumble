@@ -39,3 +39,30 @@ func (b *Barnard) OnChannelChange(e *gumble.ChannelChangeEvent) {
 	b.UiTree.Rebuild()
 	b.Ui.Refresh()
 }
+
+func (b *Barnard) OnPermissionDenied(e *gumble.PermissionDeniedEvent) {
+	var info string
+	switch e.Type {
+	case gumble.PermissionDeniedOther:
+		info = e.String
+	case gumble.PermissionDeniedPermission:
+		info = "insufficient permissions"
+	case gumble.PermissionDeniedSuperUser:
+		info = "cannot modify SuperUser"
+	case gumble.PermissionDeniedInvalidChannelName:
+		info = "invalid channel name"
+	case gumble.PermissionDeniedTextTooLong:
+		info = "text too long"
+	case gumble.PermissionDeniedTemporaryChannel:
+		info = "temporary channel"
+	case gumble.PermissionDeniedMissingCertificate:
+		info = "missing certificate"
+	case gumble.PermissionDeniedInvalidUserName:
+		info = "invalid user name"
+	case gumble.PermissionDeniedChannelFull:
+		info = "channel full"
+	case gumble.PermissionDeniedNestingLimit:
+		info = "nesting limit"
+	}
+	b.AddOutputLine(fmt.Sprintf("Permission denied: %s", info))
+}

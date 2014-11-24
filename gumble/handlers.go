@@ -486,7 +486,42 @@ func handleTextMessage(client *Client, buffer []byte) error {
 }
 
 func handlePermissionDenied(client *Client, buffer []byte) error {
-	return errUnimplementedHandler
+	var packet MumbleProto.PermissionDenied
+	if err := proto.Unmarshal(buffer, &packet); err != nil {
+		return err
+	}
+
+	if packet.Type == nil || *packet.Type == MumbleProto.PermissionDenied_H9K {
+		return errInvalidProtobuf
+	}
+
+	event := &PermissionDeniedEvent{
+		Type: PermissionDeniedType(*packet.Type),
+	}
+	if packet.Reason != nil {
+		event.String = *packet.Reason
+	}
+	if packet.Name != nil {
+		event.String = *packet.Name
+	}
+	if packet.Session != nil {
+		event.User = client.users.BySession(uint(*packet.Session))
+		if event.User == nil {
+			return errInvalidProtobuf
+		}
+	}
+	if packet.ChannelId != nil {
+		event.Channel = client.channels.ById(uint(*packet.ChannelId))
+		if event.Channel == nil {
+			return errInvalidProtobuf
+		}
+	}
+	if packet.Permission != nil {
+		event.Permission = Permission(*packet.Permission)
+	}
+
+	client.listeners.OnPermissionDenied(event)
+	return nil
 }
 
 func handleAcl(client *Client, buffer []byte) error {

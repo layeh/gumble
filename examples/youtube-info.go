@@ -118,6 +118,9 @@ func (p *plugin) OnUserChange(e *gumble.UserChangeEvent) {
 func (p *plugin) OnChannelChange(e *gumble.ChannelChangeEvent) {
 }
 
+func (p *plugin) OnPermissionDenied(e *gumble.PermissionDeniedEvent) {
+}
+
 func main() {
 	// flags
 	server := flag.String("server", "localhost:64738", "mumble server address")

@@ -67,3 +67,9 @@ func (em *eventMux) OnChannelChange(event *ChannelChangeEvent) {
 		item.listener.OnChannelChange(event)
 	}
 }
+
+func (em *eventMux) OnPermissionDenied(event *PermissionDeniedEvent) {
+	for item := em.head; item != nil; item = item.next {
+		item.listener.OnPermissionDenied(event)
+	}
+}

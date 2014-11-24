@@ -6,6 +6,7 @@ type EventListener interface {
 	OnTextMessage(e *TextMessageEvent)
 	OnUserChange(e *UserChangeEvent)
 	OnChannelChange(e *ChannelChangeEvent)
+	OnPermissionDenied(e *PermissionDeniedEvent)
 }
 
 type ConnectEvent struct {
@@ -44,4 +45,28 @@ type ChannelChangeEvent struct {
 	Moved              bool
 	NameChanged        bool
 	DescriptionChanged bool
+}
+
+type PermissionDeniedType int
+
+const (
+	PermissionDeniedOther              PermissionDeniedType = 0
+	PermissionDeniedPermission         PermissionDeniedType = 1
+	PermissionDeniedSuperUser          PermissionDeniedType = 2
+	PermissionDeniedInvalidChannelName PermissionDeniedType = 3
+	PermissionDeniedTextTooLong        PermissionDeniedType = 4
+	PermissionDeniedTemporaryChannel   PermissionDeniedType = 6
+	PermissionDeniedMissingCertificate PermissionDeniedType = 7
+	PermissionDeniedInvalidUserName    PermissionDeniedType = 8
+	PermissionDeniedChannelFull        PermissionDeniedType = 9
+	PermissionDeniedNestingLimit       PermissionDeniedType = 10
+)
+
+type PermissionDeniedEvent struct {
+	Type    PermissionDeniedType
+	Channel *Channel
+	User    *User
+
+	Permission Permission
+	String     string
 }
