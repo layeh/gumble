@@ -102,5 +102,5 @@ type PermissionDeniedEvent struct {
 
 type UserListEvent struct {
 	Client *Client
-	Users  RegisteredUserList
+	Users  RegisteredUsers
 }

@@ -15,4 +15,4 @@ func (ru *RegisteredUser) Name() string {
 	return ru.name
 }
 
-type RegisteredUserList []*RegisteredUser
+type RegisteredUsers []*RegisteredUser
