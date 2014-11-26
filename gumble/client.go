@@ -33,6 +33,7 @@ const (
 	RequestTexture
 	RequestStats
 	RequestUserList
+	RequestAcl
 )
 
 // PingInterval is the interval at which ping packets are be sent by the client

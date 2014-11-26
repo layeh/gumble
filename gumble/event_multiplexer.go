@@ -79,3 +79,9 @@ func (em *eventMux) OnUserList(event *UserListEvent) {
 		item.listener.OnUserList(event)
 	}
 }
+
+func (em *eventMux) OnAcl(event *AclEvent) {
+	for item := em.head; item != nil; item = item.next {
+		item.listener.OnAcl(event)
+	}
+}

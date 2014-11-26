@@ -14,6 +14,7 @@ type EventListener interface {
 	OnChannelChange(e *ChannelChangeEvent)
 	OnPermissionDenied(e *PermissionDeniedEvent)
 	OnUserList(e *UserListEvent)
+	OnAcl(e *AclEvent)
 }
 
 type ConnectEvent struct {
@@ -103,4 +104,9 @@ type PermissionDeniedEvent struct {
 type UserListEvent struct {
 	Client *Client
 	Users  RegisteredUsers
+}
+
+type AclEvent struct {
+	Client *Client
+	Acl
 }

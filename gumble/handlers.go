@@ -544,7 +544,29 @@ func handlePermissionDenied(client *Client, buffer []byte) error {
 }
 
 func handleAcl(client *Client, buffer []byte) error {
-	return errUnimplementedHandler
+	var packet MumbleProto.ACL
+	if err := proto.Unmarshal(buffer, &packet); err != nil {
+		return err
+	}
+
+	event := AclEvent{
+		Client: client,
+	}
+	if packet.ChannelId != nil {
+		event.Acl.channel = client.channels.ById(uint(*packet.ChannelId))
+	}
+
+	if packet.Groups != nil {
+		event.Acl.groups = make([]*AclGroup, 0, len(packet.Groups))
+		for _, group := range packet.Groups {
+			event.Acl.groups = append(event.Acl.groups, &AclGroup{
+				name: *group.Name,
+			})
+		}
+	}
+
+	client.listeners.OnAcl(&event)
+	return nil
 }
 
 func handleQueryUsers(client *Client, buffer []byte) error {

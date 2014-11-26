@@ -130,6 +130,13 @@ func (c *Channel) Request(request Request) {
 		}
 		c.client.Send(protoMessage{&packet})
 	}
+	if (request & RequestAcl) != 0 {
+		packet := MumbleProto.ACL{
+			ChannelId: &c.id,
+			Query:     proto.Bool(true),
+		}
+		c.client.Send(protoMessage{&packet})
+	}
 }
 
 // Send will send a text message to the channel.
