@@ -193,6 +193,9 @@ func handleServerSync(client *Client, buffer []byte) error {
 	if packet.WelcomeText != nil {
 		event.WelcomeMessage = *packet.WelcomeText
 	}
+	if packet.MaxBandwidth != nil {
+		event.MaximumBitrate = int(*packet.MaxBandwidth)
+	}
 	client.state = Synced
 
 	client.listeners.OnConnect(&event)

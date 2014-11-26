@@ -18,6 +18,7 @@ type EventListener interface {
 type ConnectEvent struct {
 	Client         *Client
 	WelcomeMessage string
+	MaximumBitrate int
 }
 
 type DisconnectType int

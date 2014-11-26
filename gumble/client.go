@@ -90,7 +90,6 @@ func (c *Client) Connect() error {
 		return err
 	} else {
 		encoder.SetVbr(false)
-		encoder.SetBitrate(40000)
 		c.audioEncoder = encoder
 		c.audioSequence = 0
 	}
@@ -190,6 +189,12 @@ func (c *Client) readRoutine() {
 			handle(c, data[:pLengthInt])
 		}
 	}
+}
+
+// AudioEncoder returns the audio encoder used when sending audio to the
+// server.
+func (c *Client) AudioEncoder() *gopus.Encoder {
+	return c.audioEncoder
 }
 
 // Disconnect disconnects the client from the server.
