@@ -169,6 +169,7 @@ func (c *Client) readRoutine() {
 		var pType uint16
 		var pLength uint32
 
+		conn.SetReadDeadline(time.Now().Add(pingInterval * 2))
 		if err := binary.Read(conn, binary.BigEndian, &pType); err != nil {
 			return
 		}
