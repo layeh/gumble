@@ -32,6 +32,8 @@ func (b *Barnard) OnUserChange(e *gumble.UserChangeEvent) {
 	if e.ChannelChanged && e.User == b.Client.Self() {
 		b.UpdateInputStatus(fmt.Sprintf("To: %s", e.User.Channel().Name()))
 	}
+	b.UiTree.Rebuild()
+	b.Ui.Refresh()
 }
 
 func (b *Barnard) OnChannelChange(e *gumble.ChannelChangeEvent) {
