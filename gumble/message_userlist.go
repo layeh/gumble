@@ -1,8 +1,16 @@
 package gumble
 
+import (
+	"io"
+
+	"github.com/bontibon/gumble/gumble/MumbleProto"
+)
+
 type RegisteredUser struct {
 	userId uint32
 	name   string
+
+	changed bool
 }
 
 // UserId returns the registered user's Id
@@ -15,4 +23,30 @@ func (ru *RegisteredUser) Name() string {
 	return ru.name
 }
 
+// SetName sets the new name for the user. The change does not actually happen
+// until the registered user list is sent back to the server.
+func (ru *RegisteredUser) SetName(name string) {
+	ru.name = name
+	ru.changed = true
+}
+
 type RegisteredUsers []*RegisteredUser
+
+func (pm RegisteredUsers) WriteTo(w io.Writer) (int64, error) {
+	packet := MumbleProto.UserList{}
+
+	for _, user := range pm {
+		if user.changed {
+			packet.Users = append(packet.Users, &MumbleProto.UserList_User{
+				UserId: &user.userId,
+				Name:   &user.name,
+			})
+		}
+	}
+
+	proto := protoMessage{&packet}
+	return proto.WriteTo(w)
+}
+
+func (pm RegisteredUsers) gumbleMessage() {
+}
