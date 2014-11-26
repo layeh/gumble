@@ -19,7 +19,34 @@ func (b *Barnard) OnConnect(e *gumble.ConnectEvent) {
 }
 
 func (b *Barnard) OnDisconnect(e *gumble.DisconnectEvent) {
-	b.AddOutputLine("Disconnected")
+	var reason string
+	switch e.Type {
+	case gumble.DisconnectError:
+		reason = "connection error"
+	case gumble.DisconnectOther:
+		reason = e.String
+	case gumble.DisconnectVersion:
+		reason = "invalid version number"
+	case gumble.DisconnectUserName:
+		reason = "invalid user name"
+	case gumble.DisconnectUserCredentials:
+		reason = "incorrect user password/certificate"
+	case gumble.DisconnectServerPassword:
+		reason = "incorrect server password"
+	case gumble.DisconnectUsernameInUse:
+		reason = "user name in use"
+	case gumble.DisconnectServerFull:
+		reason = "server full"
+	case gumble.DisconnectNoCertificate:
+		reason = "missing certificate"
+	case gumble.DisconnectAuthenticatorFail:
+		reason = "authenticator via  failed"
+	}
+	if reason == "" {
+		b.AddOutputLine("Disconnected")
+	} else {
+		b.AddOutputLine("Disconnected: " + reason)
+	}
 	b.UiTree.Rebuild()
 	b.Ui.Refresh()
 }

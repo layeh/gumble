@@ -157,7 +157,10 @@ func (c *Client) pingRoutine() {
 
 // readRoutine reads protocol buffer messages from the server.
 func (c *Client) readRoutine() {
-	defer c.Close()
+	defer c.close(&DisconnectEvent{
+		Client: c,
+		Type:   DisconnectError,
+	})
 
 	conn := c.connection
 	data := make([]byte, 1024)
@@ -188,8 +191,15 @@ func (c *Client) readRoutine() {
 	}
 }
 
-// Close disconnects the client from the server.
-func (c *Client) Close() error {
+// Disconnect disconnects the client from the server.
+func (c *Client) Disconnect() error {
+	return c.close(&DisconnectEvent{
+		Client: c,
+		Type:   DisconnectUser,
+	})
+}
+
+func (c *Client) close(event *DisconnectEvent) error {
 	c.closeMutex.Lock()
 	defer c.closeMutex.Unlock()
 
@@ -209,7 +219,6 @@ func (c *Client) Close() error {
 	c.self = nil
 	c.audioEncoder = nil
 
-	event := &DisconnectEvent{}
 	c.listeners.OnDisconnect(event)
 	return nil
 }
@@ -285,7 +294,7 @@ func (c *Client) Channels() Channels {
 	return c.channels
 }
 
-// Reauthenticate will resend the tokens from the connection config.
+// Reauthenticate will resend the tokens from the config.
 func (c *Client) Reauthenticate() {
 	authenticationPacket := MumbleProto.Authenticate{
 		Tokens: c.config.Tokens,

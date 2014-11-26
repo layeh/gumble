@@ -1,5 +1,9 @@
 package gumble
 
+import (
+	"github.com/bontibon/gumble/gumble/MumbleProto"
+)
+
 // EventListener is the interface that must be implemented by a type if it
 // wishes to be notified of Client events.
 type EventListener interface {
@@ -16,8 +20,28 @@ type ConnectEvent struct {
 	WelcomeMessage string
 }
 
+type DisconnectType int
+
+const (
+	DisconnectError DisconnectType = 0xFF - iota
+	DisconnectUser
+
+	DisconnectOther             DisconnectType = DisconnectType(MumbleProto.Reject_None)
+	DisconnectVersion           DisconnectType = DisconnectType(MumbleProto.Reject_WrongVersion)
+	DisconnectUserName          DisconnectType = DisconnectType(MumbleProto.Reject_InvalidUsername)
+	DisconnectUserCredentials   DisconnectType = DisconnectType(MumbleProto.Reject_WrongUserPW)
+	DisconnectServerPassword    DisconnectType = DisconnectType(MumbleProto.Reject_WrongServerPW)
+	DisconnectUsernameInUse     DisconnectType = DisconnectType(MumbleProto.Reject_UsernameInUse)
+	DisconnectServerFull        DisconnectType = DisconnectType(MumbleProto.Reject_ServerFull)
+	DisconnectNoCertificate     DisconnectType = DisconnectType(MumbleProto.Reject_NoCertificate)
+	DisconnectAuthenticatorFail DisconnectType = DisconnectType(MumbleProto.Reject_AuthenticatorFail)
+)
+
 type DisconnectEvent struct {
 	Client *Client
+	Type   DisconnectType
+
+	String string
 }
 
 type TextMessageEvent struct {
@@ -52,16 +76,16 @@ type ChannelChangeEvent struct {
 type PermissionDeniedType int
 
 const (
-	PermissionDeniedOther              PermissionDeniedType = 0
-	PermissionDeniedPermission         PermissionDeniedType = 1
-	PermissionDeniedSuperUser          PermissionDeniedType = 2
-	PermissionDeniedInvalidChannelName PermissionDeniedType = 3
-	PermissionDeniedTextTooLong        PermissionDeniedType = 4
-	PermissionDeniedTemporaryChannel   PermissionDeniedType = 6
-	PermissionDeniedMissingCertificate PermissionDeniedType = 7
-	PermissionDeniedInvalidUserName    PermissionDeniedType = 8
-	PermissionDeniedChannelFull        PermissionDeniedType = 9
-	PermissionDeniedNestingLimit       PermissionDeniedType = 10
+	PermissionDeniedOther              PermissionDeniedType = PermissionDeniedType(MumbleProto.PermissionDenied_Text)
+	PermissionDeniedPermission         PermissionDeniedType = PermissionDeniedType(MumbleProto.PermissionDenied_Permission)
+	PermissionDeniedSuperUser          PermissionDeniedType = PermissionDeniedType(MumbleProto.PermissionDenied_SuperUser)
+	PermissionDeniedInvalidChannelName PermissionDeniedType = PermissionDeniedType(MumbleProto.PermissionDenied_ChannelName)
+	PermissionDeniedTextTooLong        PermissionDeniedType = PermissionDeniedType(MumbleProto.PermissionDenied_TextTooLong)
+	PermissionDeniedTemporaryChannel   PermissionDeniedType = PermissionDeniedType(MumbleProto.PermissionDenied_TemporaryChannel)
+	PermissionDeniedMissingCertificate PermissionDeniedType = PermissionDeniedType(MumbleProto.PermissionDenied_MissingCertificate)
+	PermissionDeniedInvalidUserName    PermissionDeniedType = PermissionDeniedType(MumbleProto.PermissionDenied_UserName)
+	PermissionDeniedChannelFull        PermissionDeniedType = PermissionDeniedType(MumbleProto.PermissionDenied_ChannelFull)
+	PermissionDeniedNestingLimit       PermissionDeniedType = PermissionDeniedType(MumbleProto.PermissionDenied_NestingLimit)
 )
 
 type PermissionDeniedEvent struct {

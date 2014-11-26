@@ -60,7 +60,7 @@ func (b *Barnard) OnVoiceToggle(ui *uiterm.Ui, key uiterm.Key) {
 }
 
 func (b *Barnard) OnQuitPress(ui *uiterm.Ui, key uiterm.Key) {
-	b.Client.Close()
+	b.Client.Disconnect()
 	b.Ui.Close()
 }
 

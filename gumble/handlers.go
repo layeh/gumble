@@ -160,7 +160,22 @@ func handlePing(client *Client, buffer []byte) error {
 }
 
 func handleReject(client *Client, buffer []byte) error {
-	return errUnimplementedHandler
+	var packet MumbleProto.Reject
+	if err := proto.Unmarshal(buffer, &packet); err != nil {
+		return err
+	}
+
+	event := DisconnectEvent{
+		Client: client,
+	}
+	if packet.Type != nil {
+		event.Type = DisconnectType(*packet.Type)
+	}
+	if packet.Reason != nil {
+		event.String = *packet.Reason
+	}
+	client.close(&event)
+	return nil
 }
 
 func handleServerSync(client *Client, buffer []byte) error {

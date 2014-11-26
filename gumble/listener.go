@@ -1,7 +1,8 @@
 package gumble
 
 // Listener is a struct that implements the EventListener interface, allowing
-// it to be attached to a Client.
+// it to be attached to a Client. This is useful if you would like to have a
+// few specific listeners, rather than the whole EventListener interface.
 type Listener struct {
 	Connect          func(e *ConnectEvent)
 	Disconnect       func(e *DisconnectEvent)
