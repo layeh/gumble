@@ -34,6 +34,7 @@ const (
 	RequestStats
 	RequestUserList
 	RequestAcl
+	RequestBanList
 )
 
 // PingInterval is the interval at which ping packets are be sent by the client
@@ -203,6 +204,13 @@ func (c *Client) AudioEncoder() *gopus.Encoder {
 func (c *Client) Request(request Request) {
 	if (request & RequestUserList) != 0 {
 		packet := MumbleProto.UserList{}
+		proto := protoMessage{&packet}
+		c.Send(proto)
+	}
+	if (request & RequestBanList) != 0 {
+		packet := MumbleProto.BanList{
+			Query: proto.Bool(true),
+		}
 		proto := protoMessage{&packet}
 		c.Send(proto)
 	}

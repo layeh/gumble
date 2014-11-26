@@ -3,6 +3,7 @@ package gumble
 import (
 	"bytes"
 	"errors"
+	"net"
 	"time"
 
 	"code.google.com/p/goprotobuf/proto"
@@ -456,7 +457,47 @@ func handleUserState(client *Client, buffer []byte) error {
 }
 
 func handleBanList(client *Client, buffer []byte) error {
-	return errUnimplementedHandler
+	var packet MumbleProto.BanList
+	if err := proto.Unmarshal(buffer, &packet); err != nil {
+		return err
+	}
+
+	event := BanListEvent{
+		Client:  client,
+		BanList: make(BanList, 0, len(packet.Bans)),
+	}
+
+	for _, banPacket := range packet.Bans {
+		ban := &Ban{
+			address: net.IP(banPacket.Address),
+		}
+		if banPacket.Mask != nil {
+			size := net.IPv4len * 8
+			if len(ban.address) == net.IPv6len {
+				size = net.IPv6len * 8
+			}
+			ban.mask = net.CIDRMask(int(*banPacket.Mask), size)
+		}
+		if banPacket.Name != nil {
+			ban.name = *banPacket.Name
+		}
+		if banPacket.Hash != nil {
+			ban.hash = *banPacket.Hash
+		}
+		if banPacket.Reason != nil {
+			ban.reason = *banPacket.Reason
+		}
+		if banPacket.Start != nil {
+			ban.start, _ = time.Parse(time.RFC3339, *banPacket.Start)
+		}
+		if banPacket.Duration != nil {
+			ban.duration = time.Duration(*banPacket.Duration) * time.Second
+		}
+		event.BanList = append(event.BanList, ban)
+	}
+
+	client.listeners.OnBanList(&event)
+	return nil
 }
 
 func handleTextMessage(client *Client, buffer []byte) error {

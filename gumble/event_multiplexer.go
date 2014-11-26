@@ -85,3 +85,9 @@ func (em *eventMux) OnAcl(event *AclEvent) {
 		item.listener.OnAcl(event)
 	}
 }
+
+func (em *eventMux) OnBanList(event *BanListEvent) {
+	for item := em.head; item != nil; item = item.next {
+		item.listener.OnBanList(event)
+	}
+}

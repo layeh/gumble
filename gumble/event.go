@@ -15,6 +15,7 @@ type EventListener interface {
 	OnPermissionDenied(e *PermissionDeniedEvent)
 	OnUserList(e *UserListEvent)
 	OnAcl(e *AclEvent)
+	OnBanList(e *BanListEvent)
 }
 
 type ConnectEvent struct {
@@ -109,4 +110,9 @@ type UserListEvent struct {
 type AclEvent struct {
 	Client *Client
 	Acl
+}
+
+type BanListEvent struct {
+	Client *Client
+	BanList
 }
