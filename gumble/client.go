@@ -19,9 +19,9 @@ import (
 type State int
 
 const (
-	Disconnected State = iota
-	Connected
-	Synced
+	StateDisconnected State = iota
+	StateConnected
+	StateSynced
 )
 
 // Request is a mask of items that the client can ask the server to send.
@@ -77,14 +77,14 @@ type Client struct {
 func NewClient(config *Config) *Client {
 	client := &Client{
 		config: config,
-		state:  Disconnected,
+		state:  StateDisconnected,
 	}
 	return client
 }
 
 // Connect connects to the server.
 func (c *Client) Connect() error {
-	if c.state != Disconnected {
+	if c.state != StateDisconnected {
 		return ErrState
 	}
 	if encoder, err := gopus.NewEncoder(SampleRate, 1, gopus.Voip); err != nil {
@@ -102,7 +102,7 @@ func (c *Client) Connect() error {
 	}
 	c.users = Users{}
 	c.channels = Channels{}
-	c.state = Connected
+	c.state = StateConnected
 
 	// Channels and goroutines
 	c.end = make(chan bool)
@@ -229,7 +229,7 @@ func (c *Client) close(event *DisconnectEvent) error {
 	c.end <- true
 	c.connection.Close()
 	c.connection = nil
-	c.state = Disconnected
+	c.state = StateDisconnected
 	c.users = nil
 	c.channels = nil
 	c.self = nil
@@ -242,7 +242,7 @@ func (c *Client) close(event *DisconnectEvent) error {
 // Conn returns the underlying net.Conn to the server. Returns nil if the
 // client is disconnected.
 func (c *Client) Conn() net.Conn {
-	if c.state == Disconnected {
+	if c.state == StateDisconnected {
 		return nil
 	}
 	return c.connection

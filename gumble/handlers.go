@@ -196,7 +196,7 @@ func handleServerSync(client *Client, buffer []byte) error {
 	if packet.MaxBandwidth != nil {
 		event.MaximumBitrate = int(*packet.MaxBandwidth)
 	}
-	client.state = Synced
+	client.state = StateSynced
 
 	client.listeners.OnConnect(&event)
 	return nil
@@ -224,7 +224,7 @@ func handleChannelRemove(client *Client, buffer []byte) error {
 		}
 	}
 
-	if client.state == Synced {
+	if client.state == StateSynced {
 		event := ChannelChangeEvent{
 			Client:  client,
 			Channel: channel,
@@ -298,7 +298,7 @@ func handleChannelState(client *Client, buffer []byte) error {
 		channel.description = ""
 	}
 
-	if client.state == Synced {
+	if client.state == StateSynced {
 		client.listeners.OnChannelChange(&event)
 	}
 	return nil
@@ -326,7 +326,7 @@ func handleUserRemove(client *Client, buffer []byte) error {
 		client.users.Delete(session)
 	}
 
-	if client.state == Synced {
+	if client.state == StateSynced {
 		event := UserChangeEvent{
 			Client:       client,
 			User:         user,
@@ -449,7 +449,7 @@ func handleUserState(client *Client, buffer []byte) error {
 		user.recording = *packet.Recording
 	}
 
-	if client.state == Synced {
+	if client.state == StateSynced {
 		client.listeners.OnUserChange(&event)
 	}
 	return nil
