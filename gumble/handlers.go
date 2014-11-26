@@ -183,7 +183,7 @@ func handleServerSync(client *Client, buffer []byte) error {
 	if err := proto.Unmarshal(buffer, &packet); err != nil {
 		return err
 	}
-	event := &ConnectEvent{
+	event := ConnectEvent{
 		Client: client,
 	}
 
@@ -195,7 +195,7 @@ func handleServerSync(client *Client, buffer []byte) error {
 	}
 	client.state = Synced
 
-	client.listeners.OnConnect(event)
+	client.listeners.OnConnect(&event)
 	return nil
 }
 
@@ -222,12 +222,12 @@ func handleChannelRemove(client *Client, buffer []byte) error {
 	}
 
 	if client.state == Synced {
-		event := &ChannelChangeEvent{
+		event := ChannelChangeEvent{
 			Client:  client,
 			Channel: channel,
 			Removed: true,
 		}
-		client.listeners.OnChannelChange(event)
+		client.listeners.OnChannelChange(&event)
 	}
 	return nil
 }
@@ -241,7 +241,7 @@ func handleChannelState(client *Client, buffer []byte) error {
 	if packet.ChannelId == nil {
 		return errIncompleteProtobuf
 	}
-	event := &ChannelChangeEvent{
+	event := ChannelChangeEvent{
 		Client: client,
 	}
 	var channel *Channel
@@ -296,7 +296,7 @@ func handleChannelState(client *Client, buffer []byte) error {
 	}
 
 	if client.state == Synced {
-		client.listeners.OnChannelChange(event)
+		client.listeners.OnChannelChange(&event)
 	}
 	return nil
 }
@@ -324,12 +324,12 @@ func handleUserRemove(client *Client, buffer []byte) error {
 	}
 
 	if client.state == Synced {
-		event := &UserChangeEvent{
+		event := UserChangeEvent{
 			Client:       client,
 			User:         user,
 			Disconnected: true,
 		}
-		client.listeners.OnUserChange(event)
+		client.listeners.OnUserChange(&event)
 	}
 	return nil
 }
@@ -343,7 +343,7 @@ func handleUserState(client *Client, buffer []byte) error {
 	if packet.Session == nil {
 		return errIncompleteProtobuf
 	}
-	event := &UserChangeEvent{
+	event := UserChangeEvent{
 		Client: client,
 	}
 	var user, actor *User
@@ -447,7 +447,7 @@ func handleUserState(client *Client, buffer []byte) error {
 	}
 
 	if client.state == Synced {
-		client.listeners.OnUserChange(event)
+		client.listeners.OnUserChange(&event)
 	}
 	return nil
 }
@@ -462,7 +462,7 @@ func handleTextMessage(client *Client, buffer []byte) error {
 		return err
 	}
 
-	event := &TextMessageEvent{
+	event := TextMessageEvent{
 		Client: client,
 	}
 	if packet.Actor != nil {
@@ -496,7 +496,7 @@ func handleTextMessage(client *Client, buffer []byte) error {
 		event.Message = *packet.Message
 	}
 
-	client.listeners.OnTextMessage(event)
+	client.listeners.OnTextMessage(&event)
 	return nil
 }
 
@@ -510,7 +510,7 @@ func handlePermissionDenied(client *Client, buffer []byte) error {
 		return errInvalidProtobuf
 	}
 
-	event := &PermissionDeniedEvent{
+	event := PermissionDeniedEvent{
 		Type: PermissionDeniedType(*packet.Type),
 	}
 	if packet.Reason != nil {
@@ -535,7 +535,7 @@ func handlePermissionDenied(client *Client, buffer []byte) error {
 		event.Permission = Permission(*packet.Permission)
 	}
 
-	client.listeners.OnPermissionDenied(event)
+	client.listeners.OnPermissionDenied(&event)
 	return nil
 }
 
@@ -601,12 +601,12 @@ func handleUserStats(client *Client, buffer []byte) error {
 
 	user.statsFetched = true
 
-	event := &UserChangeEvent{
+	event := UserChangeEvent{
 		Client:       client,
 		User:         user,
 		StatsChanged: true,
 	}
-	client.listeners.OnUserChange(event)
+	client.listeners.OnUserChange(&event)
 	return nil
 }
 
