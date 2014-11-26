@@ -39,6 +39,3 @@ func (pm *TextMessage) writeTo(w io.Writer) (int64, error) {
 	proto := protoMessage{&packet}
 	return proto.writeTo(w)
 }
-
-func (pm *TextMessage) gumbleMessage() {
-}

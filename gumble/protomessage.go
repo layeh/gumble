@@ -112,6 +112,3 @@ func writeTcpHeader(w io.Writer, packetType, packetLength int) (int64, error) {
 	}
 	return written, nil
 }
-
-func (pm protoMessage) gumbleMessage() {
-}

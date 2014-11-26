@@ -63,6 +63,3 @@ func (am *audioMessage) writeTo(w io.Writer) (int64, error) {
 	}
 	return written, nil
 }
-
-func (am *audioMessage) gumbleMessage() {
-}
