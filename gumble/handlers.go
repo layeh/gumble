@@ -514,7 +514,8 @@ func handlePermissionDenied(client *Client, buffer []byte) error {
 	}
 
 	event := PermissionDeniedEvent{
-		Type: PermissionDeniedType(*packet.Type),
+		Client: client,
+		Type:   PermissionDeniedType(*packet.Type),
 	}
 	if packet.Reason != nil {
 		event.String = *packet.Reason

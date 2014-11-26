@@ -90,6 +90,7 @@ const (
 )
 
 type PermissionDeniedEvent struct {
+	Client  *Client
 	Type    PermissionDeniedType
 	Channel *Channel
 	User    *User
