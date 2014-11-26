@@ -112,15 +112,6 @@ func (p *plugin) fetchYoutubeInfo(id string) {
 	p.client.Send(&message)
 }
 
-func (p *plugin) OnUserChange(e *gumble.UserChangeEvent) {
-}
-
-func (p *plugin) OnChannelChange(e *gumble.ChannelChangeEvent) {
-}
-
-func (p *plugin) OnPermissionDenied(e *gumble.PermissionDeniedEvent) {
-}
-
 func main() {
 	// flags
 	server := flag.String("server", "localhost:64738", "mumble server address")
@@ -143,7 +134,11 @@ func main() {
 	if *insecure {
 		p.config.TlsConfig.InsecureSkipVerify = true
 	}
-	p.client.Attach(&p)
+	p.client.Attach(gumble.Listener{
+		Connect:     p.OnConnect,
+		Disconnect:  p.OnDisconnect,
+		TextMessage: p.OnTextMessage,
+	})
 	if err := p.client.Connect(); err != nil {
 		fmt.Printf("%s\n", err)
 		os.Exit(1)
