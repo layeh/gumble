@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"crypto/tls"
 
 	"github.com/bontibon/gumble/barnard"
 	"github.com/bontibon/gumble/barnard/uiterm"
@@ -16,6 +17,7 @@ func main() {
 	server := flag.String("server", "localhost:64738", "the server to connect to")
 	username := flag.String("username", "", "the username of the client")
 	insecure := flag.Bool("insecure", false, "skip server certificate verification")
+	certificate := flag.String("certificate", "", "PEM encoded certificate and private key")
 
 	flag.Parse()
 
@@ -38,6 +40,14 @@ func main() {
 	}
 	if *insecure {
 		b.Config.TlsConfig.InsecureSkipVerify = true
+	}
+	if *certificate != "" {
+		if cert, err := tls.LoadX509KeyPair(*certificate, *certificate); err != nil {
+			fmt.Fprintf(os.Stderr, "%s\n", err)
+			os.Exit(1)
+		} else {
+			b.Config.TlsConfig.Certificates = []tls.Certificate{cert}
+		}
 	}
 
 	b.Client = gumble.NewClient(&b.Config)
