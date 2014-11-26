@@ -26,7 +26,7 @@ type audioMessage struct {
 	sequence int
 }
 
-func (am *audioMessage) WriteTo(w io.Writer) (int64, error) {
+func (am *audioMessage) writeTo(w io.Writer) (int64, error) {
 	var written int64 = 0
 	// Create audio header
 	var header bytes.Buffer

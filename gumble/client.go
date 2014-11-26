@@ -332,7 +332,7 @@ func (c *Client) Send(message Message) error {
 	c.sendMutex.Lock()
 	defer c.sendMutex.Unlock()
 
-	if _, err := message.WriteTo(c.connection); err != nil {
+	if _, err := message.writeTo(c.connection); err != nil {
 		return err
 	}
 	return nil

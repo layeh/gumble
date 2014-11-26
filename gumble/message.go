@@ -6,6 +6,6 @@ import (
 
 // Message is data that be encoded and sent to the server.
 type Message interface {
-	io.WriterTo
+	writeTo(w io.Writer) (int64, error)
 	gumbleMessage()
 }

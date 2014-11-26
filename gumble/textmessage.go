@@ -14,7 +14,7 @@ type TextMessage struct {
 	Message  string     // Chat message.
 }
 
-func (pm *TextMessage) WriteTo(w io.Writer) (int64, error) {
+func (pm *TextMessage) writeTo(w io.Writer) (int64, error) {
 	packet := MumbleProto.TextMessage{
 		Message: &pm.Message,
 	}
@@ -37,7 +37,7 @@ func (pm *TextMessage) WriteTo(w io.Writer) (int64, error) {
 		}
 	}
 	proto := protoMessage{&packet}
-	return proto.WriteTo(w)
+	return proto.writeTo(w)
 }
 
 func (pm *TextMessage) gumbleMessage() {

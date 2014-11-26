@@ -32,7 +32,7 @@ func (ru *RegisteredUser) SetName(name string) {
 
 type RegisteredUsers []*RegisteredUser
 
-func (pm RegisteredUsers) WriteTo(w io.Writer) (int64, error) {
+func (pm RegisteredUsers) writeTo(w io.Writer) (int64, error) {
 	packet := MumbleProto.UserList{}
 
 	for _, user := range pm {
@@ -45,7 +45,7 @@ func (pm RegisteredUsers) WriteTo(w io.Writer) (int64, error) {
 	}
 
 	proto := protoMessage{&packet}
-	return proto.WriteTo(w)
+	return proto.writeTo(w)
 }
 
 func (pm RegisteredUsers) gumbleMessage() {
