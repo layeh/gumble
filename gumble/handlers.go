@@ -564,7 +564,28 @@ func handleContextAction(client *Client, buffer []byte) error {
 }
 
 func handleUserList(client *Client, buffer []byte) error {
-	return errUnimplementedHandler
+	var packet MumbleProto.UserList
+	if err := proto.Unmarshal(buffer, &packet); err != nil {
+		return err
+	}
+
+	event := UserListEvent{
+		Client: client,
+		Users:  make(RegisteredUserList, 0, len(packet.Users)),
+	}
+
+	for _, user := range packet.Users {
+		registeredUser := &RegisteredUser{
+			userId: *user.UserId,
+		}
+		if user.Name != nil {
+			registeredUser.name = *user.Name
+		}
+		event.Users = append(event.Users, registeredUser)
+	}
+
+	client.listeners.OnUserList(&event)
+	return nil
 }
 
 func handleVoiceTarget(client *Client, buffer []byte) error {

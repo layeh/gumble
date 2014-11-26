@@ -32,6 +32,7 @@ const (
 	RequestComment
 	RequestTexture
 	RequestStats
+	RequestUserList
 )
 
 // PingInterval is the interval at which ping packets are be sent by the client
@@ -195,6 +196,15 @@ func (c *Client) readRoutine() {
 // server.
 func (c *Client) AudioEncoder() *gopus.Encoder {
 	return c.audioEncoder
+}
+
+// Request requests that specific server information be sent to the client.
+func (c *Client) Request(request Request) {
+	if (request & RequestUserList) != 0 {
+		packet := MumbleProto.UserList{}
+		proto := protoMessage{&packet}
+		c.Send(proto)
+	}
 }
 
 // Disconnect disconnects the client from the server.

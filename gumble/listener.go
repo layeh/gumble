@@ -10,6 +10,7 @@ type Listener struct {
 	UserChange       func(e *UserChangeEvent)
 	ChannelChange    func(e *ChannelChangeEvent)
 	PermissionDenied func(e *PermissionDeniedEvent)
+	UserList         func(e *UserListEvent)
 }
 
 func (l Listener) OnConnect(e *ConnectEvent) {
@@ -45,5 +46,11 @@ func (l Listener) OnChannelChange(e *ChannelChangeEvent) {
 func (l Listener) OnPermissionDenied(e *PermissionDeniedEvent) {
 	if l.PermissionDenied != nil {
 		l.PermissionDenied(e)
+	}
+}
+
+func (l Listener) OnUserList(e *UserListEvent) {
+	if l.UserList != nil {
+		l.UserList(e)
 	}
 }

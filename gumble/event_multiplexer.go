@@ -73,3 +73,9 @@ func (em *eventMux) OnPermissionDenied(event *PermissionDeniedEvent) {
 		item.listener.OnPermissionDenied(event)
 	}
 }
+
+func (em *eventMux) OnUserList(event *UserListEvent) {
+	for item := em.head; item != nil; item = item.next {
+		item.listener.OnUserList(event)
+	}
+}

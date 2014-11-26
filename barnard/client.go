@@ -98,3 +98,6 @@ func (b *Barnard) OnPermissionDenied(e *gumble.PermissionDeniedEvent) {
 	}
 	b.AddOutputLine(fmt.Sprintf("Permission denied: %s", info))
 }
+
+func (b *Barnard) OnUserList(e *gumble.UserListEvent) {
+}
