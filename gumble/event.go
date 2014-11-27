@@ -66,15 +66,20 @@ type UserChangeEvent struct {
 	StatsChanged   bool
 }
 
+type ChannelChangeType int
+
+const (
+	ChannelChangeCreated ChannelChangeType = 1 << iota
+	ChannelChangeRemoved
+	ChannelChangeMoved
+	ChannelChangeNameChanged
+	ChannelChangeDescriptionChanged
+)
+
 type ChannelChangeEvent struct {
 	Client  *Client
+	Type    ChannelChangeType
 	Channel *Channel
-
-	Created            bool
-	Removed            bool
-	Moved              bool
-	NameChanged        bool
-	DescriptionChanged bool
 }
 
 type PermissionDeniedType int

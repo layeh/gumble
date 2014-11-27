@@ -228,8 +228,8 @@ func handleChannelRemove(client *Client, buffer []byte) error {
 	if client.state == StateSynced {
 		event := ChannelChangeEvent{
 			Client:  client,
+			Type:    ChannelChangeRemoved,
 			Channel: channel,
-			Removed: true,
 		}
 		client.listeners.OnChannelChange(&event)
 	}
@@ -254,7 +254,7 @@ func handleChannelState(client *Client, buffer []byte) error {
 		channel = client.channels.create(channelId)
 		channel.client = client
 
-		event.Created = true
+		event.Type = ChannelChangeCreated
 	} else {
 		channel = client.channels.ById(channelId)
 	}
@@ -265,7 +265,7 @@ func handleChannelState(client *Client, buffer []byte) error {
 		}
 		newParent := client.channels.ById(uint(*packet.Parent))
 		if newParent != channel.parent {
-			event.Moved = true
+			event.Type |= ChannelChangeMoved
 		}
 		channel.parent = newParent
 		if channel.parent != nil {
@@ -275,14 +275,14 @@ func handleChannelState(client *Client, buffer []byte) error {
 	if packet.Name != nil {
 		newName := *packet.Name
 		if newName != channel.name {
-			event.NameChanged = true
+			event.Type |= ChannelChangeNameChanged
 		}
 		channel.name = newName
 	}
 	if packet.Description != nil {
 		newDescription := *packet.Description
 		if newDescription != channel.description {
-			event.DescriptionChanged = true
+			event.Type |= ChannelChangeDescriptionChanged
 		}
 		channel.description = newDescription
 		channel.descriptionHash = nil
@@ -294,7 +294,7 @@ func handleChannelState(client *Client, buffer []byte) error {
 		channel.position = *packet.Position
 	}
 	if packet.DescriptionHash != nil {
-		event.DescriptionChanged = true
+		event.Type |= ChannelChangeDescriptionChanged
 		channel.descriptionHash = packet.DescriptionHash
 		channel.description = ""
 	}
