@@ -401,8 +401,8 @@ func handleUserState(client *Client, buffer []byte) error {
 		if newChannel != user.channel {
 			event.Type |= UserChangeChannel
 			user.channel = newChannel
-			user.channel.users[user.Session()] = user
 		}
+		user.channel.users[user.Session()] = user
 	}
 	if packet.Mute != nil {
 		user.mute = *packet.Mute
