@@ -9,10 +9,13 @@ import (
 	"github.com/bontibon/gumble/gumble/MumbleProto"
 )
 
+// BanList is a list of server ban entries.
+//
+// Whenever a ban is changed, it does not come into effect until the ban list
+// is sent back to the server.
 type BanList []*Ban
 
-// Add creates a new ban list entry with the given parameters. The ban does not
-// come into effect until the ban list is sent back to the server.
+// Add creates a new ban list entry with the given parameters.
 func (bl *BanList) Add(address net.IP, mask net.IPMask, reason string, duration time.Duration) *Ban {
 	ban := &Ban{
 		address:  address,
@@ -45,8 +48,7 @@ func (b *Ban) Address() net.IP {
 	return b.address
 }
 
-// SetAddress sets the banned IP address. The change does not actually happen
-// until the ban list is sent back to the server.
+// SetAddress sets the banned IP address.
 func (b *Ban) SetAddress(address net.IP) {
 	b.address = address
 }
@@ -56,8 +58,7 @@ func (b *Ban) Mask() net.IPMask {
 	return b.mask
 }
 
-// SetMask sets the IP mask that the ban applies to. The change does not
-// actually happen until the ban list is sent back to the server.
+// SetMask sets the IP mask that the ban applies to.
 func (b *Ban) SetMask(mask net.IPMask) {
 	b.mask = mask
 }
@@ -77,8 +78,7 @@ func (b *Ban) Reason() string {
 	return b.reason
 }
 
-// SetReason changes the reason for the ban. The change does not actually
-// happen until the ban list is sent back to the server.
+// SetReason changes the reason for the ban.
 func (b *Ban) SetReason(reason string) {
 	b.reason = reason
 }
@@ -93,21 +93,18 @@ func (b *Ban) Duration() time.Duration {
 	return b.duration
 }
 
-// SetDuration changes the duration of the ban. The change does not actually
-// happen until the ban list is sent back to the server.
+// SetDuration changes the duration of the ban.
 func (b *Ban) SetDuration(duration time.Duration) {
 	b.duration = duration
 }
 
-// Unban will unban the user from the server. The change does not actually
-// happen until the ban list is sent back to the server.
+// Unban will unban the user from the server.
 func (b *Ban) Unban() {
 	b.unban = true
 }
 
 // Ban will ban the user from the server. This is only useful if Unban() was
-// called on the ban entry. The change does not actually happen until the ban
-// list is sent back to the server.
+// called on the ban entry.
 func (b *Ban) Ban() {
 	b.unban = false
 }

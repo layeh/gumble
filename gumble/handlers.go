@@ -634,7 +634,7 @@ func handleUserList(client *Client, buffer []byte) error {
 
 	event := UserListEvent{
 		Client: client,
-		Users:  make(RegisteredUsers, 0, len(packet.Users)),
+		RegisteredUsers:  make(RegisteredUsers, 0, len(packet.Users)),
 	}
 
 	for _, user := range packet.Users {
@@ -644,7 +644,7 @@ func handleUserList(client *Client, buffer []byte) error {
 		if user.Name != nil {
 			registeredUser.name = *user.Name
 		}
-		event.Users = append(event.Users, registeredUser)
+		event.RegisteredUsers = append(event.RegisteredUsers, registeredUser)
 	}
 
 	client.listeners.OnUserList(&event)

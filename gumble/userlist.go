@@ -24,13 +24,16 @@ func (ru *RegisteredUser) Name() string {
 	return ru.name
 }
 
-// SetName sets the new name for the user. The change does not actually happen
-// until the registered user list is sent back to the server.
+// SetName sets the new name for the user.
 func (ru *RegisteredUser) SetName(name string) {
 	ru.name = name
 	ru.changed = true
 }
 
+// RegisteredUsers is a list of users who are registered on the server.
+//
+// Whenever a registered user is changed, it does not come into effect until
+// the registered user list is sent back to the server.
 type RegisteredUsers []*RegisteredUser
 
 func (pm RegisteredUsers) writeTo(w io.Writer) (int64, error) {

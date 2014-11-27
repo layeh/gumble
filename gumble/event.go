@@ -104,7 +104,7 @@ type PermissionDeniedEvent struct {
 
 type UserListEvent struct {
 	Client *Client
-	Users  RegisteredUsers
+	RegisteredUsers
 }
 
 type AclEvent struct {
