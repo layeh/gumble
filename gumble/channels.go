@@ -2,9 +2,9 @@ package gumble
 
 type Channels map[uint]*Channel
 
-// Create adds a new channel with the given id to the collection. If a channel
+// create adds a new channel with the given id to the collection. If a channel
 // with the given id already exists, it is overwritten.
-func (c Channels) Create(id uint) *Channel {
+func (c Channels) create(id uint) *Channel {
 	channel := &Channel{
 		id:       uint32(id),
 		children: Channels{},
@@ -26,8 +26,8 @@ func (c Channels) Exists(id uint) bool {
 	return ok
 }
 
-// Delete removes the channel with the given id from the collection.
-func (c Channels) Delete(id uint) {
+// delete removes the channel with the given id from the collection.
+func (c Channels) delete(id uint) {
 	delete(c, id)
 }
 

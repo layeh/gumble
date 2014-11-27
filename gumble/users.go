@@ -2,9 +2,9 @@ package gumble
 
 type Users map[uint]*User
 
-// Create adds a new user with the given session to the collection. If a user
+// create adds a new user with the given session to the collection. If a user
 // with the given session already exists, it is overwritten.
-func (u Users) Create(session uint) *User {
+func (u Users) create(session uint) *User {
 	user := &User{
 		session: uint32(session),
 	}
@@ -25,8 +25,8 @@ func (u Users) Exists(session uint) bool {
 	return ok
 }
 
-// Delete removes the user with the given session from the collection.
-func (u Users) Delete(session uint) {
+// delete removes the user with the given session from the collection.
+func (u Users) delete(session uint) {
 	delete(u, session)
 }
 

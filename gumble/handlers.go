@@ -219,9 +219,9 @@ func handleChannelRemove(client *Client, buffer []byte) error {
 		if channel == nil {
 			return errInvalidProtobuf
 		}
-		client.channels.Delete(channelId)
+		client.channels.delete(channelId)
 		if parent := channel.parent; parent != nil {
-			channel.parent.children.Delete(uint(channel.id))
+			channel.parent.children.delete(uint(channel.id))
 		}
 	}
 
@@ -251,7 +251,7 @@ func handleChannelState(client *Client, buffer []byte) error {
 	var channel *Channel
 	channelId := uint(*packet.ChannelId)
 	if !client.channels.Exists(channelId) {
-		channel = client.channels.Create(channelId)
+		channel = client.channels.create(channelId)
 		channel.client = client
 
 		event.Created = true
@@ -261,7 +261,7 @@ func handleChannelState(client *Client, buffer []byte) error {
 	event.Channel = channel
 	if packet.Parent != nil {
 		if channel.parent != nil {
-			channel.parent.children.Delete(channelId)
+			channel.parent.children.delete(channelId)
 		}
 		newParent := client.channels.ById(uint(*packet.Parent))
 		if newParent != channel.parent {
@@ -322,9 +322,9 @@ func handleUserRemove(client *Client, buffer []byte) error {
 			return errInvalidProtobuf
 		}
 		if user.channel != nil {
-			user.channel.users.Delete(session)
+			user.channel.users.delete(session)
 		}
-		client.users.Delete(session)
+		client.users.delete(session)
 	}
 
 	if client.state == StateSynced {
@@ -354,7 +354,7 @@ func handleUserState(client *Client, buffer []byte) error {
 	{
 		session := uint(*packet.Session)
 		if !client.users.Exists(session) {
-			user = client.users.Create(session)
+			user = client.users.create(session)
 			user.channel = client.channels.ById(0)
 			user.client = client
 
@@ -392,7 +392,7 @@ func handleUserState(client *Client, buffer []byte) error {
 	}
 	if packet.ChannelId != nil {
 		if user.channel != nil {
-			user.channel.users.Delete(user.Session())
+			user.channel.users.delete(user.Session())
 		}
 		newChannel := client.channels.ById(uint(*packet.ChannelId))
 		if newChannel == nil {
