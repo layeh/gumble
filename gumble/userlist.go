@@ -48,6 +48,9 @@ func (pm RegisteredUsers) writeTo(w io.Writer) (int64, error) {
 		}
 	}
 
+	if len(packet.Users) <= 0 {
+		return 0, nil
+	}
 	proto := protoMessage{&packet}
 	return proto.writeTo(w)
 }
