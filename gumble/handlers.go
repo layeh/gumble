@@ -633,8 +633,8 @@ func handleUserList(client *Client, buffer []byte) error {
 	}
 
 	event := UserListEvent{
-		Client: client,
-		RegisteredUsers:  make(RegisteredUsers, 0, len(packet.Users)),
+		Client:          client,
+		RegisteredUsers: make(RegisteredUsers, 0, len(packet.Users)),
 	}
 
 	for _, user := range packet.Users {

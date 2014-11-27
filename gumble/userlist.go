@@ -11,7 +11,8 @@ type RegisteredUser struct {
 	userId uint32
 	name   string
 
-	changed bool
+	changed    bool
+	deregister bool
 }
 
 // UserId returns the registered user's Id
@@ -30,6 +31,17 @@ func (ru *RegisteredUser) SetName(name string) {
 	ru.changed = true
 }
 
+// Deregister will remove the registered user from the server.
+func (ru *RegisteredUser) Deregister() {
+	ru.deregister = true
+}
+
+// Register will keep the user registered on the server. This is only useful if
+// Deregister() was called on the registered user.
+func (ru *RegisteredUser) Register() {
+	ru.deregister = false
+}
+
 // RegisteredUsers is a list of users who are registered on the server.
 //
 // Whenever a registered user is changed, it does not come into effect until
@@ -40,11 +52,14 @@ func (pm RegisteredUsers) writeTo(w io.Writer) (int64, error) {
 	packet := MumbleProto.UserList{}
 
 	for _, user := range pm {
-		if user.changed {
-			packet.Users = append(packet.Users, &MumbleProto.UserList_User{
+		if user.deregister || user.changed {
+			userListUser := &MumbleProto.UserList_User{
 				UserId: &user.userId,
-				Name:   &user.name,
-			})
+			}
+			if !user.deregister {
+				userListUser.Name = &user.name
+			}
+			packet.Users = append(packet.Users, userListUser)
 		}
 	}
 
