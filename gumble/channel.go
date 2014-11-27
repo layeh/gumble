@@ -48,8 +48,7 @@ func (c *Channel) IsTemporary() bool {
 	return c.temporary
 }
 
-// IsRoot returns true if the channel is the server's root channel, false
-// otherwise.
+// IsRoot returns true if the channel is the server's root channel.
 func (c *Channel) IsRoot() bool {
 	return c.id == 0
 }

@@ -60,7 +60,7 @@ func (b *Barnard) OnTextMessage(e *gumble.TextMessageEvent) {
 }
 
 func (b *Barnard) OnUserChange(e *gumble.UserChangeEvent) {
-	if e.ChannelChanged && e.User == b.Client.Self() {
+	if e.Type.Has(gumble.UserChangeChannel) && e.User == b.Client.Self() {
 		b.UpdateInputStatus(fmt.Sprintf("To: %s", e.User.Channel().Name()))
 	}
 	b.UiTree.Rebuild()
