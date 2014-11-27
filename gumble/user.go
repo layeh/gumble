@@ -6,6 +6,7 @@ import (
 	"github.com/bontibon/gumble/gumble/MumbleProto"
 )
 
+// User represents a user that is currently connected to the server.
 type User struct {
 	client  *Client
 	decoder *gopus.Decoder
@@ -208,6 +209,8 @@ func (u *User) Stats() (UserStats, bool) {
 }
 
 // Request requests user information that has not yet been sent to the client.
+// The supported request types are: RequestStats, RequestTexture, and
+// RequestComment.
 func (u *User) Request(request Request) {
 	if (request & RequestStats) != 0 {
 		packet := MumbleProto.UserStats{

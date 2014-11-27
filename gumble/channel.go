@@ -5,6 +5,7 @@ import (
 	"github.com/bontibon/gumble/gumble/MumbleProto"
 )
 
+// Channel represents a channel in the server's channel tree.
 type Channel struct {
 	client *Client
 
@@ -109,6 +110,17 @@ func (c *Channel) Children() Channels {
 
 // Find returns a channel whose path (by channel name) from the current channel
 // is equal to the arguments passed.
+//
+// For example, given the following server channel tree:
+//         Root
+//           Child 1
+//           Child 2
+//             Child 2.1
+//             Child 2.2
+//               Child 2.2.1
+//           Child 3
+// To get the "Child 2.2.1" channel:
+//         root.Find("Child 2", "Child 2.2", "Child 2.2.1")
 func (c *Channel) Find(names ...string) *Channel {
 	if names == nil || len(names) == 0 {
 		return c
@@ -122,7 +134,7 @@ func (c *Channel) Find(names ...string) *Channel {
 }
 
 // Request requests channel information that has not yet been sent to the
-// client.
+// client. The supported request types are: RequestDescription, RequestAcl.
 func (c *Channel) Request(request Request) {
 	if (request & RequestDescription) != 0 {
 		packet := MumbleProto.RequestBlob{

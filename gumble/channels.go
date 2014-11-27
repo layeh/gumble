@@ -1,5 +1,11 @@
 package gumble
 
+// Channels is a maps of server channels.
+//
+// When accessed through client.Channels(), it contains all channels on the
+// server. When accessed through a specific channel
+// (e.g. client.Channels()[0].Channels()), it contains only the children of the
+// channel.
 type Channels map[uint]*Channel
 
 // create adds a new channel with the given id to the collection. If a channel

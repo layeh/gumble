@@ -1,5 +1,11 @@
 package gumble
 
+// Users is a maps of server users.
+//
+// When accessed through client.Users(), it contains all users currently on the
+// server. When accessed through a specific channel
+// (e.g. client.Channels()[0].Users()), it contains only the users in the
+// channel.
 type Users map[uint]*User
 
 // create adds a new user with the given session to the collection. If a user

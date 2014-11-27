@@ -19,8 +19,14 @@ import (
 type State int
 
 const (
+	// The client is current disconnected from the server.
 	StateDisconnected State = iota
+
+	// The client is connected to the server, but has yet to receive the current
+	// server state.
 	StateConnected
+
+	// The client is connected to the server and has been sent the server state.
 	StateSynced
 )
 

@@ -6,6 +6,7 @@ import (
 	"github.com/bontibon/gumble/gumble/MumbleProto"
 )
 
+// RegisteredUser represents a registered user on the server.
 type RegisteredUser struct {
 	userId uint32
 	name   string

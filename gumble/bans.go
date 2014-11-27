@@ -24,6 +24,10 @@ func (bl *BanList) Add(address net.IP, mask net.IPMask, reason string, duration 
 	return ban
 }
 
+// Ban represents an entry in the server ban list.
+//
+// This type should not be initialized manually. Instead, create new ban
+// entries using BanList.Add().
 type Ban struct {
 	address  net.IP
 	mask     net.IPMask

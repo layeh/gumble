@@ -6,12 +6,23 @@ import (
 	"github.com/bontibon/gumble/gumble/MumbleProto"
 )
 
+// TextMessage is a chat message that can be received from and sent to the
+// server.
 type TextMessage struct {
-	Sender   *User      // User who sent the message (can be nil).
-	Users    []*User    // Users that receive the message.
-	Channels []*Channel // Channels that receive the message.
-	Trees    []*Channel // Channels that receive the message and send it recursively to sub-channels.
-	Message  string     // Chat message.
+	// User who sent the message (can be nil).
+	Sender   *User
+
+	// Users that receive the message.
+	Users    []*User
+
+	// Channels that receive the message.
+	Channels []*Channel
+
+	// Channels that receive the message and send it recursively to sub-channels.
+	Trees    []*Channel
+
+	// Chat message.
+	Message  string
 }
 
 func (pm *TextMessage) writeTo(w io.Writer) (int64, error) {
