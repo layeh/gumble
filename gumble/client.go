@@ -206,7 +206,8 @@ func (c *Client) AudioEncoder() *gopus.Encoder {
 	return c.audioEncoder
 }
 
-// Request requests that specific server information be sent to the client.
+// Request requests that specific server information be sent to the client. The
+// supported request types are: RequestUserList, and RequestBanList.
 func (c *Client) Request(request Request) {
 	if (request & RequestUserList) != 0 {
 		packet := MumbleProto.UserList{}
