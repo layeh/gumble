@@ -53,17 +53,26 @@ type TextMessageEvent struct {
 	TextMessage
 }
 
+type UserChangeType int
+
+const (
+	UserChangeConnected UserChangeType = 1 << iota
+	UserChangeDisconnected
+	UserChangeName
+	UserChangeChannel
+	UserChangeComment
+	UserChangeStats
+)
+
+func (uct UserChangeType) Has(changeType UserChangeType) bool {
+	return (uct & changeType) != 0
+}
+
 type UserChangeEvent struct {
 	Client *Client
+	Type   UserChangeType
 	User   *User
 	Actor  *User
-
-	Connected      bool
-	Disconnected   bool
-	NameChanged    bool
-	ChannelChanged bool
-	CommentChanged bool
-	StatsChanged   bool
 }
 
 type ChannelChangeType int
@@ -72,9 +81,13 @@ const (
 	ChannelChangeCreated ChannelChangeType = 1 << iota
 	ChannelChangeRemoved
 	ChannelChangeMoved
-	ChannelChangeNameChanged
-	ChannelChangeDescriptionChanged
+	ChannelChangeName
+	ChannelChangeDescription
 )
+
+func (cct ChannelChangeType) Has(changeType ChannelChangeType) bool {
+	return (cct & changeType) != 0
+}
 
 type ChannelChangeEvent struct {
 	Client  *Client

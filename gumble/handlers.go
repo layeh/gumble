@@ -254,7 +254,7 @@ func handleChannelState(client *Client, buffer []byte) error {
 		channel = client.channels.create(channelId)
 		channel.client = client
 
-		event.Type = ChannelChangeCreated
+		event.Type |= ChannelChangeCreated
 	} else {
 		channel = client.channels.ById(channelId)
 	}
@@ -275,14 +275,14 @@ func handleChannelState(client *Client, buffer []byte) error {
 	if packet.Name != nil {
 		newName := *packet.Name
 		if newName != channel.name {
-			event.Type |= ChannelChangeNameChanged
+			event.Type |= ChannelChangeName
 		}
 		channel.name = newName
 	}
 	if packet.Description != nil {
 		newDescription := *packet.Description
 		if newDescription != channel.description {
-			event.Type |= ChannelChangeDescriptionChanged
+			event.Type |= ChannelChangeDescription
 		}
 		channel.description = newDescription
 		channel.descriptionHash = nil
@@ -294,7 +294,7 @@ func handleChannelState(client *Client, buffer []byte) error {
 		channel.position = *packet.Position
 	}
 	if packet.DescriptionHash != nil {
-		event.Type |= ChannelChangeDescriptionChanged
+		event.Type |= ChannelChangeDescription
 		channel.descriptionHash = packet.DescriptionHash
 		channel.description = ""
 	}
@@ -329,9 +329,9 @@ func handleUserRemove(client *Client, buffer []byte) error {
 
 	if client.state == StateSynced {
 		event := UserChangeEvent{
-			Client:       client,
-			User:         user,
-			Disconnected: true,
+			Client: client,
+			Type:   UserChangeDisconnected,
+			User:   user,
 		}
 		client.listeners.OnUserChange(&event)
 	}
@@ -358,16 +358,16 @@ func handleUserState(client *Client, buffer []byte) error {
 			user.channel = client.channels.ById(0)
 			user.client = client
 
+			event.Type |= UserChangeConnected
+
 			decoder, _ := gopus.NewDecoder(SampleRate, 1)
 			user.decoder = decoder
 
 			if user.channel == nil {
 				return errInvalidProtobuf
 			}
-			event.ChannelChanged = true
+			event.Type |= UserChangeChannel
 			user.channel.users[session] = user
-
-			event.Connected = true
 		} else {
 			user = client.users.BySession(session)
 		}
@@ -383,7 +383,7 @@ func handleUserState(client *Client, buffer []byte) error {
 	if packet.Name != nil {
 		newName := *packet.Name
 		if newName != user.name {
-			event.NameChanged = true
+			event.Type |= UserChangeName
 		}
 		user.name = newName
 	}
@@ -399,7 +399,7 @@ func handleUserState(client *Client, buffer []byte) error {
 			return errInvalidProtobuf
 		}
 		if newChannel != user.channel {
-			event.ChannelChanged = true
+			event.Type |= UserChangeChannel
 			user.channel = newChannel
 			user.channel.users[user.Session()] = user
 		}
@@ -426,7 +426,7 @@ func handleUserState(client *Client, buffer []byte) error {
 	if packet.Comment != nil {
 		newComment := *packet.Comment
 		if newComment != user.comment {
-			event.CommentChanged = true
+			event.Type |= UserChangeComment
 		}
 		user.comment = newComment
 		user.commentHash = nil
@@ -435,7 +435,7 @@ func handleUserState(client *Client, buffer []byte) error {
 		user.hash = *packet.Hash
 	}
 	if packet.CommentHash != nil {
-		event.CommentChanged = true
+		event.Type |= UserChangeComment
 		user.commentHash = packet.CommentHash
 		user.comment = ""
 	}
@@ -690,9 +690,9 @@ func handleUserStats(client *Client, buffer []byte) error {
 	user.statsFetched = true
 
 	event := UserChangeEvent{
-		Client:       client,
-		User:         user,
-		StatsChanged: true,
+		Client: client,
+		Type:   UserChangeStats,
+		User:   user,
 	}
 	client.listeners.OnUserChange(&event)
 	return nil
