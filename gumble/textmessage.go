@@ -10,19 +10,19 @@ import (
 // server.
 type TextMessage struct {
 	// User who sent the message (can be nil).
-	Sender   *User
+	Sender *User
 
 	// Users that receive the message.
-	Users    []*User
+	Users []*User
 
 	// Channels that receive the message.
 	Channels []*Channel
 
 	// Channels that receive the message and send it recursively to sub-channels.
-	Trees    []*Channel
+	Trees []*Channel
 
 	// Chat message.
-	Message  string
+	Message string
 }
 
 func (pm *TextMessage) writeTo(w io.Writer) (int64, error) {
