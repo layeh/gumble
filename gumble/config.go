@@ -2,7 +2,10 @@ package gumble
 
 import (
 	"crypto/tls"
+	"io"
 	"net"
+
+	"github.com/bontibon/gumble/gumble/MumbleProto"
 )
 
 type Config struct {
@@ -13,4 +16,12 @@ type Config struct {
 
 	TlsConfig tls.Config
 	Dialer    net.Dialer
+}
+
+func (c *Config) writeTo(w io.Writer) (int64, error) {
+	packet := MumbleProto.Authenticate{
+		Tokens: c.Tokens,
+	}
+	proto := protoMessage{&packet}
+	return proto.writeTo(w)
 }

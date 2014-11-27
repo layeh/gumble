@@ -319,14 +319,6 @@ func (c *Client) Channels() Channels {
 	return c.channels
 }
 
-// Reauthenticate will resend the tokens from the config.
-func (c *Client) Reauthenticate() {
-	authenticationPacket := MumbleProto.Authenticate{
-		Tokens: c.config.Tokens,
-	}
-	c.Send(protoMessage{&authenticationPacket})
-}
-
 // Send will send a message to the server.
 func (c *Client) Send(message Message) error {
 	c.sendMutex.Lock()
