@@ -95,7 +95,7 @@ func (c *Client) Connect() error {
 	if c.state != StateDisconnected {
 		return ErrState
 	}
-	if encoder, err := gopus.NewEncoder(SampleRate, 1, gopus.Voip); err != nil {
+	if encoder, err := gopus.NewEncoder(AudioSampleRate, 1, gopus.Voip); err != nil {
 		return err
 	} else {
 		encoder.SetVbr(false)
@@ -342,7 +342,7 @@ func (c *Client) sendAudio(packet *AudioPacket) error {
 		Format: audioOpus,
 		Target: audioNormal,
 	}
-	if opusBuffer, err := c.audioEncoder.Encode(packet.Pcm, DefaultFrameSize, MaximumFrameSize); err != nil {
+	if opusBuffer, err := c.audioEncoder.Encode(packet.Pcm, AudioDefaultFrameSize, AudioMaximumFrameSize); err != nil {
 		return err
 	} else {
 		c.audioSequence = (c.audioSequence + 1) % 10000

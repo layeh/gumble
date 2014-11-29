@@ -138,7 +138,7 @@ func handleUdpTunnel(client *Client, buffer []byte) error {
 	}
 
 	opus := buffer[bytesRead : bytesRead+int64(audioLength)]
-	if pcm, err := user.decoder.Decode(opus, MaximumFrameSize, false); err != nil {
+	if pcm, err := user.decoder.Decode(opus, AudioMaximumFrameSize, false); err != nil {
 		return err
 	} else {
 		_ = audioTarget
@@ -360,7 +360,7 @@ func handleUserState(client *Client, buffer []byte) error {
 
 			event.Type |= UserChangeConnected
 
-			decoder, _ := gopus.NewDecoder(SampleRate, 1)
+			decoder, _ := gopus.NewDecoder(AudioSampleRate, 1)
 			user.decoder = decoder
 
 			if user.channel == nil {
