@@ -1,10 +1,10 @@
 package main
 
 import (
+	"crypto/tls"
 	"flag"
 	"fmt"
 	"os"
-	"crypto/tls"
 
 	"github.com/bontibon/gumble/barnard"
 	"github.com/bontibon/gumble/barnard/uiterm"
@@ -37,6 +37,7 @@ func main() {
 	b.Config = gumble.Config{
 		Username: *username,
 		Address:  *server,
+		Listener: &b,
 	}
 	if *insecure {
 		b.Config.TlsConfig.InsecureSkipVerify = true
@@ -51,7 +52,6 @@ func main() {
 	}
 
 	b.Client = gumble.NewClient(&b.Config)
-	b.Client.Attach(&b)
 	if _, err := b.Client.AttachAudio(b.Stream, gumble.AudioSource|gumble.AudioSink); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
 		os.Exit(1)

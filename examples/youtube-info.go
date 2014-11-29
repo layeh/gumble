@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/bontibon/gumble/gumble"
+	"github.com/bontibon/gumble/gumbleutil"
 )
 
 const responseTemplate = `
@@ -134,11 +135,11 @@ func main() {
 	if *insecure {
 		p.config.TlsConfig.InsecureSkipVerify = true
 	}
-	p.client.Attach(gumble.Listener{
+	p.config.Listener = gumbleutil.Listener{
 		Connect:     p.OnConnect,
 		Disconnect:  p.OnDisconnect,
 		TextMessage: p.OnTextMessage,
-	})
+	}
 	if err := p.client.Connect(); err != nil {
 		fmt.Printf("%s\n", err)
 		os.Exit(1)

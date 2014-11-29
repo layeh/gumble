@@ -58,8 +58,6 @@ var (
 type Client struct {
 	config *Config
 
-	listeners eventMux
-
 	state  State
 	self   *User
 	server struct {
@@ -81,8 +79,11 @@ type Client struct {
 	sendMutex  sync.Mutex
 }
 
-// NewClient creates a new gumble client.
+// NewClient creates a new gumble client. Returns nil if config is nil.
 func NewClient(config *Config) *Client {
+	if config == nil {
+		return nil
+	}
 	client := &Client{
 		config: config,
 		state:  StateDisconnected,
@@ -251,7 +252,9 @@ func (c *Client) close(event *DisconnectEvent) error {
 	c.self = nil
 	c.audioEncoder = nil
 
-	c.listeners.OnDisconnect(event)
+	if listener := c.config.Listener; listener != nil {
+		listener.OnDisconnect(event)
+	}
 	return nil
 }
 
@@ -262,11 +265,6 @@ func (c *Client) Conn() net.Conn {
 		return nil
 	}
 	return c.connection
-}
-
-// Attach adds an event listener.
-func (c *Client) Attach(listener EventListener) Detachable {
-	return c.listeners.Attach(listener)
 }
 
 // AttachAudio will attach an AudioStream to the client.

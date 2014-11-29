@@ -199,7 +199,9 @@ func handleServerSync(client *Client, buffer []byte) error {
 	}
 	client.state = StateSynced
 
-	client.listeners.OnConnect(&event)
+	if listener := client.config.Listener; listener != nil {
+		listener.OnConnect(&event)
+	}
 	return nil
 }
 
@@ -231,7 +233,9 @@ func handleChannelRemove(client *Client, buffer []byte) error {
 			Type:    ChannelChangeRemoved,
 			Channel: channel,
 		}
-		client.listeners.OnChannelChange(&event)
+		if listener := client.config.Listener; listener != nil {
+			listener.OnChannelChange(&event)
+		}
 	}
 	return nil
 }
@@ -300,7 +304,9 @@ func handleChannelState(client *Client, buffer []byte) error {
 	}
 
 	if client.state == StateSynced {
-		client.listeners.OnChannelChange(&event)
+		if listener := client.config.Listener; listener != nil {
+			listener.OnChannelChange(&event)
+		}
 	}
 	return nil
 }
@@ -344,7 +350,9 @@ func handleUserRemove(client *Client, buffer []byte) error {
 	}
 
 	if client.state == StateSynced {
-		client.listeners.OnUserChange(&event)
+		if listener := client.config.Listener; listener != nil {
+			listener.OnUserChange(&event)
+		}
 	}
 	return nil
 }
@@ -462,7 +470,9 @@ func handleUserState(client *Client, buffer []byte) error {
 	}
 
 	if client.state == StateSynced {
-		client.listeners.OnUserChange(&event)
+		if listener := client.config.Listener; listener != nil {
+			listener.OnUserChange(&event)
+		}
 	}
 	return nil
 }
@@ -507,7 +517,9 @@ func handleBanList(client *Client, buffer []byte) error {
 		event.BanList = append(event.BanList, ban)
 	}
 
-	client.listeners.OnBanList(&event)
+	if listener := client.config.Listener; listener != nil {
+		listener.OnBanList(&event)
+	}
 	return nil
 }
 
@@ -551,7 +563,9 @@ func handleTextMessage(client *Client, buffer []byte) error {
 		event.Message = *packet.Message
 	}
 
-	client.listeners.OnTextMessage(&event)
+	if listener := client.config.Listener; listener != nil {
+		listener.OnTextMessage(&event)
+	}
 	return nil
 }
 
@@ -591,7 +605,9 @@ func handlePermissionDenied(client *Client, buffer []byte) error {
 		event.Permission = Permission(*packet.Permission)
 	}
 
-	client.listeners.OnPermissionDenied(&event)
+	if listener := client.config.Listener; listener != nil {
+		listener.OnPermissionDenied(&event)
+	}
 	return nil
 }
 
@@ -617,7 +633,9 @@ func handleAcl(client *Client, buffer []byte) error {
 		}
 	}
 
-	client.listeners.OnAcl(&event)
+	if listener := client.config.Listener; listener != nil {
+		listener.OnAcl(&event)
+	}
 	return nil
 }
 
@@ -658,7 +676,9 @@ func handleUserList(client *Client, buffer []byte) error {
 		event.RegisteredUsers = append(event.RegisteredUsers, registeredUser)
 	}
 
-	client.listeners.OnUserList(&event)
+	if listener := client.config.Listener; listener != nil {
+		listener.OnUserList(&event)
+	}
 	return nil
 }
 
@@ -705,7 +725,10 @@ func handleUserStats(client *Client, buffer []byte) error {
 		Type:   UserChangeStats,
 		User:   user,
 	}
-	client.listeners.OnUserChange(&event)
+
+	if listener := client.config.Listener; listener != nil {
+		listener.OnUserChange(&event)
+	}
 	return nil
 }
 
