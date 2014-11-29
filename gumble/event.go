@@ -58,6 +58,8 @@ type UserChangeType int
 const (
 	UserChangeConnected UserChangeType = 1 << iota
 	UserChangeDisconnected
+	UserChangeKicked
+	UserChangeBanned
 	UserChangeName
 	UserChangeChannel
 	UserChangeComment
@@ -73,6 +75,8 @@ type UserChangeEvent struct {
 	Type   UserChangeType
 	User   *User
 	Actor  *User
+
+	String string
 }
 
 type ChannelChangeType int

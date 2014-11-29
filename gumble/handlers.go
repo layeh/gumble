@@ -314,25 +314,36 @@ func handleUserRemove(client *Client, buffer []byte) error {
 	if packet.Session == nil {
 		return errIncompleteProtobuf
 	}
-	var user *User
+	event := UserChangeEvent{
+		Client: client,
+		Type:   UserChangeDisconnected,
+	}
 	{
 		session := uint(*packet.Session)
-		user = client.users.BySession(session)
-		if user == nil {
+		event.User = client.users.BySession(session)
+		if event.User == nil {
 			return errInvalidProtobuf
 		}
-		if user.channel != nil {
-			user.channel.users.delete(session)
+		if event.User.channel != nil {
+			event.User.channel.users.delete(session)
 		}
 		client.users.delete(session)
 	}
+	if packet.Actor != nil {
+		event.Actor = client.users.BySession(uint(*packet.Actor))
+		if event.Actor == nil {
+			return errInvalidProtobuf
+		}
+		event.Type |= UserChangeKicked
+	}
+	if packet.Reason != nil {
+		event.String = *packet.Reason
+	}
+	if packet.Ban != nil && *packet.Ban {
+		event.Type |= UserChangeBanned
+	}
 
 	if client.state == StateSynced {
-		event := UserChangeEvent{
-			Client: client,
-			Type:   UserChangeDisconnected,
-			User:   user,
-		}
 		client.listeners.OnUserChange(&event)
 	}
 	return nil
