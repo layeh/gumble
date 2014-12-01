@@ -24,12 +24,12 @@ func (v *Version) Os() (os, osVersion string) {
 
 // SemanticVersion returns the struct's semantic version components.
 func (v *Version) SemanticVersion() (major, minor, patch uint) {
-	major = uint(v.version >> 16)
-	minor = uint(v.version >> 8)
-	patch = uint(v.version)
+	major = uint(v.version>>16) & 0xFFFF
+	minor = uint(v.version>>8) & 0xFF
+	patch = uint(v.version) & 0xFF
 	return
 }
 
 func (v *Version) setSemanticVersion(major, minor, patch uint) {
-	v.version = uint32(major)<<16 | uint32(minor)<<8 | uint32(patch)
+	v.version = uint32(major&0xFFFF)<<16 | uint32(minor&0xFF)<<8 | uint32(patch&0xFF)
 }
