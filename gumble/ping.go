@@ -57,18 +57,11 @@ func Ping(address string, timeout time.Duration) (*PingResponse, error) {
 		return nil, err
 	}
 
-	var packet bytes.Buffer
-	var id [8]byte
-	if err := binary.Write(&packet, binary.BigEndian, int32(0)); err != nil {
+	var packet [12]byte
+	if _, err := rand.Read(packet[4:]); err != nil {
 		return nil, err
 	}
-	if _, err := rand.Read(id[:]); err != nil {
-		return nil, err
-	}
-	if _, err := packet.Write(id[:]); err != nil {
-		return nil, err
-	}
-	if _, err := packet.WriteTo(conn); err != nil {
+	if _, err := conn.Write(packet[:]); err != nil {
 		return nil, err
 	}
 
@@ -78,7 +71,7 @@ func Ping(address string, timeout time.Duration) (*PingResponse, error) {
 		if _, err := io.ReadFull(conn, incoming[:]); err != nil {
 			return nil, err
 		}
-		if !bytes.Equal(incoming[4:12], id[:]) {
+		if !bytes.Equal(incoming[4:12], packet[4:]) {
 			continue
 		}
 
