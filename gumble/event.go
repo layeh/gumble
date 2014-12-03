@@ -74,8 +74,8 @@ func (uct UserChangeType) Has(changeType UserChangeType) bool {
 type UserChangeEvent struct {
 	Client *Client
 	Type   UserChangeType
-	*User
-	Actor *User
+	User   *User
+	Actor  *User
 
 	String string
 }
@@ -95,9 +95,9 @@ func (cct ChannelChangeType) Has(changeType ChannelChangeType) bool {
 }
 
 type ChannelChangeEvent struct {
-	Client *Client
-	Type   ChannelChangeType
-	*Channel
+	Client  *Client
+	Type    ChannelChangeType
+	Channel *Channel
 }
 
 type PermissionDeniedType int
@@ -126,18 +126,18 @@ type PermissionDeniedEvent struct {
 }
 
 type UserListEvent struct {
-	Client *Client
-	RegisteredUsers
+	Client   *Client
+	UserList RegisteredUsers
 }
 
 type AclEvent struct {
 	Client *Client
-	Acl
+	Acl    *Acl
 }
 
 type BanListEvent struct {
-	Client *Client
-	BanList
+	Client  *Client
+	BanList BanList
 }
 
 type ContextActionChangeType int
@@ -148,7 +148,7 @@ const (
 )
 
 type ContextActionChangeEvent struct {
-	Client *Client
-	Type   ContextActionChangeType
-	*ContextAction
+	Client        *Client
+	Type          ContextActionChangeType
+	ContextAction *ContextAction
 }

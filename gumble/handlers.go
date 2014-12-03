@@ -619,6 +619,7 @@ func handleAcl(client *Client, buffer []byte) error {
 
 	event := AclEvent{
 		Client: client,
+		Acl:    &Acl{},
 	}
 	if packet.ChannelId != nil {
 		event.Acl.channel = client.channels.ById(uint(*packet.ChannelId))
@@ -704,8 +705,8 @@ func handleUserList(client *Client, buffer []byte) error {
 	}
 
 	event := UserListEvent{
-		Client:          client,
-		RegisteredUsers: make(RegisteredUsers, 0, len(packet.Users)),
+		Client:   client,
+		UserList: make(RegisteredUsers, 0, len(packet.Users)),
 	}
 
 	for _, user := range packet.Users {
@@ -715,7 +716,7 @@ func handleUserList(client *Client, buffer []byte) error {
 		if user.Name != nil {
 			registeredUser.name = *user.Name
 		}
-		event.RegisteredUsers = append(event.RegisteredUsers, registeredUser)
+		event.UserList = append(event.UserList, registeredUser)
 	}
 
 	if listener := client.config.Listener; listener != nil {
