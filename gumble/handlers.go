@@ -648,7 +648,49 @@ func handleCryptSetup(client *Client, buffer []byte) error {
 }
 
 func handleContextActionModify(client *Client, buffer []byte) error {
-	return errUnimplementedHandler
+	var packet MumbleProto.ContextActionModify
+	if err := proto.Unmarshal(buffer, &packet); err != nil {
+		return err
+	}
+
+	if packet.Action == nil || packet.Operation == nil {
+		return errInvalidProtobuf
+	}
+
+	event := ContextActionChangeEvent{
+		Client: client,
+	}
+
+	switch *packet.Operation {
+	case MumbleProto.ContextActionModify_Add:
+		if client.contextActions.Exists(*packet.Action) {
+			return nil
+		}
+		event.Type = ContextActionAdd
+		contextAction := client.contextActions.create(*packet.Action)
+		if packet.Text != nil {
+			contextAction.label = *packet.Text
+		}
+		if packet.Context != nil {
+			contextAction.contextType = ContextActionType(*packet.Context)
+		}
+		event.ContextAction = contextAction
+	case MumbleProto.ContextActionModify_Remove:
+		if !client.contextActions.Exists(*packet.Action) {
+			return nil
+		}
+		event.Type = ContextActionRemove
+		contextAction := client.contextActions[*packet.Action]
+		client.contextActions.delete(*packet.Action)
+		event.ContextAction = contextAction
+	default:
+		return errInvalidProtobuf
+	}
+
+	if listener := client.config.Listener; listener != nil {
+		listener.OnContextActionChange(&event)
+	}
+	return nil
 }
 
 func handleContextAction(client *Client, buffer []byte) error {

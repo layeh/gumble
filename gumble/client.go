@@ -67,8 +67,9 @@ type Client struct {
 	connection *tls.Conn
 	tls        tls.Config
 
-	users    Users
-	channels Channels
+	users          Users
+	channels       Channels
+	contextActions ContextActions
 
 	audio         *Audio
 	audioEncoder  *gopus.Encoder
@@ -111,6 +112,7 @@ func (c *Client) Connect() error {
 	}
 	c.users = Users{}
 	c.channels = Channels{}
+	c.contextActions = ContextActions{}
 	c.state = StateConnected
 
 	// Channels and goroutines
@@ -249,6 +251,7 @@ func (c *Client) close(event *DisconnectEvent) error {
 	c.state = StateDisconnected
 	c.users = nil
 	c.channels = nil
+	c.contextActions = nil
 	c.self = nil
 	c.audioEncoder = nil
 
@@ -322,6 +325,11 @@ func (c *Client) Users() Users {
 // Channels returns a collection containing the server's channels.
 func (c *Client) Channels() Channels {
 	return c.channels
+}
+
+// ContextActions returns a collection containing the server's context actions.
+func (c *Client) ContextActions() ContextActions {
+	return c.contextActions
 }
 
 // Send will send a message to the server.

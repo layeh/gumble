@@ -106,3 +106,6 @@ func (b *Barnard) OnAcl(e *gumble.AclEvent) {
 
 func (b *Barnard) OnBanList(e *gumble.BanListEvent) {
 }
+
+func (b *Barnard) OnContextActionChange(e *gumble.ContextActionChangeEvent) {
+}

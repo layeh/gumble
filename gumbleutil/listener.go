@@ -8,15 +8,16 @@ import (
 // it to be attached to a Client. This is useful if you would like to have a
 // few specific listeners, rather than the whole EventListener interface.
 type Listener struct {
-	Connect          func(e *gumble.ConnectEvent)
-	Disconnect       func(e *gumble.DisconnectEvent)
-	TextMessage      func(e *gumble.TextMessageEvent)
-	UserChange       func(e *gumble.UserChangeEvent)
-	ChannelChange    func(e *gumble.ChannelChangeEvent)
-	PermissionDenied func(e *gumble.PermissionDeniedEvent)
-	UserList         func(e *gumble.UserListEvent)
-	Acl              func(e *gumble.AclEvent)
-	BanList          func(e *gumble.BanListEvent)
+	Connect             func(e *gumble.ConnectEvent)
+	Disconnect          func(e *gumble.DisconnectEvent)
+	TextMessage         func(e *gumble.TextMessageEvent)
+	UserChange          func(e *gumble.UserChangeEvent)
+	ChannelChange       func(e *gumble.ChannelChangeEvent)
+	PermissionDenied    func(e *gumble.PermissionDeniedEvent)
+	UserList            func(e *gumble.UserListEvent)
+	Acl                 func(e *gumble.AclEvent)
+	BanList             func(e *gumble.BanListEvent)
+	ContextActionChange func(e *gumble.ContextActionChangeEvent)
 }
 
 func (l Listener) OnConnect(e *gumble.ConnectEvent) {
@@ -70,5 +71,11 @@ func (l Listener) OnAcl(e *gumble.AclEvent) {
 func (l Listener) OnBanList(e *gumble.BanListEvent) {
 	if l.BanList != nil {
 		l.BanList(e)
+	}
+}
+
+func (l Listener) OnContextActionChange(e *gumble.ContextActionChangeEvent) {
+	if l.ContextActionChange != nil {
+		l.ContextActionChange(e)
 	}
 }

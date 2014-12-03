@@ -16,6 +16,7 @@ type EventListener interface {
 	OnUserList(e *UserListEvent)
 	OnAcl(e *AclEvent)
 	OnBanList(e *BanListEvent)
+	OnContextActionChange(e *ContextActionChangeEvent)
 }
 
 type ConnectEvent struct {
@@ -137,4 +138,17 @@ type AclEvent struct {
 type BanListEvent struct {
 	Client *Client
 	BanList
+}
+
+type ContextActionChangeType int
+
+const (
+	ContextActionAdd    ContextActionChangeType = ContextActionChangeType(MumbleProto.ContextActionModify_Add)
+	ContextActionRemove ContextActionChangeType = ContextActionChangeType(MumbleProto.ContextActionModify_Remove)
+)
+
+type ContextActionChangeEvent struct {
+	Client *Client
+	Type   ContextActionChangeType
+	*ContextAction
 }

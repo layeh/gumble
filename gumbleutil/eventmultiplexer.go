@@ -95,3 +95,9 @@ func (em *EventMultiplexer) OnBanList(event *gumble.BanListEvent) {
 		item.listener.OnBanList(event)
 	}
 }
+
+func (em *EventMultiplexer) OnContextActionChange(event *gumble.ContextActionChangeEvent) {
+	for item := em.head; item != nil; item = item.next {
+		item.listener.OnContextActionChange(event)
+	}
+}
