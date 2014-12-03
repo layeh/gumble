@@ -74,8 +74,8 @@ func (uct UserChangeType) Has(changeType UserChangeType) bool {
 type UserChangeEvent struct {
 	Client *Client
 	Type   UserChangeType
-	User   *User
-	Actor  *User
+	*User
+	Actor *User
 
 	String string
 }
@@ -95,9 +95,9 @@ func (cct ChannelChangeType) Has(changeType ChannelChangeType) bool {
 }
 
 type ChannelChangeEvent struct {
-	Client  *Client
-	Type    ChannelChangeType
-	Channel *Channel
+	Client *Client
+	Type   ChannelChangeType
+	*Channel
 }
 
 type PermissionDeniedType int
