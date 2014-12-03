@@ -11,6 +11,7 @@ import (
 
 type PingResponse struct {
 	address        *net.UDPAddr
+	ping           time.Duration
 	version        Version
 	connectedUsers int
 	maximumUsers   int
@@ -20,6 +21,11 @@ type PingResponse struct {
 // Address returns the the address of the pinged server.
 func (pr *PingResponse) Address() *net.UDPAddr {
 	return pr.address
+}
+
+// Ping returns the round-trip time from the client to the server.
+func (pr *PingResponse) Ping() time.Duration {
+	return pr.ping
 }
 
 // Version returns the server's version. Only the .Version() and
@@ -61,6 +67,7 @@ func Ping(address string, timeout time.Duration) (*PingResponse, error) {
 	if _, err := rand.Read(packet[4:]); err != nil {
 		return nil, err
 	}
+	start := time.Now()
 	if _, err := conn.Write(packet[:]); err != nil {
 		return nil, err
 	}
@@ -77,6 +84,7 @@ func Ping(address string, timeout time.Duration) (*PingResponse, error) {
 
 		return &PingResponse{
 			address: addr,
+			ping:    time.Since(start),
 			version: Version{
 				version: binary.BigEndian.Uint32(incoming[0:]),
 			},

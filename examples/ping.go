@@ -22,6 +22,7 @@ func main() {
 	version := resp.Version()
 	major, minor, patch := version.SemanticVersion()
 	fmt.Printf("Address:         %s\n", resp.Address())
+	fmt.Printf("Ping:            %s\n", resp.Ping())
 	fmt.Printf("Version:         %d.%d.%d\n", major, minor, patch)
 	fmt.Printf("Connected Users: %d\n", resp.ConnectedUsers())
 	fmt.Printf("Maximum Users:   %d\n", resp.MaximumUsers())
