@@ -5,7 +5,7 @@ gumble is a [Go](https://golang.org/) client library for the
 
 ## Documentation
 
-- [API Reference](https://godoc.org/github.com/layeh/gumble)
+- [API Reference](https://godoc.org/github.com/layeh/gumble/gumble)
 
 ## Requirements
 
