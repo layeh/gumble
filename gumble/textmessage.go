@@ -3,7 +3,7 @@ package gumble
 import (
 	"io"
 
-	"github.com/bontibon/gumble/gumble/MumbleProto"
+	"github.com/layeh/gumble/gumble/MumbleProto"
 )
 
 // TextMessage is a chat message that can be received from and sent to the

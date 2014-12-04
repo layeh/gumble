@@ -6,7 +6,7 @@ import (
 	"io"
 
 	"code.google.com/p/goprotobuf/proto"
-	"github.com/bontibon/gumble/gumble/MumbleProto"
+	"github.com/layeh/gumble/gumble/MumbleProto"
 )
 
 var (

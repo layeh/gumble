@@ -6,9 +6,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/bontibon/gumble/gumble"
-	"github.com/bontibon/gumble/gumble_ffmpeg"
-	"github.com/bontibon/gumble/gumbleutil"
+	"github.com/layeh/gumble/gumble"
+	"github.com/layeh/gumble/gumble_ffmpeg"
+	"github.com/layeh/gumble/gumbleutil"
 )
 
 type plugin struct {

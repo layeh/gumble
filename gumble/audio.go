@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"io"
 
-	"github.com/bontibon/gumble/gumble/varint"
+	"github.com/layeh/gumble/gumble/varint"
 )
 
 const (

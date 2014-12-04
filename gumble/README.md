@@ -5,12 +5,12 @@ gumble is a [Go](https://golang.org/) client library for the
 
 ## Documentation
 
-- [API Reference](https://godoc.org/github.com/-----/gumble) FIXME
+- [API Reference](https://godoc.org/github.com/layeh/gumble)
 
 ## Requirements
 
 - [goprotobuf](https://code.google.com/p/goprotobuf/)
-- [gopus](https://github.com/-----/gopus) FIXME
+- [gopus](https://github.com/layeh/gopus)
 
 ## Author
 

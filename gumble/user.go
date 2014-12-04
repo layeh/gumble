@@ -2,8 +2,8 @@ package gumble
 
 import (
 	"code.google.com/p/goprotobuf/proto"
-	"github.com/bontibon/gopus"
-	"github.com/bontibon/gumble/gumble/MumbleProto"
+	"github.com/layeh/gopus"
+	"github.com/layeh/gumble/gumble/MumbleProto"
 )
 
 // User represents a user that is currently connected to the server.

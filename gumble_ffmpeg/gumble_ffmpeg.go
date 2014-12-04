@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/bontibon/gumble/gumble"
+	"github.com/layeh/gumble/gumble"
 )
 
 var (

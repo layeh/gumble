@@ -2,7 +2,7 @@ package gumble
 
 import (
 	"code.google.com/p/goprotobuf/proto"
-	"github.com/bontibon/gumble/gumble/MumbleProto"
+	"github.com/layeh/gumble/gumble/MumbleProto"
 )
 
 // Channel represents a channel in the server's channel tree.

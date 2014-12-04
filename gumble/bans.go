@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"code.google.com/p/goprotobuf/proto"
-	"github.com/bontibon/gumble/gumble/MumbleProto"
+	"github.com/layeh/gumble/gumble/MumbleProto"
 )
 
 // BanList is a list of server ban entries.

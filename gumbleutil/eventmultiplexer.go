@@ -1,7 +1,7 @@
 package gumbleutil
 
 import (
-	"github.com/bontibon/gumble/gumble"
+	"github.com/layeh/gumble/gumble"
 )
 
 type EventMultiplexerItem struct {

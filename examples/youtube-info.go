@@ -11,8 +11,8 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/bontibon/gumble/gumble"
-	"github.com/bontibon/gumble/gumbleutil"
+	"github.com/layeh/gumble/gumble"
+	"github.com/layeh/gumble/gumbleutil"
 )
 
 const responseTemplate = `

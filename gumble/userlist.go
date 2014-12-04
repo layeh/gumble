@@ -3,7 +3,7 @@ package gumble
 import (
 	"io"
 
-	"github.com/bontibon/gumble/gumble/MumbleProto"
+	"github.com/layeh/gumble/gumble/MumbleProto"
 )
 
 // RegisteredUser represents a registered user on the server.
