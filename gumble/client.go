@@ -30,19 +30,6 @@ const (
 	StateSynced
 )
 
-// Request is a mask of items that the client can ask the server to send.
-type Request int
-
-const (
-	RequestDescription Request = 1 << iota
-	RequestComment
-	RequestTexture
-	RequestStats
-	RequestUserList
-	RequestAcl
-	RequestBanList
-)
-
 // PingInterval is the interval at which ping packets are be sent by the client
 // to the server.
 const pingInterval time.Duration = time.Second * 10
