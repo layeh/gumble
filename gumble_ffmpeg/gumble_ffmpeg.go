@@ -50,6 +50,7 @@ func (s *Stream) Play(file string) error {
 	}
 	s.cmd = exec.Command("ffmpeg", "-i", file, "-ac", "1", "-ar", strconv.Itoa(gumble.AudioSampleRate), "-f", "s16le", "-")
 	if pipe, err := s.cmd.StdoutPipe(); err != nil {
+		s.cmd = nil
 		return nil
 	} else {
 		s.pipe = pipe
