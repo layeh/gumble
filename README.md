@@ -10,8 +10,6 @@
     - [ffmpeg](https://www.ffmpeg.org/) audio source for gumble
 - gumbleutil
     - Extras that can make working with gumble easier
-- barnard
-    - Terminal-based client which uses the gumble library
 
 ## Author
 
