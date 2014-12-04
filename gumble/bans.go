@@ -109,7 +109,7 @@ func (b *Ban) Ban() {
 	b.unban = false
 }
 
-func (bl BanList) writeTo(w io.Writer) (int64, error) {
+func (bl BanList) writeTo(client *Client, w io.Writer) (int64, error) {
 	packet := MumbleProto.BanList{
 		Query: proto.Bool(false),
 	}
@@ -127,5 +127,5 @@ func (bl BanList) writeTo(w io.Writer) (int64, error) {
 	}
 
 	proto := protoMessage{&packet}
-	return proto.writeTo(w)
+	return proto.writeTo(client, w)
 }

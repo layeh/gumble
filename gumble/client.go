@@ -71,7 +71,6 @@ type Client struct {
 	channels       Channels
 	contextActions ContextActions
 
-	audio         *Audio
 	audioEncoder  *gopus.Encoder
 	audioSequence int
 
@@ -241,10 +240,6 @@ func (c *Client) close(event *DisconnectEvent) error {
 	if c.connection == nil {
 		return ErrState
 	}
-	if c.audio != nil {
-		c.audio.Detach()
-		c.audio = nil
-	}
 	c.end <- true
 	c.connection.Close()
 	c.connection = nil
@@ -268,41 +263,6 @@ func (c *Client) Conn() net.Conn {
 		return nil
 	}
 	return c.connection
-}
-
-// AttachAudio will attach an AudioStream to the client.
-//
-// Only one AudioStream can be attached at a time. If one is already attached,
-// it will be detached before the new stream is attached.
-func (c *Client) AttachAudio(stream AudioStream, flags AudioFlag) (*Audio, error) {
-	if c.audio != nil {
-		c.audio.Detach()
-	}
-
-	audio := &Audio{
-		client: c,
-		stream: stream,
-		flags:  flags,
-	}
-	if err := stream.OnAttach(); err != nil {
-		return nil, err
-	}
-	if audio.IsSource() {
-		if err := stream.OnAttachSource(c.sendAudio); err != nil {
-			stream.OnDetach()
-			return nil, err
-		}
-	}
-	if audio.IsSink() {
-		if incoming, err := stream.OnAttachSink(); err != nil {
-			stream.OnDetach()
-			return nil, err
-		} else {
-			audio.incoming = incoming
-		}
-	}
-	c.audio = audio
-	return audio, nil
 }
 
 // State returns the current state of the client.
@@ -337,24 +297,8 @@ func (c *Client) Send(message Message) error {
 	c.sendMutex.Lock()
 	defer c.sendMutex.Unlock()
 
-	if _, err := message.writeTo(c.connection); err != nil {
+	if _, err := message.writeTo(c, c.connection); err != nil {
 		return err
-	}
-	return nil
-}
-
-func (c *Client) sendAudio(packet *AudioPacket) error {
-	message := audioMessage{
-		Format: audioOpus,
-		Target: audioNormal,
-	}
-	if opusBuffer, err := c.audioEncoder.Encode(packet.Pcm, AudioDefaultFrameSize, AudioMaximumFrameSize); err != nil {
-		return err
-	} else {
-		c.audioSequence = (c.audioSequence + 1) % 10000
-		message.sequence = c.audioSequence
-		message.opus = opusBuffer
-		c.Send(&message)
 	}
 	return nil
 }

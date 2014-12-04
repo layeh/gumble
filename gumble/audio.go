@@ -1,10 +1,10 @@
 package gumble
 
-type AudioFlag int
+import (
+	"bytes"
+	"io"
 
-const (
-	AudioSource AudioFlag = 1 << iota // An audio stream that creates outgoing audio
-	AudioSink                         // An audio stream that processes incoming audio
+	"github.com/bontibon/gumble/gumble/varint"
 )
 
 const (
@@ -13,40 +13,67 @@ const (
 	AudioMaximumFrameSize = AudioDefaultFrameSize * 10
 )
 
-type AudioCallback func(packet *AudioPacket) error
+type AudioListener interface {
+	OnAudioPacket(e *AudioPacketEvent)
+}
+
+type AudioPacketEvent struct {
+	Client      *Client
+	AudioPacket AudioPacket
+}
+
+// AudioBuffer is a slice of PCM samples.
+type AudioBuffer []int16
 
 type AudioPacket struct {
 	Sender   *User
 	Sequence int
-	Pcm      []int16
+	Pcm      AudioBuffer
 }
 
-type AudioStream interface {
-	OnAttach() error
-	OnAttachSource(AudioCallback) error
-	OnAttachSink() (AudioCallback, error)
-	OnDetach()
-}
+func (ab AudioBuffer) writeTo(client *Client, w io.Writer) (int64, error) {
+	var written int64 = 0
 
-type Audio struct {
-	client   *Client
-	stream   AudioStream
-	flags    AudioFlag
-	incoming AudioCallback
-}
-
-func (a *Audio) Detach() {
-	if a.client.audio != a {
-		return
+	// Create Opus buffer
+	opus, err := client.audioEncoder.Encode(ab, AudioDefaultFrameSize, AudioMaximumFrameSize)
+	if err != nil {
+		return 0, err
 	}
-	a.client.audio = nil
-	a.stream.OnDetach()
-}
 
-func (a *Audio) IsSource() bool {
-	return (a.flags & AudioSource) != 0
-}
+	// Create audio header
+	var header bytes.Buffer
+	formatTarget := byte(4)<<5 | byte(0)
+	if err := header.WriteByte(formatTarget); err != nil {
+		return 0, err
+	}
+	if _, err := varint.WriteTo(&header, int64(client.audioSequence)); err != nil {
+		return 0, err
+	}
+	if _, err := varint.WriteTo(&header, int64(len(opus))); err != nil {
+		return 0, err
+	}
 
-func (a *Audio) IsSink() bool {
-	return (a.flags & AudioSink) != 0
+	// Write packet header
+	if n, err := writeTcpHeader(w, 1, header.Len()+len(opus)); err != nil {
+		return n, err
+	} else {
+		written += n
+	}
+
+	// Write audio header
+	if n, err := header.WriteTo(w); err != nil {
+		return (written + n), err
+	} else {
+		written += n
+	}
+
+	// Write audio data
+	if n, err := w.Write(opus); err != nil {
+		return (written + int64(n)), err
+	} else {
+		written += int64(n)
+	}
+
+	client.audioSequence = (client.audioSequence + 1) % 10000
+	return written, nil
 }

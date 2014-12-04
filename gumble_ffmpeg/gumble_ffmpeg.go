@@ -17,31 +17,17 @@ var (
 )
 
 type Stream struct {
+	client     *gumble.Client
 	cmd        *exec.Cmd
 	pipe       io.ReadCloser
-	outgoing   gumble.AudioCallback
 	sourceStop chan bool
 }
 
-func New() (*Stream, error) {
-	stream := &Stream{}
+func New(client *gumble.Client) (*Stream, error) {
+	stream := &Stream{
+		client: client,
+	}
 	return stream, nil
-}
-
-func (s *Stream) OnAttach() error {
-	return nil
-}
-
-func (s *Stream) OnAttachSource(outgoing gumble.AudioCallback) error {
-	s.outgoing = outgoing
-	return nil
-}
-
-func (s *Stream) OnAttachSink() (gumble.AudioCallback, error) {
-	return nil, ErrUnsupported
-}
-
-func (s *Stream) OnDetach() {
 }
 
 func (s *Stream) Play(file string) error {
@@ -77,12 +63,8 @@ func (s *Stream) sourceRoutine() {
 		s.sourceStop = nil
 	}()
 
-	outgoing := s.outgoing
 	stop := s.sourceStop
 	int16Buffer := make([]int16, gumble.AudioDefaultFrameSize)
-	packet := gumble.AudioPacket{
-		Pcm: int16Buffer,
-	}
 	byteBuffer := make([]byte, gumble.AudioDefaultFrameSize*2)
 
 	for {
@@ -96,7 +78,7 @@ func (s *Stream) sourceRoutine() {
 			for i := range int16Buffer {
 				int16Buffer[i] = int16(binary.LittleEndian.Uint16(byteBuffer[i*2 : (i+1)*2]))
 			}
-			outgoing(&packet)
+			s.client.Send(gumble.AudioBuffer(int16Buffer))
 		}
 	}
 }

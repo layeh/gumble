@@ -48,7 +48,7 @@ func (ru *RegisteredUser) Register() {
 // the registered user list is sent back to the server.
 type RegisteredUsers []*RegisteredUser
 
-func (pm RegisteredUsers) writeTo(w io.Writer) (int64, error) {
+func (pm RegisteredUsers) writeTo(client *Client, w io.Writer) (int64, error) {
 	packet := MumbleProto.UserList{}
 
 	for _, user := range pm {
@@ -67,5 +67,5 @@ func (pm RegisteredUsers) writeTo(w io.Writer) (int64, error) {
 		return 0, nil
 	}
 	proto := protoMessage{&packet}
-	return proto.writeTo(w)
+	return proto.writeTo(client, w)
 }

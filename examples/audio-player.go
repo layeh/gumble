@@ -56,12 +56,6 @@ func main() {
 		keepAlive: make(chan bool),
 		files:     make(map[string]string),
 	}
-	if stream, err := gumble_ffmpeg.New(); err != nil {
-		fmt.Printf("%s\n", err)
-		os.Exit(1)
-	} else {
-		p.stream = stream
-	}
 
 	// store file names
 	for _, file := range flag.Args() {
@@ -82,9 +76,11 @@ func main() {
 		Disconnect:  p.OnDisconnect,
 		TextMessage: p.OnTextMessage,
 	}
-	if _, err := p.client.AttachAudio(p.stream, gumble.AudioSource); err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err)
+	if stream, err := gumble_ffmpeg.New(p.client); err != nil {
+		fmt.Printf("%s\n", err)
 		os.Exit(1)
+	} else {
+		p.stream = stream
 	}
 	if err := p.client.Connect(); err != nil {
 		fmt.Printf("%s\n", err)

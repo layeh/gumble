@@ -25,14 +25,6 @@ func main() {
 	b := barnard.Barnard{}
 	b.Ui = uiterm.New(&b)
 
-	// Audio
-	if stream, err := gumble_openal.New(); err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err)
-		os.Exit(1)
-	} else {
-		b.Stream = stream
-	}
-
 	// Gumble
 	b.Config = gumble.Config{
 		Username: *username,
@@ -52,9 +44,13 @@ func main() {
 	}
 
 	b.Client = gumble.NewClient(&b.Config)
-	if _, err := b.Client.AttachAudio(b.Stream, gumble.AudioSource|gumble.AudioSink); err != nil {
+	// Audio
+	if stream, err := gumble_openal.New(b.Client); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
 		os.Exit(1)
+	} else {
+		b.Config.AudioListener = stream
+		b.Stream = stream
 	}
 
 	if err := b.Client.Connect(); err != nil {

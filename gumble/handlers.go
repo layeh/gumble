@@ -81,10 +81,6 @@ func handleVersion(client *Client, buffer []byte) error {
 }
 
 func handleUdpTunnel(client *Client, buffer []byte) error {
-	if client.audio == nil || !client.audio.IsSink() {
-		return nil
-	}
-
 	reader := bytes.NewReader(buffer)
 	var bytesRead int64
 
@@ -142,12 +138,17 @@ func handleUdpTunnel(client *Client, buffer []byte) error {
 		return err
 	} else {
 		_ = audioTarget
-		packet := AudioPacket{
-			Sender:   user,
-			Sequence: int(sequence),
-			Pcm:      pcm,
+		event := AudioPacketEvent{
+			Client: client,
+			AudioPacket: AudioPacket{
+				Sender:   user,
+				Sequence: int(sequence),
+				Pcm:      pcm,
+			},
 		}
-		client.audio.incoming(&packet)
+		if listener := client.config.AudioListener; listener != nil {
+			listener.OnAudioPacket(&event)
+		}
 	}
 	return nil
 }

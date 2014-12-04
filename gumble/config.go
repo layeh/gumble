@@ -9,12 +9,17 @@ import (
 )
 
 type Config struct {
-	Username string       // Client username
-	Password string       // Client password (usually not required)
-	Address  string       // Server address, including port (e.g. localhost:64738)
-	Tokens   AccessTokens // Server access tokens
+	// User name used when authenticating with the server.
+	Username string
+	// Password used when authenticating with the server. A password is not
+	// usually required to connect to a server.
+	Password string
+	// Server address, including port (e.g. localhost:64738).
+	Address string
+	Tokens  AccessTokens
 
-	Listener EventListener
+	Listener      EventListener
+	AudioListener AudioListener
 
 	TlsConfig tls.Config
 	Dialer    net.Dialer
@@ -22,10 +27,10 @@ type Config struct {
 
 type AccessTokens []string
 
-func (at AccessTokens) writeTo(w io.Writer) (int64, error) {
+func (at AccessTokens) writeTo(client *Client, w io.Writer) (int64, error) {
 	packet := MumbleProto.Authenticate{
 		Tokens: at,
 	}
 	proto := protoMessage{&packet}
-	return proto.writeTo(w)
+	return proto.writeTo(client, w)
 }

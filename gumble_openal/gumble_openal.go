@@ -14,8 +14,9 @@ var (
 )
 
 type Stream struct {
+	client *gumble.Client
+
 	deviceSource *openal.CaptureDevice
-	outgoing     gumble.AudioCallback
 	sourceStop   chan bool
 
 	deviceSink  *openal.Device
@@ -24,37 +25,27 @@ type Stream struct {
 	buffer      []byte
 }
 
-func New() (*Stream, error) {
-	stream := &Stream{
+func New(client *gumble.Client) (*Stream, error) {
+	s := &Stream{
+		client:      client,
 		userStreams: make(map[uint]openal.Source),
 	}
-	return stream, nil
-}
 
-func (s *Stream) OnAttach() error {
-	return nil
-}
-
-func (s *Stream) OnAttachSource(outgoing gumble.AudioCallback) error {
 	s.deviceSource = openal.CaptureOpenDevice("", gumble.AudioSampleRate, openal.FormatMono16, gumble.AudioDefaultFrameSize)
-	s.outgoing = outgoing
-	return nil
-}
 
-func (s *Stream) OnAttachSink() (gumble.AudioCallback, error) {
 	s.deviceSink = openal.OpenDevice("")
 	s.contextSink = s.deviceSink.CreateContext()
 	s.contextSink.Activate()
 	s.buffer = make([]byte, gumble.AudioMaximumFrameSize)
-	return s.sinkCallback, nil
+
+	return s, nil
 }
 
-func (s *Stream) OnDetach() {
+func (s *Stream) Destroy() {
 	if s.deviceSource != nil {
 		s.StopSource()
 		s.deviceSource.CaptureCloseDevice()
 		s.deviceSource = nil
-		s.outgoing = nil
 	}
 	if s.deviceSink != nil {
 		s.contextSink.Destroy()
@@ -84,10 +75,11 @@ func (s *Stream) StopSource() error {
 	return nil
 }
 
-func (s *Stream) sinkCallback(packet *gumble.AudioPacket) error {
+func (s *Stream) OnAudioPacket(e *gumble.AudioPacketEvent) {
+	packet := e.AudioPacket
 	samples := len(packet.Pcm)
 	if samples*2 > cap(s.buffer) {
-		return nil
+		return
 	}
 	var source openal.Source
 	if userSource, ok := s.userStreams[packet.Sender.Session()]; !ok {
@@ -112,15 +104,12 @@ func (s *Stream) sinkCallback(packet *gumble.AudioPacket) error {
 	if source.State() != openal.Playing {
 		source.Play()
 	}
-	return nil
 }
 
 func (s *Stream) sourceRoutine() {
 	ticker := time.NewTicker(10 * time.Millisecond)
 	defer ticker.Stop()
 
-	packet := gumble.AudioPacket{}
-	outgoing := s.outgoing
 	stop := s.sourceStop
 	int16Buffer := make([]int16, gumble.AudioDefaultFrameSize)
 
@@ -136,8 +125,7 @@ func (s *Stream) sourceRoutine() {
 			for i := range int16Buffer {
 				int16Buffer[i] = int16(binary.LittleEndian.Uint16(buff[i*2 : (i+1)*2]))
 			}
-			packet.Pcm = int16Buffer
-			outgoing(&packet)
+			s.client.Send(gumble.AudioBuffer(int16Buffer))
 		}
 	}
 }
