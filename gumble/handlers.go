@@ -137,11 +137,11 @@ func handleUdpTunnel(client *Client, buffer []byte) error {
 	if pcm, err := user.decoder.Decode(opus, AudioMaximumFrameSize, false); err != nil {
 		return err
 	} else {
-		_ = audioTarget
 		event := AudioPacketEvent{
 			Client: client,
 			AudioPacket: AudioPacket{
 				Sender:   user,
+				Target:   int(audioTarget),
 				Sequence: int(sequence),
 				Pcm:      pcm,
 			},

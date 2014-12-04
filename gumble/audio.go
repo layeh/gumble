@@ -27,6 +27,7 @@ type AudioBuffer []int16
 
 type AudioPacket struct {
 	Sender   *User
+	Target   int
 	Sequence int
 	Pcm      AudioBuffer
 }
