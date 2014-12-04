@@ -73,6 +73,7 @@ type Client struct {
 
 	audioEncoder  *gopus.Encoder
 	audioSequence int
+	audioTarget   *VoiceTarget
 
 	end        chan bool
 	closeMutex sync.Mutex
@@ -102,6 +103,7 @@ func (c *Client) Connect() error {
 		encoder.SetVbr(false)
 		c.audioEncoder = encoder
 		c.audioSequence = 0
+		c.audioTarget = nil
 	}
 	if conn, err := tls.DialWithDialer(&c.config.Dialer, "tcp", c.config.Address, &c.config.TlsConfig); err != nil {
 		c.audioEncoder = nil
@@ -290,6 +292,12 @@ func (c *Client) Channels() Channels {
 // ContextActions returns a collection containing the server's context actions.
 func (c *Client) ContextActions() ContextActions {
 	return c.contextActions
+}
+
+// SetVoiceTarget sets to whom transmitted audio will be sent. The VoiceTarget
+// must have already been sent to the server for targeting to work correctly.
+func (c *Client) SetVoiceTarget(target *VoiceTarget) {
+	c.audioTarget = target
 }
 
 // Send will send a message to the server.

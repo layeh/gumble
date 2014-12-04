@@ -43,7 +43,11 @@ func (ab AudioBuffer) writeTo(client *Client, w io.Writer) (int64, error) {
 
 	// Create audio header
 	var header bytes.Buffer
-	formatTarget := byte(4)<<5 | byte(0)
+	var targetId int
+	if target := client.audioTarget; target != nil {
+		targetId = target.id
+	}
+	formatTarget := byte(4)<<5 | byte(targetId)
 	if err := header.WriteByte(formatTarget); err != nil {
 		return 0, err
 	}
