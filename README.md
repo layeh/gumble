@@ -11,6 +11,10 @@
 - gumbleutil
     - Extras that can make working with gumble easier
 
+## License
+
+MIT
+
 ## Author
 
 Tim Cooper (<tim.cooper@layeh.com>)
