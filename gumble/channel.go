@@ -101,9 +101,9 @@ func (c *Channel) SetDescription(description string) {
 	c.client.Send(protoMessage{&packet})
 }
 
-// Children returns a container containing the channels directly underneath the
+// Channels returns a container containing the channels directly underneath the
 // current channel.
-func (c *Channel) Children() Channels {
+func (c *Channel) Channels() Channels {
 	return c.children
 }
 
