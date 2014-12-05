@@ -12,8 +12,7 @@ import (
 )
 
 var (
-	ErrState       = errors.New("invalid state")
-	ErrUnsupported = errors.New("unsupported audio stream type")
+	ErrState = errors.New("invalid state")
 )
 
 type Stream struct {
