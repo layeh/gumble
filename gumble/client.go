@@ -20,14 +20,15 @@ import (
 type State int
 
 const (
-	// The client is current disconnected from the server.
+	// StateDisconnected means the client is not connected to a server.
 	StateDisconnected State = iota
 
-	// The client is connected to the server, but has yet to receive the current
-	// server state.
+	// StateConnected means the client is connected to a server, but has yet to
+	// receive the initial server state.
 	StateConnected
 
-	// The client is connected to the server and has been sent the server state.
+	// StateSynced means the client is connected to a server and has been sent
+	// the server state.
 	StateSynced
 )
 
@@ -40,9 +41,12 @@ const pingInterval time.Duration = time.Second * 10
 const maximumPacketSize = 1024 * 1024 * 10 // 10 megabytes
 
 var (
+	// ErrState is the error returned from Client methods if the action cannot
+	// be performed due to the current connection state.
 	ErrState = errors.New("client is in an invalid state")
 )
 
+// Client is the type used to create a connection to a server.
 type Client struct {
 	config *Config
 
@@ -85,20 +89,19 @@ func (c *Client) Connect() error {
 	if c.state != StateDisconnected {
 		return ErrState
 	}
-	if encoder, err := gopus.NewEncoder(AudioSampleRate, 1, gopus.Voip); err != nil {
+	encoder, err := gopus.NewEncoder(AudioSampleRate, 1, gopus.Voip)
+	if err != nil {
 		return err
-	} else {
-		encoder.SetVbr(false)
-		c.audioEncoder = encoder
-		c.audioSequence = 0
-		c.audioTarget = nil
 	}
-	if conn, err := tls.DialWithDialer(&c.config.Dialer, "tcp", c.config.Address, &c.config.TlsConfig); err != nil {
-		c.audioEncoder = nil
+	encoder.SetVbr(false)
+	c.audioSequence = 0
+	c.audioTarget = nil
+
+	c.connection, err = tls.DialWithDialer(&c.config.Dialer, "tcp", c.config.Address, &c.config.TLSConfig)
+	if err != nil {
 		return err
-	} else {
-		c.connection = conn
 	}
+	c.audioEncoder = encoder
 	c.users = Users{}
 	c.channels = Channels{}
 	c.contextActions = ContextActions{}

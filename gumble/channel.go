@@ -20,8 +20,8 @@ type Channel struct {
 	temporary       bool
 }
 
-// Id returns the channel's unique Id.
-func (c *Channel) Id() uint {
+// ID returns the channel's unique Id.
+func (c *Channel) ID() uint {
 	return uint(c.id)
 }
 

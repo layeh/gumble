@@ -86,69 +86,67 @@ func handleUdpTunnel(client *Client, buffer []byte) error {
 
 	var audioType byte
 	var audioTarget byte
-	var sequence int64
 	var user *User
 	var audioLength int
 
 	// Header byte
-	if typeTarget, err := varint.ReadByte(reader); err != nil {
+	typeTarget, err := varint.ReadByte(reader)
+	if err != nil {
 		return err
-	} else {
-		audioType = (typeTarget >> 5) & 0x7
-		audioTarget = typeTarget & 0x1F
-		// Opus only
-		if audioType != 4 {
-			return errInvalidProtobuf
-		}
-		bytesRead += 1
 	}
+	audioType = (typeTarget >> 5) & 0x7
+	audioTarget = typeTarget & 0x1F
+	// Opus only
+	if audioType != 4 {
+		return errInvalidProtobuf
+	}
+	bytesRead++
 
 	// Session
-	if session, n, err := varint.ReadFrom(reader); err != nil {
+	session, n, err := varint.ReadFrom(reader)
+	if err != nil {
 		return err
-	} else {
-		user = client.users[uint(session)]
-		if user == nil {
-			return errInvalidProtobuf
-		}
-		bytesRead += n
 	}
+	user = client.users[uint(session)]
+	if user == nil {
+		return errInvalidProtobuf
+	}
+	bytesRead += n
 
 	// Sequence
-	if seq, n, err := varint.ReadFrom(reader); err != nil {
+	sequence, n, err := varint.ReadFrom(reader)
+	if err != nil {
 		return err
-	} else {
-		sequence = seq
-		bytesRead += n
 	}
+	bytesRead += n
 
 	// Length
-	if length, n, err := varint.ReadFrom(reader); err != nil {
+	length, n, err := varint.ReadFrom(reader)
+	if err != nil {
 		return err
-	} else {
-		audioLength = int(length)
-		if audioLength > reader.Len() {
-			return errInvalidProtobuf
-		}
-		bytesRead += n
 	}
+	audioLength = int(length)
+	if audioLength > reader.Len() {
+		return errInvalidProtobuf
+	}
+	bytesRead += n
 
 	opus := buffer[bytesRead : bytesRead+int64(audioLength)]
-	if pcm, err := user.decoder.Decode(opus, AudioMaximumFrameSize, false); err != nil {
+	pcm, err := user.decoder.Decode(opus, AudioMaximumFrameSize, false)
+	if err != nil {
 		return err
-	} else {
-		event := AudioPacketEvent{
-			Client: client,
-			AudioPacket: AudioPacket{
-				Sender:   user,
-				Target:   int(audioTarget),
-				Sequence: int(sequence),
-				Pcm:      pcm,
-			},
-		}
-		if listener := client.config.AudioListener; listener != nil {
-			listener.OnAudioPacket(&event)
-		}
+	}
+	event := AudioPacketEvent{
+		Client: client,
+		AudioPacket: AudioPacket{
+			Sender:   user,
+			Target:   int(audioTarget),
+			Sequence: int(sequence),
+			Pcm:      pcm,
+		},
+	}
+	if listener := client.config.AudioListener; listener != nil {
+		listener.OnAudioPacket(&event)
 	}
 	return nil
 }
@@ -217,12 +215,12 @@ func handleChannelRemove(client *Client, buffer []byte) error {
 	}
 	var channel *Channel
 	{
-		channelId := uint(*packet.ChannelId)
-		channel = client.channels.ById(channelId)
+		channelID := uint(*packet.ChannelId)
+		channel = client.channels.ByID(channelID)
 		if channel == nil {
 			return errInvalidProtobuf
 		}
-		client.channels.delete(channelId)
+		client.channels.delete(channelID)
 		if parent := channel.parent; parent != nil {
 			channel.parent.children.delete(uint(channel.id))
 		}
@@ -254,21 +252,21 @@ func handleChannelState(client *Client, buffer []byte) error {
 		Client: client,
 	}
 	var channel *Channel
-	channelId := uint(*packet.ChannelId)
-	if !client.channels.Exists(channelId) {
-		channel = client.channels.create(channelId)
+	channelID := uint(*packet.ChannelId)
+	if !client.channels.Exists(channelID) {
+		channel = client.channels.create(channelID)
 		channel.client = client
 
 		event.Type |= ChannelChangeCreated
 	} else {
-		channel = client.channels.ById(channelId)
+		channel = client.channels.ByID(channelID)
 	}
 	event.Channel = channel
 	if packet.Parent != nil {
 		if channel.parent != nil {
-			channel.parent.children.delete(channelId)
+			channel.parent.children.delete(channelID)
 		}
-		newParent := client.channels.ById(uint(*packet.Parent))
+		newParent := client.channels.ByID(uint(*packet.Parent))
 		if newParent != channel.parent {
 			event.Type |= ChannelChangeMoved
 		}
@@ -375,7 +373,7 @@ func handleUserState(client *Client, buffer []byte) error {
 		session := uint(*packet.Session)
 		if !client.users.Exists(session) {
 			user = client.users.create(session)
-			user.channel = client.channels.ById(0)
+			user.channel = client.channels.ByID(0)
 			user.client = client
 
 			event.Type |= UserChangeConnected
@@ -408,13 +406,13 @@ func handleUserState(client *Client, buffer []byte) error {
 		user.name = newName
 	}
 	if packet.UserId != nil {
-		user.userId = *packet.UserId
+		user.userID = *packet.UserId
 	}
 	if packet.ChannelId != nil {
 		if user.channel != nil {
 			user.channel.users.delete(user.Session())
 		}
-		newChannel := client.channels.ById(uint(*packet.ChannelId))
+		newChannel := client.channels.ByID(uint(*packet.ChannelId))
 		if newChannel == nil {
 			return errInvalidProtobuf
 		}
@@ -547,7 +545,7 @@ func handleTextMessage(client *Client, buffer []byte) error {
 	if packet.ChannelId != nil {
 		event.Channels = make([]*Channel, 0, len(packet.ChannelId))
 		for _, id := range packet.ChannelId {
-			if channel := client.channels.ById(uint(id)); channel != nil {
+			if channel := client.channels.ByID(uint(id)); channel != nil {
 				event.Channels = append(event.Channels, channel)
 			}
 		}
@@ -555,7 +553,7 @@ func handleTextMessage(client *Client, buffer []byte) error {
 	if packet.TreeId != nil {
 		event.Trees = make([]*Channel, 0, len(packet.TreeId))
 		for _, id := range packet.TreeId {
-			if channel := client.channels.ById(uint(id)); channel != nil {
+			if channel := client.channels.ByID(uint(id)); channel != nil {
 				event.Trees = append(event.Trees, channel)
 			}
 		}
@@ -597,7 +595,7 @@ func handlePermissionDenied(client *Client, buffer []byte) error {
 		}
 	}
 	if packet.ChannelId != nil {
-		event.Channel = client.channels.ById(uint(*packet.ChannelId))
+		event.Channel = client.channels.ByID(uint(*packet.ChannelId))
 		if event.Channel == nil {
 			return errInvalidProtobuf
 		}
@@ -623,7 +621,7 @@ func handleAcl(client *Client, buffer []byte) error {
 		Acl:    &Acl{},
 	}
 	if packet.ChannelId != nil {
-		event.Acl.channel = client.channels.ById(uint(*packet.ChannelId))
+		event.Acl.channel = client.channels.ByID(uint(*packet.ChannelId))
 	}
 
 	if packet.Groups != nil {
@@ -712,7 +710,7 @@ func handleUserList(client *Client, buffer []byte) error {
 
 	for _, user := range packet.Users {
 		registeredUser := &RegisteredUser{
-			userId: *user.UserId,
+			userID: *user.UserId,
 		}
 		if user.Name != nil {
 			registeredUser.name = *user.Name

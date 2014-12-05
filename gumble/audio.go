@@ -8,15 +8,26 @@ import (
 )
 
 const (
-	AudioSampleRate       = 48000
+	// AudioSampleRate is the audio sample rate (in hertz) for incoming and
+	// outgoing audio.
+	AudioSampleRate = 48000
+
+	// AudioDefaultFrameSize is the number of audio frames that should be sent in
+	// a 10ms window.
 	AudioDefaultFrameSize = AudioSampleRate / 100
+
+	// AudioMaximumFrameSize is the maximum audio frame size from another user
+	// that will be processed.
 	AudioMaximumFrameSize = AudioDefaultFrameSize * 10
 )
 
+// AudioListener is the interface that must be implemented by types wishing to
+// receive incoming audio data from the server.
 type AudioListener interface {
 	OnAudioPacket(e *AudioPacketEvent)
 }
 
+// AudioPacketEvent is event that is passed to AudioListener.OnAudioPacket.
 type AudioPacketEvent struct {
 	Client      *Client
 	AudioPacket AudioPacket
@@ -25,6 +36,7 @@ type AudioPacketEvent struct {
 // AudioBuffer is a slice of PCM samples.
 type AudioBuffer []int16
 
+// AudioPacket contains incoming audio data and information.
 type AudioPacket struct {
 	Sender   *User
 	Target   int
@@ -33,7 +45,7 @@ type AudioPacket struct {
 }
 
 func (ab AudioBuffer) writeTo(client *Client, w io.Writer) (int64, error) {
-	var written int64 = 0
+	var written int64
 
 	// Create Opus buffer
 	opus, err := client.audioEncoder.Encode(ab, AudioDefaultFrameSize, AudioMaximumFrameSize)
@@ -43,11 +55,11 @@ func (ab AudioBuffer) writeTo(client *Client, w io.Writer) (int64, error) {
 
 	// Create audio header
 	var header bytes.Buffer
-	var targetId int
+	var targetID int
 	if target := client.audioTarget; target != nil {
-		targetId = target.id
+		targetID = target.id
 	}
-	formatTarget := byte(4)<<5 | byte(targetId)
+	formatTarget := byte(4)<<5 | byte(targetID)
 	if err := header.WriteByte(formatTarget); err != nil {
 		return 0, err
 	}
@@ -59,25 +71,25 @@ func (ab AudioBuffer) writeTo(client *Client, w io.Writer) (int64, error) {
 	}
 
 	// Write packet header
-	if n, err := writeTcpHeader(w, 1, header.Len()+len(opus)); err != nil {
-		return n, err
-	} else {
-		written += n
+	ni, err := writeTcpHeader(w, 1, header.Len()+len(opus))
+	if err != nil {
+		return int64(ni), err
 	}
+	written += int64(ni)
 
 	// Write audio header
-	if n, err := header.WriteTo(w); err != nil {
+	n, err := header.WriteTo(w)
+	if err != nil {
 		return (written + n), err
-	} else {
-		written += n
 	}
+	written += n
 
 	// Write audio data
-	if n, err := w.Write(opus); err != nil {
-		return (written + int64(n)), err
-	} else {
-		written += int64(n)
+	ni, err = w.Write(opus)
+	if err != nil {
+		return (written + int64(ni)), err
 	}
+	written += int64(ni)
 
 	client.audioSequence = (client.audioSequence + 1) % 10000
 	return written, nil

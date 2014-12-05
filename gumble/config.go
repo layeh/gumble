@@ -8,6 +8,7 @@ import (
 	"github.com/layeh/gumble/gumble/MumbleProto"
 )
 
+// Config holds the configuration data used by Client.
 type Config struct {
 	// User name used when authenticating with the server.
 	Username string
@@ -21,10 +22,12 @@ type Config struct {
 	Listener      EventListener
 	AudioListener AudioListener
 
-	TlsConfig tls.Config
+	TLSConfig tls.Config
 	Dialer    net.Dialer
 }
 
+// AccessTokens are additional passwords that can be provided to the server to
+// gain access to restricted channels.
 type AccessTokens []string
 
 func (at AccessTokens) writeTo(client *Client, w io.Writer) (int64, error) {

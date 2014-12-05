@@ -12,6 +12,8 @@ type voiceTargetChannel struct {
 	links, recursive bool
 }
 
+// VoiceTarget represents a set of users and/or channels that the client can
+// whisper to.
 type VoiceTarget struct {
 	id       int
 	users    []*User
@@ -24,14 +26,14 @@ func (vt *VoiceTarget) Clear() {
 	vt.channels = nil
 }
 
-// Id returns the voice target ID.
-func (vt *VoiceTarget) Id() int {
+// ID returns the voice target ID.
+func (vt *VoiceTarget) ID() int {
 	return vt.id
 }
 
-// SetId sets the ID of the voice target. This value must be in the range
+// SetID sets the ID of the voice target. This value must be in the range
 // [1, 30].
-func (vt *VoiceTarget) SetId(id int) {
+func (vt *VoiceTarget) SetID(id int) {
 	vt.id = id
 }
 

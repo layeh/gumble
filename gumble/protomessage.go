@@ -78,37 +78,37 @@ func (pm protoMessage) writeTo(client *Client, w io.Writer) (int64, error) {
 		return 0, errUnknownMessage
 	}
 
-	if data, err := proto.Marshal(pm.proto); err != nil {
+	data, err := proto.Marshal(pm.proto)
+	if err != nil {
 		return 0, err
-	} else {
-		var written int64 = 0
-		if n, err := writeTcpHeader(w, protoType, len(data)); err != nil {
-			return n, err
-		} else {
-			written += n
-		}
-		if n, err := w.Write(data); err != nil {
-			return (written + int64(n)), err
-		} else {
-			written += int64(n)
-		}
-		return written, nil
 	}
+	var written int64
+	n, err := writeTcpHeader(w, protoType, len(data))
+	if err != nil {
+		return int64(n), err
+	}
+	written += int64(n)
+	n, err = w.Write(data)
+	if err != nil {
+		return (written + int64(n)), err
+	}
+	written += int64(n)
+	return written, nil
 }
 
-func writeTcpHeader(w io.Writer, packetType, packetLength int) (int64, error) {
-	var written int64 = 0
+func writeTcpHeader(w io.Writer, packetType, packetLength int) (int, error) {
+	var written int
 	wireType := uint16(packetType)
 	wireLength := uint32(packetLength)
-	if err := binary.Write(w, binary.BigEndian, wireType); err != nil {
+	err := binary.Write(w, binary.BigEndian, wireType)
+	if err != nil {
 		return 0, err
-	} else {
-		written += 2
 	}
-	if err := binary.Write(w, binary.BigEndian, wireLength); err != nil {
+	written += 2
+	err = binary.Write(w, binary.BigEndian, wireLength)
+	if err != nil {
 		return written, err
-	} else {
-		written += 4
 	}
+	written += 4
 	return written, nil
 }

@@ -8,16 +8,16 @@ import (
 
 // RegisteredUser represents a registered user on the server.
 type RegisteredUser struct {
-	userId uint32
+	userID uint32
 	name   string
 
 	changed    bool
 	deregister bool
 }
 
-// UserId returns the registered user's Id
-func (ru *RegisteredUser) UserId() uint {
-	return uint(ru.userId)
+// UserID returns the registered user's Id
+func (ru *RegisteredUser) UserID() uint {
+	return uint(ru.userID)
 }
 
 // Name returns the registered user's name
@@ -54,7 +54,7 @@ func (pm RegisteredUsers) writeTo(client *Client, w io.Writer) (int64, error) {
 	for _, user := range pm {
 		if user.deregister || user.changed {
 			userListUser := &MumbleProto.UserList_User{
-				UserId: &user.userId,
+				UserId: &user.userID,
 			}
 			if !user.deregister {
 				userListUser.Name = &user.name

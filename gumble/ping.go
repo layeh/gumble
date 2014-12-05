@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+// PingResponse contains information about a server that responded to a UDP
+// ping packet.
 type PingResponse struct {
 	address        *net.UDPAddr
 	ping           time.Duration

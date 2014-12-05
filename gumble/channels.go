@@ -1,6 +1,6 @@
 package gumble
 
-// Channels is a maps of server channels.
+// Channels is a map of server channels.
 //
 // When accessed through client.Channels(), it contains all channels on the
 // server. When accessed through a specific channel
@@ -20,9 +20,9 @@ func (c Channels) create(id uint) *Channel {
 	return channel
 }
 
-// ById returns a pointer to the channel with the given id, null if no channel
+// ByID returns a pointer to the channel with the given id, null if no channel
 // exists with the given id.
-func (c Channels) ById(id uint) *Channel {
+func (c Channels) ByID(id uint) *Channel {
 	return c[id]
 }
 

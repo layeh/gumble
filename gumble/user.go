@@ -11,7 +11,7 @@ type User struct {
 	client  *Client
 	decoder *gopus.Decoder
 
-	session, userId                          uint32
+	session, userID                          uint32
 	name                                     string
 	channel                                  *Channel
 	mute, deaf, suppress, selfMute, selfDeaf bool
@@ -31,10 +31,10 @@ func (u *User) Session() uint {
 	return uint(u.session)
 }
 
-// UserId returns the user's UserId. Returns an invalid value if the user is
+// UserID returns the user's UserId. Returns an invalid value if the user is
 // not registered.
-func (u *User) UserId() uint {
-	return uint(u.userId)
+func (u *User) UserID() uint {
+	return uint(u.userID)
 }
 
 // Name returns the user's name.
@@ -109,13 +109,13 @@ func (u *User) IsRecording() bool {
 }
 
 // IsRegistered returns true if the user's certificate has been registered with
-// the server. A registered user will have a valid user Id.
+// the server. A registered user will have a valid user ID.
 func (u *User) IsRegistered() bool {
-	return u.userId > 0
+	return u.userID > 0
 }
 
 // Register will register the user with the server. If the client has
-// permission to do so, the user will shortly be given a UserId.
+// permission to do so, the user will shortly be given a UserID.
 func (u *User) Register() {
 	packet := MumbleProto.UserState{
 		Session: &u.session,

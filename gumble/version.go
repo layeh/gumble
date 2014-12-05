@@ -1,5 +1,6 @@
 package gumble
 
+// Version represents a Mumble client or server version.
 type Version struct {
 	version                uint32
 	release, os, osVersion string

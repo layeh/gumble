@@ -133,7 +133,7 @@ func main() {
 	p.config.Password = *password
 	p.config.Address = *server
 	if *insecure {
-		p.config.TlsConfig.InsecureSkipVerify = true
+		p.config.TLSConfig.InsecureSkipVerify = true
 	}
 	p.config.Listener = gumbleutil.Listener{
 		Connect:     p.OnConnect,

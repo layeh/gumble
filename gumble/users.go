@@ -1,6 +1,6 @@
 package gumble
 
-// Users is a maps of server users.
+// Users is a map of server users.
 //
 // When accessed through client.Users(), it contains all users currently on the
 // server. When accessed through a specific channel
