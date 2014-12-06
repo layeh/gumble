@@ -1,4 +1,6 @@
-# gumble
+# gumbleutil
+
+gumbleutil contains a few extras that can make working with gumble easier.
 
 ## Installation
 
