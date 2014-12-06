@@ -287,6 +287,8 @@ func (c *Client) ContextActions() ContextActions {
 
 // SetVoiceTarget sets to whom transmitted audio will be sent. The VoiceTarget
 // must have already been sent to the server for targeting to work correctly.
+// Passing nil will disable voice targeting (i.e. switch back to regular
+// speaking).
 func (c *Client) SetVoiceTarget(target *VoiceTarget) {
 	c.audioTarget = target
 }
