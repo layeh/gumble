@@ -20,7 +20,7 @@ type Channel struct {
 	temporary       bool
 }
 
-// ID returns the channel's unique Id.
+// ID returns the channel's unique ID.
 func (c *Channel) ID() uint {
 	return uint(c.id)
 }

@@ -26,13 +26,13 @@ type User struct {
 	stats        UserStats
 }
 
-// Session returns the user's session Id.
+// Session returns the user's session ID.
 func (u *User) Session() uint {
 	return uint(u.session)
 }
 
-// UserID returns the user's UserId. Returns an invalid value if the user is
-// not registered.
+// UserID returns the user's ID. Returns an invalid value if the user is not
+// registered.
 func (u *User) UserID() uint {
 	return uint(u.userID)
 }

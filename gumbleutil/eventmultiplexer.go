@@ -23,10 +23,15 @@ func (emi *EventMultiplexerItem) Detach() {
 	}
 }
 
+// EventMultiplexer is a struct that implements the gumble.EventListener
+// interface. It allows multiple, attached gumble.EventListeners to be called
+// when an event is triggered.
 type EventMultiplexer struct {
 	head, tail *EventMultiplexerItem
 }
 
+// Attach includes the given listener in the list of gumble.EventListeners that
+// will be triggered when an event happens.
 func (em *EventMultiplexer) Attach(listener gumble.EventListener) *EventMultiplexerItem {
 	item := &EventMultiplexerItem{
 		mux:      em,

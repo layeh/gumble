@@ -15,7 +15,7 @@ type RegisteredUser struct {
 	deregister bool
 }
 
-// UserID returns the registered user's Id
+// UserID returns the registered user's ID
 func (ru *RegisteredUser) UserID() uint {
 	return uint(ru.userID)
 }
