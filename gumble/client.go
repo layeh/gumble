@@ -237,9 +237,11 @@ func (c *Client) close(event *DisconnectEvent) error {
 	c.self = nil
 	c.audioEncoder = nil
 
-	if listener := c.config.Listener; listener != nil {
-		listener.OnDisconnect(event)
-	}
+	go func() {
+		if listener := c.config.Listener; listener != nil {
+			listener.OnDisconnect(event)
+		}
+	}()
 	return nil
 }
 
