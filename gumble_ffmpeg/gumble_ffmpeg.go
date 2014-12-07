@@ -11,10 +11,6 @@ import (
 	"github.com/layeh/gumble/gumble"
 )
 
-var (
-	ErrState = errors.New("invalid state")
-)
-
 type Stream struct {
 	client     *gumble.Client
 	cmd        *exec.Cmd
@@ -31,7 +27,7 @@ func New(client *gumble.Client) (*Stream, error) {
 
 func (s *Stream) Play(file string) error {
 	if s.sourceStop != nil {
-		return ErrState
+		return errors.New("already playing")
 	}
 	s.cmd = exec.Command("ffmpeg", "-i", file, "-ac", "1", "-ar", strconv.Itoa(gumble.AudioSampleRate), "-f", "s16le", "-")
 	if pipe, err := s.cmd.StdoutPipe(); err != nil {
@@ -46,9 +42,14 @@ func (s *Stream) Play(file string) error {
 	return nil
 }
 
+func (s *Stream) IsPlaying() bool {
+	return s.sourceStop != nil
+}
+
 func (s *Stream) Stop() error {
 	if s.sourceStop != nil {
 		close(s.sourceStop)
+		s.cmd.Wait()
 	}
 	return nil
 }
@@ -58,7 +59,8 @@ func (s *Stream) sourceRoutine() {
 	defer ticker.Stop()
 
 	defer func() {
-		s.pipe.Close()
+		s.cmd.Process.Kill()
+		s.cmd = nil
 		s.sourceStop = nil
 	}()
 
