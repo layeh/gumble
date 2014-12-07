@@ -43,6 +43,8 @@ func (em *EventMultiplexer) Attach(listener gumble.EventListener) *EventMultiple
 	}
 	if em.tail == nil {
 		em.tail = item
+	} else {
+		em.tail.next = item
 	}
 	return item
 }
