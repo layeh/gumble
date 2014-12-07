@@ -61,9 +61,9 @@ type Client struct {
 	audioSequence int
 	audioTarget   *VoiceTarget
 
-	end        chan bool
-	closeMutex sync.Mutex
-	sendMutex  sync.Mutex
+	end             chan bool
+	disconnectEvent DisconnectEvent
+	sendMutex       sync.Mutex
 }
 
 // NewClient creates a new gumble client. Returns nil if config is nil.
@@ -73,7 +73,6 @@ func NewClient(config *Config) *Client {
 	}
 	client := &Client{
 		config: config,
-		state:  StateDisconnected,
 	}
 	return client
 }
@@ -154,10 +153,9 @@ func (c *Client) pingRoutine() {
 
 // readRoutine reads protocol buffer messages from the server.
 func (c *Client) readRoutine() {
-	defer c.close(&DisconnectEvent{
+	c.disconnectEvent = DisconnectEvent{
 		Client: c,
-		Type:   DisconnectError,
-	})
+	}
 
 	conn := c.connection
 	data := make([]byte, 1024)
@@ -168,24 +166,37 @@ func (c *Client) readRoutine() {
 
 		conn.SetReadDeadline(time.Now().Add(pingInterval * 2))
 		if err := binary.Read(conn, binary.BigEndian, &pType); err != nil {
-			return
+			break
 		}
 		if err := binary.Read(conn, binary.BigEndian, &pLength); err != nil {
-			return
+			break
 		}
 		pLengthInt := int(pLength)
 		if pLengthInt > maximumPacketSize {
-			return
+			break
 		}
 		if pLengthInt > cap(data) {
 			data = make([]byte, pLengthInt)
 		}
 		if _, err := io.ReadFull(conn, data[:pLengthInt]); err != nil {
-			return
+			break
 		}
 		if handle, ok := handlers[pType]; ok {
 			handle(c, data[:pLengthInt])
 		}
+	}
+
+	event := DisconnectEvent{
+		Client: c,
+		Type:   DisconnectError,
+	}
+
+	close(c.end)
+	if listener := c.config.Listener; listener != nil {
+		listener.OnDisconnect(&event)
+	}
+	*c = Client{
+		config: c.config,
 	}
 }
 
@@ -214,34 +225,11 @@ func (c *Client) Request(request Request) {
 
 // Disconnect disconnects the client from the server.
 func (c *Client) Disconnect() error {
-	return c.close(&DisconnectEvent{
-		Client: c,
-		Type:   DisconnectUser,
-	})
-}
-
-func (c *Client) close(event *DisconnectEvent) error {
-	c.closeMutex.Lock()
-	defer c.closeMutex.Unlock()
-
 	if c.connection == nil {
 		return errors.New("client is already disconnected")
 	}
-	c.end <- true
+	c.disconnectEvent.Type = DisconnectUser
 	c.connection.Close()
-	c.connection = nil
-	c.state = StateDisconnected
-	c.users = nil
-	c.channels = nil
-	c.contextActions = nil
-	c.self = nil
-	c.audioEncoder = nil
-
-	go func() {
-		if listener := c.config.Listener; listener != nil {
-			listener.OnDisconnect(event)
-		}
-	}()
 	return nil
 }
 

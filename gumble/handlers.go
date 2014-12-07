@@ -165,16 +165,13 @@ func handleReject(c *Client, buffer []byte) error {
 		return err
 	}
 
-	event := DisconnectEvent{
-		Client: c,
-	}
 	if packet.Type != nil {
-		event.Type = DisconnectType(*packet.Type)
+		c.disconnectEvent.Type = DisconnectType(*packet.Type)
 	}
 	if packet.Reason != nil {
-		event.String = *packet.Reason
+		c.disconnectEvent.String = *packet.Reason
 	}
-	c.close(&event)
+	c.connection.Close()
 	return nil
 }
 
