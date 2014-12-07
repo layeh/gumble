@@ -12,6 +12,8 @@ import (
 )
 
 type Stream struct {
+	Done func()
+
 	client     *gumble.Client
 	cmd        *exec.Cmd
 	pipe       io.ReadCloser
@@ -62,6 +64,9 @@ func (s *Stream) sourceRoutine() {
 		s.cmd.Process.Kill()
 		s.cmd = nil
 		s.sourceStop = nil
+		if done := s.Done; done != nil {
+			done()
+		}
 	}()
 
 	stop := s.sourceStop
