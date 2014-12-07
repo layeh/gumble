@@ -40,12 +40,6 @@ const pingInterval time.Duration = time.Second * 10
 // accepted from the server.
 const maximumPacketSize = 1024 * 1024 * 10 // 10 megabytes
 
-var (
-	// ErrState is the error returned from Client methods if the action cannot
-	// be performed due to the current connection state.
-	ErrState = errors.New("client is in an invalid state")
-)
-
 // Client is the type used to create a connection to a server.
 type Client struct {
 	config *Config
@@ -87,7 +81,7 @@ func NewClient(config *Config) *Client {
 // Connect connects to the server.
 func (c *Client) Connect() error {
 	if c.state != StateDisconnected {
-		return ErrState
+		return errors.New("client is already connected")
 	}
 	encoder, err := gopus.NewEncoder(AudioSampleRate, 1, gopus.Voip)
 	if err != nil {
@@ -231,7 +225,7 @@ func (c *Client) close(event *DisconnectEvent) error {
 	defer c.closeMutex.Unlock()
 
 	if c.connection == nil {
-		return ErrState
+		return errors.New("client is already disconnected")
 	}
 	c.end <- true
 	c.connection.Close()
