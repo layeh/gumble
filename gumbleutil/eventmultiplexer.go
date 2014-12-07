@@ -47,61 +47,61 @@ func (em *EventMultiplexer) Attach(listener gumble.EventListener) *EventMultiple
 	return item
 }
 
-func (em *EventMultiplexer) OnConnect(event *gumble.ConnectEvent) {
+func (em EventMultiplexer) OnConnect(event *gumble.ConnectEvent) {
 	for item := em.head; item != nil; item = item.next {
 		item.listener.OnConnect(event)
 	}
 }
 
-func (em *EventMultiplexer) OnDisconnect(event *gumble.DisconnectEvent) {
+func (em EventMultiplexer) OnDisconnect(event *gumble.DisconnectEvent) {
 	for item := em.head; item != nil; item = item.next {
 		item.listener.OnDisconnect(event)
 	}
 }
 
-func (em *EventMultiplexer) OnTextMessage(event *gumble.TextMessageEvent) {
+func (em EventMultiplexer) OnTextMessage(event *gumble.TextMessageEvent) {
 	for item := em.head; item != nil; item = item.next {
 		item.listener.OnTextMessage(event)
 	}
 }
 
-func (em *EventMultiplexer) OnUserChange(event *gumble.UserChangeEvent) {
+func (em EventMultiplexer) OnUserChange(event *gumble.UserChangeEvent) {
 	for item := em.head; item != nil; item = item.next {
 		item.listener.OnUserChange(event)
 	}
 }
 
-func (em *EventMultiplexer) OnChannelChange(event *gumble.ChannelChangeEvent) {
+func (em EventMultiplexer) OnChannelChange(event *gumble.ChannelChangeEvent) {
 	for item := em.head; item != nil; item = item.next {
 		item.listener.OnChannelChange(event)
 	}
 }
 
-func (em *EventMultiplexer) OnPermissionDenied(event *gumble.PermissionDeniedEvent) {
+func (em EventMultiplexer) OnPermissionDenied(event *gumble.PermissionDeniedEvent) {
 	for item := em.head; item != nil; item = item.next {
 		item.listener.OnPermissionDenied(event)
 	}
 }
 
-func (em *EventMultiplexer) OnUserList(event *gumble.UserListEvent) {
+func (em EventMultiplexer) OnUserList(event *gumble.UserListEvent) {
 	for item := em.head; item != nil; item = item.next {
 		item.listener.OnUserList(event)
 	}
 }
 
-func (em *EventMultiplexer) OnAcl(event *gumble.AclEvent) {
+func (em EventMultiplexer) OnAcl(event *gumble.AclEvent) {
 	for item := em.head; item != nil; item = item.next {
 		item.listener.OnAcl(event)
 	}
 }
 
-func (em *EventMultiplexer) OnBanList(event *gumble.BanListEvent) {
+func (em EventMultiplexer) OnBanList(event *gumble.BanListEvent) {
 	for item := em.head; item != nil; item = item.next {
 		item.listener.OnBanList(event)
 	}
 }
 
-func (em *EventMultiplexer) OnContextActionChange(event *gumble.ContextActionChangeEvent) {
+func (em EventMultiplexer) OnContextActionChange(event *gumble.ContextActionChangeEvent) {
 	for item := em.head; item != nil; item = item.next {
 		item.listener.OnContextActionChange(event)
 	}
