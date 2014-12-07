@@ -45,6 +45,11 @@ const (
 	DisconnectAuthenticatorFail DisconnectType = DisconnectType(MumbleProto.Reject_AuthenticatorFail)
 )
 
+// Has returns true if the DisconnectType has changeType part of its bitmask.
+func (dt DisconnectType) Has(changeType DisconnectType) bool {
+	return (dt & changeType) != 0
+}
+
 // DisconnectEvent is the event that is passed to EventListener.OnDisconnect.
 type DisconnectEvent struct {
 	Client *Client
@@ -132,6 +137,12 @@ const (
 	PermissionDeniedChannelFull        PermissionDeniedType = PermissionDeniedType(MumbleProto.PermissionDenied_ChannelFull)
 	PermissionDeniedNestingLimit       PermissionDeniedType = PermissionDeniedType(MumbleProto.PermissionDenied_NestingLimit)
 )
+
+// Has returns true if the PermissionDeniedType has changeType part of its
+// bitmask.
+func (pdt PermissionDeniedType) Has(changeType PermissionDeniedType) bool {
+	return (pdt & changeType) != 0
+}
 
 // PermissionDeniedEvent is the event that is passed to
 // EventListener.OnPermissionDenied.
