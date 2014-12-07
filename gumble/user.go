@@ -87,9 +87,18 @@ func (u *User) Hash() string {
 	return u.hash
 }
 
-// Texture returns the user's texture. This function can return nil.
+// Texture returns the user's texture (avatar). This function can return nil.
 func (u *User) Texture() []byte {
 	return u.texture
+}
+
+// SetTexture sets the user's texture.
+func (u *User) SetTexture(texture []byte) {
+	packet := MumbleProto.UserState{
+		Session: &u.session,
+		Texture: texture,
+	}
+	u.client.Send(protoMessage{&packet})
 }
 
 // TextureHash returns the user's texture hash. This  can return nil.
