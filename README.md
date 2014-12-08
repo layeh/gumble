@@ -11,6 +11,13 @@
 - gumbleutil
     - Extras that can make working with gumble easier
 
+## Related projects
+
+- [barnard](https://github.com/layeh/barnard)
+    - terminal-based Mumble client
+- [piepan](https://github.com/layeh/piepan)
+    - program and library for writing Mumble bots with Lua scripts
+
 ## License
 
 MIT
