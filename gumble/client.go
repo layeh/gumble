@@ -86,6 +86,7 @@ func (c *Client) Connect() error {
 	if err != nil {
 		return err
 	}
+	encoder.SetBitrate(40000)
 	encoder.SetVbr(false)
 	c.audioSequence = 0
 	c.audioTarget = nil
