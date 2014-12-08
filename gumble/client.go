@@ -187,14 +187,9 @@ func (c *Client) readRoutine() {
 		}
 	}
 
-	event := DisconnectEvent{
-		Client: c,
-		Type:   DisconnectError,
-	}
-
 	close(c.end)
 	if listener := c.config.Listener; listener != nil {
-		listener.OnDisconnect(&event)
+		listener.OnDisconnect(&c.disconnectEvent)
 	}
 	*c = Client{
 		config: c.config,
