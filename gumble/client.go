@@ -88,6 +88,8 @@ func (c *Client) Connect() error {
 	}
 	encoder.SetBitrate(40000)
 	encoder.SetVbr(false)
+	/* TODO: set this to the server's max bitrate */
+	encoder.SetBitrate(40000)
 	c.audioSequence = 0
 	c.audioTarget = nil
 
