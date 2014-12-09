@@ -3,6 +3,7 @@ package gumble
 import (
 	"bytes"
 	"errors"
+	"math"
 	"net"
 	"time"
 
@@ -404,13 +405,16 @@ func handleUserState(c *Client, buffer []byte) error {
 	}
 	if packet.UserId != nil {
 		if *packet.UserId != user.userID && !event.Type.Has(UserChangeConnected) {
-			if int32(*packet.UserId) > 0 {
+			if *packet.UserId != math.MaxUint32 {
 				event.Type |= UserChangeRegistered
+				user.userID = *packet.UserId
 			} else {
 				event.Type |= UserChangeUnregistered
+				user.userID = 0
 			}
+		} else {
+			user.userID = *packet.UserId
 		}
-		user.userID = *packet.UserId
 	}
 	if packet.ChannelId != nil {
 		if user.channel != nil {
