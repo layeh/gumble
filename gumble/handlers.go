@@ -273,24 +273,25 @@ func handleChannelState(c *Client, buffer []byte) error {
 		}
 	}
 	if packet.Name != nil {
-		newName := *packet.Name
-		if newName != channel.name {
+		if *packet.Name != channel.name {
 			event.Type |= ChannelChangeName
 		}
-		channel.name = newName
+		channel.name = *packet.Name
 	}
 	if packet.Description != nil {
-		newDescription := *packet.Description
-		if newDescription != channel.description {
+		if *packet.Description != channel.description {
 			event.Type |= ChannelChangeDescription
 		}
-		channel.description = newDescription
+		channel.description = *packet.Description
 		channel.descriptionHash = nil
 	}
 	if packet.Temporary != nil {
 		channel.temporary = *packet.Temporary
 	}
 	if packet.Position != nil {
+		if *packet.Position != channel.position {
+			event.Type |= ChannelChangePosition
+		}
 		channel.position = *packet.Position
 	}
 	if packet.DescriptionHash != nil {
@@ -396,13 +397,19 @@ func handleUserState(c *Client, buffer []byte) error {
 		event.Actor = actor
 	}
 	if packet.Name != nil {
-		newName := *packet.Name
-		if newName != user.name {
+		if *packet.Name != user.name {
 			event.Type |= UserChangeName
 		}
-		user.name = newName
+		user.name = *packet.Name
 	}
 	if packet.UserId != nil {
+		if *packet.UserId != user.userID && !event.Type.Has(UserChangeConnected) {
+			if int32(*packet.UserId) > 0 {
+				event.Type |= UserChangeRegistered
+			} else {
+				event.Type |= UserChangeUnregistered
+			}
+		}
 		user.userID = *packet.UserId
 	}
 	if packet.ChannelId != nil {
@@ -420,30 +427,45 @@ func handleUserState(c *Client, buffer []byte) error {
 		user.channel.users[user.Session()] = user
 	}
 	if packet.Mute != nil {
+		if *packet.Mute != user.mute {
+			event.Type |= UserChangeAudio
+		}
 		user.mute = *packet.Mute
 	}
 	if packet.Deaf != nil {
+		if *packet.Deaf != user.deaf {
+			event.Type |= UserChangeAudio
+		}
 		user.deaf = *packet.Deaf
 	}
 	if packet.Suppress != nil {
+		if *packet.Suppress != user.suppress {
+			event.Type |= UserChangeAudio
+		}
 		user.suppress = *packet.Suppress
 	}
 	if packet.SelfMute != nil {
+		if *packet.SelfMute != user.selfMute {
+			event.Type |= UserChangeAudio
+		}
 		user.selfMute = *packet.SelfMute
 	}
 	if packet.SelfDeaf != nil {
+		if *packet.SelfDeaf != user.selfDeaf {
+			event.Type |= UserChangeAudio
+		}
 		user.selfDeaf = *packet.SelfDeaf
 	}
 	if packet.Texture != nil {
+		event.Type |= UserChangeTexture
 		user.texture = packet.Texture
 		user.textureHash = nil
 	}
 	if packet.Comment != nil {
-		newComment := *packet.Comment
-		if newComment != user.comment {
+		if *packet.Comment != user.comment {
 			event.Type |= UserChangeComment
 		}
-		user.comment = newComment
+		user.comment = *packet.Comment
 		user.commentHash = nil
 	}
 	if packet.Hash != nil {
@@ -455,13 +477,20 @@ func handleUserState(c *Client, buffer []byte) error {
 		user.comment = ""
 	}
 	if packet.TextureHash != nil {
+		event.Type |= UserChangeTexture
 		user.textureHash = packet.TextureHash
 		user.texture = nil
 	}
 	if packet.PrioritySpeaker != nil {
+		if *packet.PrioritySpeaker != user.prioritySpeaker {
+			event.Type |= UserChangePrioritySpeaker
+		}
 		user.prioritySpeaker = *packet.PrioritySpeaker
 	}
 	if packet.Recording != nil {
+		if *packet.Recording != user.recording {
+			event.Type |= UserChangeRecording
+		}
 		user.recording = *packet.Recording
 	}
 

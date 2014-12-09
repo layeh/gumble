@@ -73,9 +73,15 @@ const (
 	UserChangeDisconnected
 	UserChangeKicked
 	UserChangeBanned
+	UserChangeRegistered
+	UserChangeUnregistered
 	UserChangeName
 	UserChangeChannel
 	UserChangeComment
+	UserChangeAudio
+	UserChangeTexture
+	UserChangePrioritySpeaker
+	UserChangeRecording
 	UserChangeStats
 )
 
@@ -104,6 +110,7 @@ const (
 	ChannelChangeMoved
 	ChannelChangeName
 	ChannelChangeDescription
+	ChannelChangePosition
 )
 
 // Has returns true if the ChannelChangeType has changeType part of its
