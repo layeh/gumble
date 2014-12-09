@@ -112,7 +112,7 @@ func (u *User) IsPrioritySpeaker() bool {
 	return u.prioritySpeaker
 }
 
-// PrioritySpeaker sets if the user is the priority speaker in the channel.
+// SetPrioritySpeaker sets if the user is the priority speaker in the channel.
 func (u *User) SetPrioritySpeaker(prioritySpeaker bool) {
 	packet := MumbleProto.UserState{
 		Session:         &u.session,
