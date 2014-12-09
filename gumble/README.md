@@ -39,6 +39,7 @@ gumble is a [Go](https://golang.org/) client library for the
 
 ## Requirements
 
+- Go 1.3+
 - [goprotobuf](https://code.google.com/p/goprotobuf/)
 - [gopus](https://github.com/layeh/gopus)
 
