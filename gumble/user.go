@@ -126,6 +126,15 @@ func (u *User) IsRecording() bool {
 	return u.recording
 }
 
+// SetRecording sets if the user is recording audio.
+func (u *User) SetRecording(recording bool) {
+	packet := MumbleProto.UserState{
+		Session:   &u.session,
+		Recording: &recording,
+	}
+	u.client.Send(protoMessage{&packet})
+}
+
 // IsRegistered returns true if the user's certificate has been registered with
 // the server. A registered user will have a valid user ID.
 func (u *User) IsRegistered() bool {
