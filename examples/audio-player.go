@@ -64,17 +64,14 @@ func main() {
 	}
 
 	// client
+	p.config = gumble.Config{
+		Username: *username,
+		Password: *password,
+		Address:  *server,
+	}
 	p.client = gumble.NewClient(&p.config)
-	p.config.Username = *username
-	p.config.Password = *password
-	p.config.Address = *server
 	if *insecure {
 		p.config.TLSConfig.InsecureSkipVerify = true
-	}
-	p.config.Listener = gumbleutil.Listener{
-		Connect:     p.OnConnect,
-		Disconnect:  p.OnDisconnect,
-		TextMessage: p.OnTextMessage,
 	}
 	if stream, err := gumble_ffmpeg.New(p.client); err != nil {
 		fmt.Printf("%s\n", err)
@@ -82,6 +79,11 @@ func main() {
 	} else {
 		p.stream = stream
 	}
+	p.client.Attach(gumbleutil.Listener{
+		Connect:     p.OnConnect,
+		Disconnect:  p.OnDisconnect,
+		TextMessage: p.OnTextMessage,
+	})
 	if err := p.client.Connect(); err != nil {
 		fmt.Printf("%s\n", err)
 		os.Exit(1)

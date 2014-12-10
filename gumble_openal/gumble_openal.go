@@ -15,6 +15,7 @@ var (
 
 type Stream struct {
 	client *gumble.Client
+	link   gumble.Detacher
 
 	deviceSource *openal.CaptureDevice
 	sourceStop   chan bool
@@ -38,10 +39,13 @@ func New(client *gumble.Client) (*Stream, error) {
 	s.contextSink.Activate()
 	s.buffer = make([]byte, gumble.AudioMaximumFrameSize)
 
+	s.link = client.AttachAudio(s)
+
 	return s, nil
 }
 
 func (s *Stream) Destroy() {
+	s.link.Detach()
 	if s.deviceSource != nil {
 		s.StopSource()
 		s.deviceSource.CaptureCloseDevice()

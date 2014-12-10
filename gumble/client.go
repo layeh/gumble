@@ -44,6 +44,9 @@ const maximumPacketSize = 1024 * 1024 * 10 // 10 megabytes
 type Client struct {
 	config *Config
 
+	listeners      eventMultiplexer
+	audioListeners audioEventMultiplexer
+
 	state  State
 	self   *User
 	server struct {
@@ -131,6 +134,17 @@ func (c *Client) Connect() error {
 	return nil
 }
 
+// Attach adds an event listener that will receive incoming connection events.
+func (c *Client) Attach(listener EventListener) Detacher {
+	return c.listeners.Attach(listener)
+}
+
+// AttachAudio adds an audio event listener that will receive incoming audio
+// packets.
+func (c *Client) AttachAudio(listener AudioListener) Detacher {
+	return c.audioListeners.Attach(listener)
+}
+
 // pingRoutine sends ping packets to the server at regular intervals.
 func (c *Client) pingRoutine() {
 	ticker := time.NewTicker(pingInterval)
@@ -188,11 +202,11 @@ func (c *Client) readRoutine() {
 	}
 
 	close(c.end)
-	if listener := c.config.Listener; listener != nil {
-		listener.OnDisconnect(&c.disconnectEvent)
-	}
+	c.listeners.OnDisconnect(&c.disconnectEvent)
 	*c = Client{
-		config: c.config,
+		config:         c.config,
+		listeners:      c.listeners,
+		audioListeners: c.audioListeners,
 	}
 }
 

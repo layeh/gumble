@@ -19,9 +19,6 @@ type Config struct {
 	Address string
 	Tokens  AccessTokens
 
-	Listener      EventListener
-	AudioListener AudioListener
-
 	TLSConfig tls.Config
 	Dialer    net.Dialer
 }

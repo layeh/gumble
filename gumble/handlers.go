@@ -146,9 +146,7 @@ func handleUdpTunnel(c *Client, buffer []byte) error {
 			Pcm:      pcm,
 		},
 	}
-	if listener := c.config.AudioListener; listener != nil {
-		listener.OnAudioPacket(&event)
-	}
+	c.audioListeners.OnAudioPacket(&event)
 	return nil
 }
 
@@ -196,9 +194,7 @@ func handleServerSync(c *Client, buffer []byte) error {
 	}
 	c.state = StateSynced
 
-	if listener := c.config.Listener; listener != nil {
-		listener.OnConnect(&event)
-	}
+	c.listeners.OnConnect(&event)
 	return nil
 }
 
@@ -230,9 +226,7 @@ func handleChannelRemove(c *Client, buffer []byte) error {
 			Type:    ChannelChangeRemoved,
 			Channel: channel,
 		}
-		if listener := c.config.Listener; listener != nil {
-			listener.OnChannelChange(&event)
-		}
+		c.listeners.OnChannelChange(&event)
 	}
 	return nil
 }
@@ -302,9 +296,7 @@ func handleChannelState(c *Client, buffer []byte) error {
 	}
 
 	if c.state == StateSynced {
-		if listener := c.config.Listener; listener != nil {
-			listener.OnChannelChange(&event)
-		}
+		c.listeners.OnChannelChange(&event)
 	}
 	return nil
 }
@@ -348,9 +340,7 @@ func handleUserRemove(c *Client, buffer []byte) error {
 	}
 
 	if c.state == StateSynced {
-		if listener := c.config.Listener; listener != nil {
-			listener.OnUserChange(&event)
-		}
+		c.listeners.OnUserChange(&event)
 	}
 	return nil
 }
@@ -499,9 +489,7 @@ func handleUserState(c *Client, buffer []byte) error {
 	}
 
 	if c.state == StateSynced {
-		if listener := c.config.Listener; listener != nil {
-			listener.OnUserChange(&event)
-		}
+		c.listeners.OnUserChange(&event)
 	}
 	return nil
 }
@@ -546,9 +534,7 @@ func handleBanList(c *Client, buffer []byte) error {
 		event.BanList = append(event.BanList, ban)
 	}
 
-	if listener := c.config.Listener; listener != nil {
-		listener.OnBanList(&event)
-	}
+	c.listeners.OnBanList(&event)
 	return nil
 }
 
@@ -592,9 +578,7 @@ func handleTextMessage(c *Client, buffer []byte) error {
 		event.Message = *packet.Message
 	}
 
-	if listener := c.config.Listener; listener != nil {
-		listener.OnTextMessage(&event)
-	}
+	c.listeners.OnTextMessage(&event)
 	return nil
 }
 
@@ -634,9 +618,7 @@ func handlePermissionDenied(c *Client, buffer []byte) error {
 		event.Permission = Permission(*packet.Permission)
 	}
 
-	if listener := c.config.Listener; listener != nil {
-		listener.OnPermissionDenied(&event)
-	}
+	c.listeners.OnPermissionDenied(&event)
 	return nil
 }
 
@@ -663,9 +645,7 @@ func handleAcl(c *Client, buffer []byte) error {
 		}
 	}
 
-	if listener := c.config.Listener; listener != nil {
-		listener.OnAcl(&event)
-	}
+	c.listeners.OnAcl(&event)
 	return nil
 }
 
@@ -717,9 +697,7 @@ func handleContextActionModify(c *Client, buffer []byte) error {
 		return errInvalidProtobuf
 	}
 
-	if listener := c.config.Listener; listener != nil {
-		listener.OnContextActionChange(&event)
-	}
+	c.listeners.OnContextActionChange(&event)
 	return nil
 }
 
@@ -748,9 +726,7 @@ func handleUserList(c *Client, buffer []byte) error {
 		event.UserList = append(event.UserList, registeredUser)
 	}
 
-	if listener := c.config.Listener; listener != nil {
-		listener.OnUserList(&event)
-	}
+	c.listeners.OnUserList(&event)
 	return nil
 }
 
@@ -798,9 +774,7 @@ func handleUserStats(c *Client, buffer []byte) error {
 		User:   user,
 	}
 
-	if listener := c.config.Listener; listener != nil {
-		listener.OnUserChange(&event)
-	}
+	c.listeners.OnUserChange(&event)
 	return nil
 }
 

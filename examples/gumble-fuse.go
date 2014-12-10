@@ -166,18 +166,20 @@ func main() {
 	}
 
 	// client
+	p.config = gumble.Config{
+		Username: *username,
+		Password: *password,
+		Address:  *server,
+	}
 	p.client = gumble.NewClient(&p.config)
-	p.config.Username = *username
-	p.config.Password = *password
-	p.config.Address = *server
 	if *insecure {
 		p.config.TLSConfig.InsecureSkipVerify = true
 	}
-	p.config.Listener = gumbleutil.Listener{
+	p.client.Attach(gumbleutil.Listener{
 		Connect:    p.OnConnect,
 		Disconnect: p.OnDisconnect,
 		UserChange: p.OnUserChange,
-	}
+	})
 	if err := p.client.Connect(); err != nil {
 		fmt.Printf("%s\n", err)
 		os.Exit(1)
