@@ -38,11 +38,10 @@ func (em *eventMultiplexer) Attach(listener EventListener) Detacher {
 	if em.head == nil {
 		em.head = item
 	}
-	if em.tail == nil {
-		em.tail = item
-	} else {
+	if em.tail != nil {
 		em.tail.next = item
 	}
+	em.tail = item
 	return item
 }
 
