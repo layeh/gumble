@@ -16,7 +16,7 @@
 - [barnard](https://github.com/layeh/barnard)
     - terminal-based Mumble client
 - [piepan](https://github.com/layeh/piepan)
-    - program and library for writing Mumble bots with Lua scripts
+    - an easy to use framework for writing scriptable Mumble bots using JavaScript
 
 ## License
 
