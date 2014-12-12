@@ -12,7 +12,7 @@ func ChannelPath(channel *gumble.Channel) []string {
 		pieces = append(pieces, channel.Name())
 	}
 	for i := 0; i < (len(pieces) / 2); i++ {
-		pieces[len(pieces) - 1 - i], pieces[i] = pieces[i], pieces[len(pieces) - 1 - i]
+		pieces[len(pieces)-1-i], pieces[i] = pieces[i], pieces[len(pieces)-1-i]
 	}
 	return pieces
 }

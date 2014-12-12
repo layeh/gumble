@@ -1,11 +1,11 @@
 package gumbleutil
 
 import (
-	"os"
 	"crypto/tls"
-	"encoding/pem"
 	"crypto/x509"
+	"encoding/pem"
 	"io/ioutil"
+	"os"
 
 	"github.com/layeh/gumble/gumble"
 )
