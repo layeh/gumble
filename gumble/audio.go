@@ -3,6 +3,7 @@ package gumble
 import (
 	"bytes"
 	"io"
+	"math"
 
 	"github.com/layeh/gumble/gumble/varint"
 )
@@ -91,6 +92,6 @@ func (ab AudioBuffer) writeTo(client *Client, w io.Writer) (int64, error) {
 	}
 	written += int64(ni)
 
-	client.audioSequence = (client.audioSequence + 1) % 10000
+	client.audioSequence = (client.audioSequence + 1) % math.MaxInt32
 	return written, nil
 }
