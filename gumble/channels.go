@@ -20,7 +20,7 @@ func (c Channels) create(id uint) *Channel {
 	return channel
 }
 
-// ByID returns a pointer to the channel with the given id, null if no channel
+// ByID returns a pointer to the channel with the given id, nil if no channel
 // exists with the given id.
 func (c Channels) ByID(id uint) *Channel {
 	return c[id]

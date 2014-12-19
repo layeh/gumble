@@ -18,7 +18,7 @@ func (u Users) create(session uint) *User {
 	return user
 }
 
-// BySession returns a pointer to the user with the given session, null if no
+// BySession returns a pointer to the user with the given session, nil if no
 // user exists with the given session.
 func (u Users) BySession(session uint) *User {
 	return u[session]

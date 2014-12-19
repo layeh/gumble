@@ -1,17 +1,19 @@
+// Package gumble is a client for the Mumble voice chat software.
+//
 // Getting started
 //
-//1. Create a new `gumble.Config` to hold your connection settings:
+//1. Create a new Config to hold your connection settings:
 //
 //        config := gumble.Config{
 //          Username: "gumble-test",
 //          Address:  "example.com:64738",
 //        }
 //
-//2. Create a new `gumble.Client`:
+//2. Create a new Client:
 //
 //        client := gumble.NewClient(&config)
 //
-//3. Implement `gumble.EventListener` (or use gumbleutil.Listener) and attach it to the client:
+//3. Implement EventListener (or use gumbleutil.Listener) and attach it to the client:
 //
 //        client.Attach(gumbleutil.Listener{
 //          TextMessage: func(e *gumble.TextMessageEvent) {

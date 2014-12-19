@@ -31,7 +31,7 @@ func (pr *PingResponse) Ping() time.Duration {
 }
 
 // Version returns the server's version. Only the .Version() and
-// .SemanticVersion() methods of the returned value will have valid values.
+// .SemanticVersion() methods of the returned value will return valid values.
 func (pr *PingResponse) Version() Version {
 	return pr.version
 }

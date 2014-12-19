@@ -1,4 +1,3 @@
-// Package gumble is a client for the Mumble voice chat software.
 package gumble
 
 import (
