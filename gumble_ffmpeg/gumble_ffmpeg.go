@@ -51,7 +51,6 @@ func (s *Stream) IsPlaying() bool {
 func (s *Stream) Stop() error {
 	if s.sourceStop != nil {
 		close(s.sourceStop)
-		s.cmd.Wait()
 	}
 	return nil
 }
@@ -62,6 +61,7 @@ func (s *Stream) sourceRoutine() {
 
 	defer func() {
 		s.cmd.Process.Kill()
+		s.cmd.Wait()
 		s.cmd = nil
 		s.sourceStop = nil
 		if done := s.Done; done != nil {
