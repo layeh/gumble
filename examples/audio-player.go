@@ -11,83 +11,42 @@ import (
 	"github.com/layeh/gumble/gumbleutil"
 )
 
-type plugin struct {
-	config    gumble.Config
-	client    *gumble.Client
-	stream    *gumble_ffmpeg.Stream
-	files     map[string]string
-	keepAlive chan bool
-}
-
-func (p *plugin) OnConnect(e *gumble.ConnectEvent) {
-	fmt.Printf("audio player loaded! (%d files)\n", len(p.files))
-}
-
-func (p *plugin) OnDisconnect(e *gumble.DisconnectEvent) {
-	p.keepAlive <- true
-}
-
-func (p *plugin) OnTextMessage(e *gumble.TextMessageEvent) {
-	if e.Sender == nil {
-		return
-	}
-	file, ok := p.files[e.Message]
-	if !ok {
-		return
-	}
-	if err := p.stream.Play(file); err != nil {
-		fmt.Printf("%s\n", err)
-	} else {
-		fmt.Printf("Playing %s\n", file)
-	}
-}
-
 func main() {
-	// flags
-	server := flag.String("server", "localhost:64738", "mumble server address")
-	username := flag.String("username", "audio-player", "client username")
-	password := flag.String("password", "", "client password")
-	insecure := flag.Bool("insecure", false, "skip checking server certificate")
+	files := make(map[string]string)
+	var stream *gumble_ffmpeg.Stream
 
-	flag.Parse()
+	gumbleutil.Main(func(_ *gumble.Config, client *gumble.Client) {
+		var err error
+		stream, err = gumble_ffmpeg.New(client)
+		if err != nil {
+			fmt.Printf("%s\n", err)
+			os.Exit(1)
+		}
 
-	// implementation
-	p := plugin{
-		keepAlive: make(chan bool),
-		files:     make(map[string]string),
-	}
+		for _, file := range flag.Args() {
+			key := filepath.Base(file)
+			files[key] = file
+		}
+	}, gumbleutil.Listener{
+		// Connect event
+		Connect: func(e *gumble.ConnectEvent) {
+			fmt.Printf("audio player loaded! (%d files)\n", len(files))
+		},
 
-	// store file names
-	for _, file := range flag.Args() {
-		key := filepath.Base(file)
-		p.files[key] = file
-	}
-
-	// client
-	p.config = gumble.Config{
-		Username: *username,
-		Password: *password,
-		Address:  *server,
-	}
-	p.client = gumble.NewClient(&p.config)
-	if *insecure {
-		p.config.TLSConfig.InsecureSkipVerify = true
-	}
-	if stream, err := gumble_ffmpeg.New(p.client); err != nil {
-		fmt.Printf("%s\n", err)
-		os.Exit(1)
-	} else {
-		p.stream = stream
-	}
-	p.client.Attach(gumbleutil.Listener{
-		Connect:     p.OnConnect,
-		Disconnect:  p.OnDisconnect,
-		TextMessage: p.OnTextMessage,
+		// Text message event
+		TextMessage: func(e *gumble.TextMessageEvent) {
+			if e.Sender == nil {
+				return
+			}
+			file, ok := files[e.Message]
+			if !ok {
+				return
+			}
+			if err := stream.Play(file); err != nil {
+				fmt.Printf("%s\n", err)
+			} else {
+				fmt.Printf("Playing %s\n", file)
+			}
+		},
 	})
-	if err := p.client.Connect(); err != nil {
-		fmt.Printf("%s\n", err)
-		os.Exit(1)
-	}
-
-	<-p.keepAlive
 }
