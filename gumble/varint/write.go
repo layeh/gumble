@@ -12,6 +12,9 @@ import (
 func WriteTo(w io.Writer, value int64) (int64, error) {
 	var length int
 	var buff [4]byte
+	if value < 0 {
+		return 0, ErrOutOfRange
+	}
 	if value <= 0x7F {
 		buff[0] = byte(value)
 		length = 1
