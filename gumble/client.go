@@ -245,9 +245,6 @@ func (c *Client) Disconnect() error {
 // Conn returns the underlying net.Conn to the server. Returns nil if the
 // client is disconnected.
 func (c *Client) Conn() net.Conn {
-	if c.state == StateDisconnected {
-		return nil
-	}
 	return c.connection
 }
 
