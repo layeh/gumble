@@ -43,7 +43,6 @@ func ReadByte(r io.Reader) (byte, error) {
 	var buff [1]byte
 	if _, err := io.ReadFull(r, buff[:]); err != nil {
 		return 0, err
-	} else {
-		return buff[0], nil
 	}
+	return buff[0], nil
 }
