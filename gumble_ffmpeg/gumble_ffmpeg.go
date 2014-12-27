@@ -18,11 +18,13 @@ type Stream struct {
 	cmd        *exec.Cmd
 	pipe       io.ReadCloser
 	sourceStop chan bool
+	volume     float32
 }
 
 func New(client *gumble.Client) (*Stream, error) {
 	stream := &Stream{
 		client: client,
+		volume: 1.0,
 	}
 	return stream, nil
 }
@@ -55,6 +57,14 @@ func (s *Stream) Stop() error {
 	return nil
 }
 
+func (s *Stream) Volume() float32 {
+	return s.volume
+}
+
+func (s *Stream) SetVolume(volume float32) {
+	s.volume = volume
+}
+
 func (s *Stream) sourceRoutine() {
 	ticker := time.NewTicker(10 * time.Millisecond)
 	defer ticker.Stop()
@@ -82,7 +92,8 @@ func (s *Stream) sourceRoutine() {
 				return
 			}
 			for i := range int16Buffer {
-				int16Buffer[i] = int16(binary.LittleEndian.Uint16(byteBuffer[i*2 : (i+1)*2]))
+				float := float32(int16(binary.LittleEndian.Uint16(byteBuffer[i*2 : (i+1)*2])))
+				int16Buffer[i] = int16(s.volume * float)
 			}
 			s.client.Send(gumble.AudioBuffer(int16Buffer))
 		}
