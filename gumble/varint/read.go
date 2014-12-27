@@ -27,13 +27,13 @@ func ReadFrom(r io.Reader) (int64, int64, error) {
 		if n, err := io.ReadFull(r, buffer[0:2]); err != nil {
 			return 0, int64(n + 1), err
 		}
-		return int64(b&0x1F)<<8 | int64(buffer[0])<<8 | int64(buffer[1]), 3, nil
+		return int64(b&0x1F)<<16 | int64(buffer[0])<<8 | int64(buffer[1]), 3, nil
 	}
 	if (b & 0xF0) == 0xE0 {
 		if n, err := io.ReadFull(r, buffer[0:3]); err != nil {
 			return 0, int64(n + 1), err
 		}
-		return int64(b&0xF)<<8 | int64(buffer[0])<<8 | int64(buffer[1])<<8 | int64(buffer[2]), 4, nil
+		return int64(b&0xF)<<24 | int64(buffer[0])<<16 | int64(buffer[1])<<8 | int64(buffer[2]), 4, nil
 	}
 	return 0, 1, ErrOutOfRange
 }
