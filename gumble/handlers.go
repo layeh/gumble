@@ -126,7 +126,8 @@ func handleUdpTunnel(c *Client, buffer []byte) error {
 	if err != nil {
 		return err
 	}
-	audioLength = int(length)
+	// Opus audio packets set the 13th bit in the size field as the terminator.
+	audioLength = int(length) &^ 0x2000
 	if audioLength > reader.Len() {
 		return errInvalidProtobuf
 	}
