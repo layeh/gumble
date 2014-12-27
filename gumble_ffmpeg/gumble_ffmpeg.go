@@ -3,6 +3,7 @@ package gumble_ffmpeg
 import (
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"io"
 	"os/exec"
 	"strconv"
@@ -33,7 +34,7 @@ func (s *Stream) Play(file string) error {
 	if s.sourceStop != nil {
 		return errors.New("already playing")
 	}
-	s.cmd = exec.Command("ffmpeg", "-i", file, "-ac", "1", "-ar", strconv.Itoa(gumble.AudioSampleRate), "-f", "s16le", "-")
+	s.cmd = exec.Command("ffmpeg", "-i", file, "-ac", "1", "-ar", strconv.Itoa(gumble.AudioSampleRate), "-af", fmt.Sprintf("volume=%f", s.volume), "-f", "s16le", "-")
 	if pipe, err := s.cmd.StdoutPipe(); err != nil {
 		s.cmd = nil
 		return nil
