@@ -3,6 +3,7 @@ package gumble_ffmpeg
 import (
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"io"
 	"os/exec"
 	"strconv"
@@ -18,11 +19,13 @@ type Stream struct {
 	cmd        *exec.Cmd
 	pipe       io.ReadCloser
 	sourceStop chan bool
+	volume     float32
 }
 
 func New(client *gumble.Client) (*Stream, error) {
 	stream := &Stream{
 		client: client,
+		volume: 1.0,
 	}
 	return stream, nil
 }
@@ -31,7 +34,7 @@ func (s *Stream) Play(file string) error {
 	if s.sourceStop != nil {
 		return errors.New("already playing")
 	}
-	s.cmd = exec.Command("ffmpeg", "-i", file, "-ac", "1", "-ar", strconv.Itoa(gumble.AudioSampleRate), "-f", "s16le", "-")
+	s.cmd = exec.Command("ffmpeg", "-i", file, "-ac", "1", "-ar", strconv.Itoa(gumble.AudioSampleRate), "-af", fmt.Sprintf("volume=%f", s.volume), "-f", "s16le", "-")
 	if pipe, err := s.cmd.StdoutPipe(); err != nil {
 		s.cmd = nil
 		return nil
