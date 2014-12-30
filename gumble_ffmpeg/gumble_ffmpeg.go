@@ -36,13 +36,15 @@ func (s *Stream) Play(file string) error {
 	s.cmd = exec.Command("ffmpeg", "-i", file, "-ac", "1", "-ar", strconv.Itoa(gumble.AudioSampleRate), "-f", "s16le", "-")
 	if pipe, err := s.cmd.StdoutPipe(); err != nil {
 		s.cmd = nil
-		return nil
+		return err
 	} else {
 		s.pipe = pipe
 	}
+	if err := s.cmd.Start(); err != nil {
+		return err
+	}
 	s.sourceStop = make(chan bool)
 	go s.sourceRoutine()
-	s.cmd.Start()
 	return nil
 }
 
