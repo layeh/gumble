@@ -133,6 +133,11 @@ func (c *Client) Connect() error {
 	return nil
 }
 
+// Config returns the client's configuration.
+func (c *Client) Config() *Config {
+	return c.config
+}
+
 // Attach adds an event listener that will receive incoming connection events.
 func (c *Client) Attach(listener EventListener) Detacher {
 	return c.listeners.Attach(listener)
