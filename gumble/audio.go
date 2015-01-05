@@ -20,6 +20,10 @@ const (
 	// AudioMaximumFrameSize is the maximum audio frame size from another user
 	// that will be processed.
 	AudioMaximumFrameSize = AudioDefaultFrameSize * 10
+
+	// AudioDefaultDataBytes is the default number of bytes that an audio frame
+	// can use.
+	AudioDefaultDataBytes = 128
 )
 
 // AudioListener is the interface that must be implemented by types wishing to
@@ -49,7 +53,11 @@ func (ab AudioBuffer) writeTo(client *Client, w io.Writer) (int64, error) {
 	var written int64
 
 	// Create Opus buffer
-	opus, err := client.audioEncoder.Encode(ab, AudioDefaultFrameSize, AudioMaximumFrameSize)
+	dataBytes := client.config.AudioDataBytes
+	if dataBytes <= 0 {
+		dataBytes = AudioDefaultDataBytes
+	}
+	opus, err := client.audioEncoder.Encode(ab, len(ab), dataBytes)
 	if err != nil {
 		return 0, err
 	}

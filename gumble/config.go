@@ -19,6 +19,9 @@ type Config struct {
 	Address string
 	Tokens  AccessTokens
 
+	// AudioDataBytes is the number of bytes that an audio frame can use
+	AudioDataBytes int
+
 	TLSConfig tls.Config
 	Dialer    net.Dialer
 }
