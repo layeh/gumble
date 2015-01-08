@@ -21,37 +21,33 @@ var (
 	errInvalidProtobuf      = errors.New("protobuf message has an invalid field")
 )
 
-var handlers map[uint16]handlerFunc
-
-func init() {
-	handlers = map[uint16]handlerFunc{
-		0:  handleVersion,
-		1:  handleUdpTunnel,
-		2:  handleAuthenticate,
-		3:  handlePing,
-		4:  handleReject,
-		5:  handleServerSync,
-		6:  handleChannelRemove,
-		7:  handleChannelState,
-		8:  handleUserRemove,
-		9:  handleUserState,
-		10: handleBanList,
-		11: handleTextMessage,
-		12: handlePermissionDenied,
-		13: handleAcl,
-		14: handleQueryUsers,
-		15: handleCryptSetup,
-		16: handleContextActionModify,
-		17: handleContextAction,
-		18: handleUserList,
-		19: handleVoiceTarget,
-		20: handlePermissionQuery,
-		21: handleCodecVersion,
-		22: handleUserStats,
-		23: handleRequestBlob,
-		24: handleServerConfig,
-		25: handleSuggestConfig,
-	}
+var handlers = map[uint16]handlerFunc{
+	0:  handleVersion,
+	1:  handleUdpTunnel,
+	2:  handleAuthenticate,
+	3:  handlePing,
+	4:  handleReject,
+	5:  handleServerSync,
+	6:  handleChannelRemove,
+	7:  handleChannelState,
+	8:  handleUserRemove,
+	9:  handleUserState,
+	10: handleBanList,
+	11: handleTextMessage,
+	12: handlePermissionDenied,
+	13: handleAcl,
+	14: handleQueryUsers,
+	15: handleCryptSetup,
+	16: handleContextActionModify,
+	17: handleContextAction,
+	18: handleUserList,
+	19: handleVoiceTarget,
+	20: handlePermissionQuery,
+	21: handleCodecVersion,
+	22: handleUserStats,
+	23: handleRequestBlob,
+	24: handleServerConfig,
+	25: handleSuggestConfig,
 }
 
 func parseVersion(packet *MumbleProto.Version) Version {
