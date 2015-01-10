@@ -11,7 +11,7 @@ var autoBitrate = &Listener{
 			if dataBytes <= 0 {
 				dataBytes = gumble.AudioDefaultDataBytes
 			}
-			bitrate := e.MaximumBitrate - (20 + 8 + 4 + ((1 + 5 + 2 + dataBytes) / 100) * 10) * 8 * 100
+			bitrate := e.MaximumBitrate - (20 + 8 + 4 + ((1 + 5 + 2 + dataBytes) / 100) * 25) * 8 * 100
 			e.Client.AudioEncoder().SetBitrate(bitrate)
 		}
 	},
