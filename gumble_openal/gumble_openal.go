@@ -81,7 +81,7 @@ func (s *Stream) StopSource() error {
 
 func (s *Stream) OnAudioPacket(e *gumble.AudioPacketEvent) {
 	packet := e.AudioPacket
-	samples := len(packet.Pcm)
+	samples := len(packet.PositionalAudioBuffer.AudioBuffer)
 	if samples*2 > cap(s.buffer) {
 		return
 	}
@@ -93,7 +93,7 @@ func (s *Stream) OnAudioPacket(e *gumble.AudioPacketEvent) {
 		source = userSource
 	}
 
-	for i, value := range packet.Pcm {
+	for i, value := range packet.PositionalAudioBuffer.AudioBuffer {
 		binary.LittleEndian.PutUint16(s.buffer[i*2:], uint16(value))
 	}
 

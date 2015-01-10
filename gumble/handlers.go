@@ -2,6 +2,7 @@ package gumble
 
 import (
 	"bytes"
+	"encoding/binary"
 	"errors"
 	"math"
 	"net"
@@ -128,22 +129,27 @@ func handleUdpTunnel(c *Client, buffer []byte) error {
 	if audioLength > reader.Len() {
 		return errInvalidProtobuf
 	}
+	audioLength64 := int64(audioLength)
 	bytesRead += n
 
-	opus := buffer[bytesRead : bytesRead+int64(audioLength)]
+	opus := buffer[bytesRead : bytesRead+audioLength64]
 	pcm, err := user.decoder.Decode(opus, AudioMaximumFrameSize, false)
 	if err != nil {
 		return err
 	}
 	event := AudioPacketEvent{
 		Client: c,
-		AudioPacket: AudioPacket{
-			Sender:   user,
-			Target:   int(audioTarget),
-			Sequence: int(sequence),
-			Pcm:      pcm,
-		},
 	}
+	event.AudioPacket.Sender = user
+	event.AudioPacket.Target = int(audioTarget)
+	event.AudioPacket.Sequence = int(sequence)
+	event.AudioPacket.PositionalAudioBuffer.AudioBuffer = pcm
+
+	reader.Seek(audioLength64, 1)
+	binary.Read(reader, binary.LittleEndian, &event.AudioPacket.PositionalAudioBuffer.X)
+	binary.Read(reader, binary.LittleEndian, &event.AudioPacket.PositionalAudioBuffer.Y)
+	binary.Read(reader, binary.LittleEndian, &event.AudioPacket.PositionalAudioBuffer.Z)
+
 	c.audioListeners.OnAudioPacket(&event)
 	return nil
 }

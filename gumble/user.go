@@ -266,3 +266,19 @@ func (u *User) Send(message string) {
 	}
 	u.client.Send(&textMessage)
 }
+
+// SetPlugin sets the user's plugin data.
+//
+// Plugins are currently only used for positional audio. Clients will receive
+// positional audio information from other users if their plugin context is the
+// same. The official Mumble client sets the context to:
+//
+//  PluginShortName + "\x00" + AdditionalContextInformation
+func (u *User) SetPlugin(context []byte, identity string) {
+	packet := MumbleProto.UserState{
+		Session:        &u.session,
+		PluginContext:  context,
+		PluginIdentity: &identity,
+	}
+	u.client.Send(protoMessage{&packet})
+}

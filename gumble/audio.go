@@ -41,12 +41,19 @@ type AudioPacketEvent struct {
 // AudioBuffer is a slice of PCM samples.
 type AudioBuffer []int16
 
+// PositionalAudioBuffer is an AudioBuffer that has a position in 3D space
+// associated with it.
+type PositionalAudioBuffer struct {
+	X, Y, Z float32
+	AudioBuffer
+}
+
 // AudioPacket contains incoming audio data and information.
 type AudioPacket struct {
 	Sender   *User
 	Target   int
 	Sequence int
-	Pcm      AudioBuffer
+	PositionalAudioBuffer
 }
 
 func (ab AudioBuffer) writeTo(client *Client, w io.Writer) (int64, error) {
