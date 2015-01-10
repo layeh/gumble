@@ -7,7 +7,7 @@ import (
 	"github.com/layeh/gumble/gumble/MumbleProto"
 )
 
-var targetLoopback VoiceTarget = VoiceTarget{
+var targetLoopback = VoiceTarget{
 	id: 31,
 }
 
