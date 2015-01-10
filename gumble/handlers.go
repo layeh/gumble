@@ -2,6 +2,7 @@ package gumble
 
 import (
 	"bytes"
+	"crypto/x509"
 	"encoding/binary"
 	"errors"
 	"math"
@@ -760,17 +761,42 @@ func handleUserStats(c *Client, buffer []byte) error {
 		return errInvalidProtobuf
 	}
 
+	if user.stats == nil {
+		user.stats = &UserStats{}
+	}
+	*user.stats = UserStats{
+		user: user,
+	}
+	stats := user.stats
+
 	if packet.Version != nil {
-		user.stats.version = parseVersion(packet.Version)
+		stats.version = parseVersion(packet.Version)
 	}
 	if packet.Onlinesecs != nil {
-		user.stats.connected = time.Now().Add(time.Duration(*packet.Onlinesecs) * -time.Second)
+		stats.connected = time.Now().Add(time.Duration(*packet.Onlinesecs) * -time.Second)
 	}
 	if packet.Idlesecs != nil {
-		user.stats.idle = time.Duration(*packet.Idlesecs) * time.Second
+		stats.idle = time.Duration(*packet.Idlesecs) * time.Second
 	}
-
-	user.statsFetched = true
+	if packet.Bandwidth != nil {
+		stats.bandwidth = int(*packet.Bandwidth)
+	}
+	if packet.Address != nil {
+		stats.ip = net.IP(packet.Address)
+	}
+	if packet.Certificates != nil {
+		stats.certificates = make([]*x509.Certificate, 0, len(packet.Certificates))
+		for _, data := range packet.Certificates {
+			if data != nil {
+				if cert, err := x509.ParseCertificate(data); err == nil {
+					stats.certificates = append(stats.certificates, cert)
+				}
+			}
+		}
+	}
+	if packet.Opus != nil {
+		stats.opus = *packet.Opus
+	}
 
 	event := UserChangeEvent{
 		Client: c,

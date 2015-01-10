@@ -22,8 +22,7 @@ type User struct {
 	prioritySpeaker                          bool
 	recording                                bool
 
-	statsFetched bool
-	stats        UserStats
+	stats *UserStats
 }
 
 // Session returns the user's session ID.
@@ -229,10 +228,10 @@ func (u *User) SetSelfDeafened(muted bool) {
 	u.client.Send(protoMessage{&packet})
 }
 
-// Stats returns the user's stats, and a boolean value specifying if the stats
-// are valid or not.
-func (u *User) Stats() (UserStats, bool) {
-	return u.stats, u.statsFetched
+// Stats returns the user's stats, or nil if the stats for the user have not
+// yet been requested.
+func (u *User) Stats() *UserStats {
+	return u.stats
 }
 
 // Request requests user information that has not yet been sent to the client.
