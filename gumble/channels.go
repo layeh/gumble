@@ -20,23 +20,6 @@ func (c Channels) create(id uint) *Channel {
 	return channel
 }
 
-// ByID returns a pointer to the channel with the given id, nil if no channel
-// exists with the given id.
-func (c Channels) ByID(id uint) *Channel {
-	return c[id]
-}
-
-// Exists returns true if a channel with the given id exists in the collection.
-func (c Channels) Exists(id uint) bool {
-	_, ok := c[id]
-	return ok
-}
-
-// delete removes the channel with the given id from the collection.
-func (c Channels) delete(id uint) {
-	delete(c, id)
-}
-
 // Find returns a channel whose path (by channel name) from the server root
 // channel is equal to the arguments passed. If the root channel does not
 // exist, nil is returned.

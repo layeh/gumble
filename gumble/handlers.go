@@ -189,7 +189,7 @@ func handleServerSync(c *Client, buffer []byte) error {
 	}
 
 	if packet.Session != nil {
-		c.self = c.users.BySession(uint(*packet.Session))
+		c.self = c.users[uint(*packet.Session)]
 	}
 	if packet.WelcomeText != nil {
 		event.WelcomeMessage = *packet.WelcomeText
@@ -215,13 +215,13 @@ func handleChannelRemove(c *Client, buffer []byte) error {
 	var channel *Channel
 	{
 		channelID := uint(*packet.ChannelId)
-		channel = c.channels.ByID(channelID)
+		channel = c.channels[channelID]
 		if channel == nil {
 			return errInvalidProtobuf
 		}
-		c.channels.delete(channelID)
+		delete(c.channels, channelID)
 		if parent := channel.parent; parent != nil {
-			channel.parent.children.delete(uint(channel.id))
+			delete(channel.parent.children, uint(channel.id))
 		}
 	}
 
@@ -248,22 +248,20 @@ func handleChannelState(c *Client, buffer []byte) error {
 	event := ChannelChangeEvent{
 		Client: c,
 	}
-	var channel *Channel
 	channelID := uint(*packet.ChannelId)
-	if !c.channels.Exists(channelID) {
+	channel := c.channels[channelID]
+	if channel == nil {
 		channel = c.channels.create(channelID)
 		channel.client = c
 
 		event.Type |= ChannelChangeCreated
-	} else {
-		channel = c.channels.ByID(channelID)
 	}
 	event.Channel = channel
 	if packet.Parent != nil {
 		if channel.parent != nil {
-			channel.parent.children.delete(channelID)
+			delete(channel.parent.children, channelID)
 		}
-		newParent := c.channels.ByID(uint(*packet.Parent))
+		newParent := c.channels[uint(*packet.Parent)]
 		if newParent != channel.parent {
 			event.Type |= ChannelChangeMoved
 		}
@@ -321,17 +319,17 @@ func handleUserRemove(c *Client, buffer []byte) error {
 	}
 	{
 		session := uint(*packet.Session)
-		event.User = c.users.BySession(session)
+		event.User = c.users[session]
 		if event.User == nil {
 			return errInvalidProtobuf
 		}
 		if event.User.channel != nil {
-			event.User.channel.users.delete(session)
+			delete(event.User.channel.users, session)
 		}
-		c.users.delete(session)
+		delete(c.users, session)
 	}
 	if packet.Actor != nil {
-		event.Actor = c.users.BySession(uint(*packet.Actor))
+		event.Actor = c.users[uint(*packet.Actor)]
 		if event.Actor == nil {
 			return errInvalidProtobuf
 		}
@@ -365,9 +363,10 @@ func handleUserState(c *Client, buffer []byte) error {
 	var user, actor *User
 	{
 		session := uint(*packet.Session)
-		if !c.users.Exists(session) {
+		user = c.users[session]
+		if user == nil {
 			user = c.users.create(session)
-			user.channel = c.channels.ByID(0)
+			user.channel = c.channels[0]
 			user.client = c
 
 			event.Type |= UserChangeConnected
@@ -380,13 +379,11 @@ func handleUserState(c *Client, buffer []byte) error {
 			}
 			event.Type |= UserChangeChannel
 			user.channel.users[session] = user
-		} else {
-			user = c.users.BySession(session)
 		}
 	}
 	event.User = user
 	if packet.Actor != nil {
-		actor = c.users.BySession(uint(*packet.Actor))
+		actor = c.users[uint(*packet.Actor)]
 		if actor == nil {
 			return errInvalidProtobuf
 		}
@@ -413,9 +410,9 @@ func handleUserState(c *Client, buffer []byte) error {
 	}
 	if packet.ChannelId != nil {
 		if user.channel != nil {
-			user.channel.users.delete(user.Session())
+			delete(user.channel.users, user.Session())
 		}
-		newChannel := c.channels.ByID(uint(*packet.ChannelId))
+		newChannel := c.channels[uint(*packet.ChannelId)]
 		if newChannel == nil {
 			return errInvalidProtobuf
 		}
@@ -553,12 +550,12 @@ func handleTextMessage(c *Client, buffer []byte) error {
 		Client: c,
 	}
 	if packet.Actor != nil {
-		event.Sender = c.users.BySession(uint(*packet.Actor))
+		event.Sender = c.users[uint(*packet.Actor)]
 	}
 	if packet.Session != nil {
 		event.Users = make([]*User, 0, len(packet.Session))
 		for _, session := range packet.Session {
-			if user := c.users.BySession(uint(session)); user != nil {
+			if user := c.users[uint(session)]; user != nil {
 				event.Users = append(event.Users, user)
 			}
 		}
@@ -566,7 +563,7 @@ func handleTextMessage(c *Client, buffer []byte) error {
 	if packet.ChannelId != nil {
 		event.Channels = make([]*Channel, 0, len(packet.ChannelId))
 		for _, id := range packet.ChannelId {
-			if channel := c.channels.ByID(uint(id)); channel != nil {
+			if channel := c.channels[uint(id)]; channel != nil {
 				event.Channels = append(event.Channels, channel)
 			}
 		}
@@ -574,7 +571,7 @@ func handleTextMessage(c *Client, buffer []byte) error {
 	if packet.TreeId != nil {
 		event.Trees = make([]*Channel, 0, len(packet.TreeId))
 		for _, id := range packet.TreeId {
-			if channel := c.channels.ByID(uint(id)); channel != nil {
+			if channel := c.channels[uint(id)]; channel != nil {
 				event.Trees = append(event.Trees, channel)
 			}
 		}
@@ -608,13 +605,13 @@ func handlePermissionDenied(c *Client, buffer []byte) error {
 		event.String = *packet.Name
 	}
 	if packet.Session != nil {
-		event.User = c.users.BySession(uint(*packet.Session))
+		event.User = c.users[uint(*packet.Session)]
 		if event.User == nil {
 			return errInvalidProtobuf
 		}
 	}
 	if packet.ChannelId != nil {
-		event.Channel = c.channels.ByID(uint(*packet.ChannelId))
+		event.Channel = c.channels[uint(*packet.ChannelId)]
 		if event.Channel == nil {
 			return errInvalidProtobuf
 		}
@@ -638,7 +635,7 @@ func handleAcl(c *Client, buffer []byte) error {
 		Acl:    &Acl{},
 	}
 	if packet.ChannelId != nil {
-		event.Acl.channel = c.channels.ByID(uint(*packet.ChannelId))
+		event.Acl.channel = c.channels[uint(*packet.ChannelId)]
 	}
 
 	if packet.Groups != nil {
@@ -756,7 +753,7 @@ func handleUserStats(c *Client, buffer []byte) error {
 	if packet.Session == nil {
 		return errIncompleteProtobuf
 	}
-	user := c.users.BySession(uint(*packet.Session))
+	user := c.users[uint(*packet.Session)]
 	if user == nil {
 		return errInvalidProtobuf
 	}
