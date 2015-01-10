@@ -2,6 +2,7 @@ package gumble
 
 import (
 	"bytes"
+	"encoding/binary"
 	"io"
 	"math"
 
@@ -48,6 +49,10 @@ type PositionalAudioBuffer struct {
 	AudioBuffer
 }
 
+func (pab PositionalAudioBuffer) writeTo(client *Client, w io.Writer) (int64, error) {
+	return writeAudioTo(client, w, pab.AudioBuffer, &pab)
+}
+
 // AudioPacket contains incoming audio data and information.
 type AudioPacket struct {
 	Sender   *User
@@ -57,6 +62,10 @@ type AudioPacket struct {
 }
 
 func (ab AudioBuffer) writeTo(client *Client, w io.Writer) (int64, error) {
+	return writeAudioTo(client, w, ab, nil)
+}
+
+func writeAudioTo(client *Client, w io.Writer, ab AudioBuffer, pab *PositionalAudioBuffer) (int64, error) {
 	var written int64
 
 	// Create Opus buffer
@@ -86,8 +95,13 @@ func (ab AudioBuffer) writeTo(client *Client, w io.Writer) (int64, error) {
 		return 0, err
 	}
 
+	var positionalLength int
+	if pab != nil {
+		positionalLength = 3 * 4
+	}
+
 	// Write packet header
-	ni, err := writeTcpHeader(w, 1, header.Len()+len(opus))
+	ni, err := writeTcpHeader(w, 1, header.Len()+len(opus)+positionalLength)
 	if err != nil {
 		return int64(ni), err
 	}
@@ -106,6 +120,22 @@ func (ab AudioBuffer) writeTo(client *Client, w io.Writer) (int64, error) {
 		return (written + int64(ni)), err
 	}
 	written += int64(ni)
+
+	// Write positional audio information
+	if pab != nil {
+		if err := binary.Write(w, binary.LittleEndian, pab.X); err != nil {
+			return written, err
+		}
+		written += 4
+		if err := binary.Write(w, binary.LittleEndian, pab.Y); err != nil {
+			return written, err
+		}
+		written += 4
+		if err := binary.Write(w, binary.LittleEndian, pab.Z); err != nil {
+			return written, err
+		}
+		written += 4
+	}
 
 	client.audioSequence = (client.audioSequence + 1) % math.MaxInt32
 	return written, nil
