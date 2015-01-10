@@ -19,6 +19,7 @@ var (
 	errUnimplementedHandler = errors.New("the handler has not been implemented")
 	errIncompleteProtobuf   = errors.New("protobuf message is missing a required field")
 	errInvalidProtobuf      = errors.New("protobuf message has an invalid field")
+	errUnsupportedAudio     = errors.New("unsupported audio codec")
 )
 
 var handlers = map[uint16]handlerFunc{
@@ -95,7 +96,7 @@ func handleUdpTunnel(c *Client, buffer []byte) error {
 	audioTarget = typeTarget & 0x1F
 	// Opus only
 	if audioType != 4 {
-		return errInvalidProtobuf
+		return errUnsupportedAudio
 	}
 	bytesRead++
 
