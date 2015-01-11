@@ -12,7 +12,7 @@ const (
 	RequestTexture
 	RequestStats
 	RequestUserList
-	RequestAcl
+	RequestACL
 	RequestBanList
 	RequestPermission
 )

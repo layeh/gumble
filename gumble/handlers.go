@@ -38,7 +38,7 @@ var handlers = map[uint16]handlerFunc{
 	10: handleBanList,
 	11: handleTextMessage,
 	12: handlePermissionDenied,
-	13: handleAcl,
+	13: handleACL,
 	14: handleQueryUsers,
 	15: handleCryptSetup,
 	16: handleContextActionModify,
@@ -625,30 +625,30 @@ func handlePermissionDenied(c *Client, buffer []byte) error {
 	return nil
 }
 
-func handleAcl(c *Client, buffer []byte) error {
+func handleACL(c *Client, buffer []byte) error {
 	var packet MumbleProto.ACL
 	if err := proto.Unmarshal(buffer, &packet); err != nil {
 		return err
 	}
 
-	event := AclEvent{
+	event := ACLEvent{
 		Client: c,
-		Acl:    &Acl{},
+		ACL:    &ACL{},
 	}
 	if packet.ChannelId != nil {
-		event.Acl.channel = c.channels[uint(*packet.ChannelId)]
+		event.ACL.channel = c.channels[uint(*packet.ChannelId)]
 	}
 
 	if packet.Groups != nil {
-		event.Acl.groups = make([]*AclGroup, 0, len(packet.Groups))
+		event.ACL.groups = make([]*ACLGroup, 0, len(packet.Groups))
 		for _, group := range packet.Groups {
-			event.Acl.groups = append(event.Acl.groups, &AclGroup{
+			event.ACL.groups = append(event.ACL.groups, &ACLGroup{
 				name: *group.Name,
 			})
 		}
 	}
 
-	c.listeners.OnAcl(&event)
+	c.listeners.OnACL(&event)
 	return nil
 }
 

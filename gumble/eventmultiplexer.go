@@ -87,9 +87,9 @@ func (em eventMultiplexer) OnUserList(event *UserListEvent) {
 	}
 }
 
-func (em eventMultiplexer) OnAcl(event *AclEvent) {
+func (em eventMultiplexer) OnACL(event *ACLEvent) {
 	for item := em.head; item != nil; item = item.next {
-		item.listener.OnAcl(event)
+		item.listener.OnACL(event)
 	}
 }
 

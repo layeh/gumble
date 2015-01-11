@@ -14,7 +14,7 @@ type EventListener interface {
 	OnChannelChange(e *ChannelChangeEvent)
 	OnPermissionDenied(e *PermissionDeniedEvent)
 	OnUserList(e *UserListEvent)
-	OnAcl(e *AclEvent)
+	OnACL(e *ACLEvent)
 	OnBanList(e *BanListEvent)
 	OnContextActionChange(e *ContextActionChangeEvent)
 }
@@ -170,10 +170,10 @@ type UserListEvent struct {
 	UserList RegisteredUsers
 }
 
-// AclEvent is the event that is passed to EventListener.OnAcl.
-type AclEvent struct {
+// ACLEvent is the event that is passed to EventListener.OnACL.
+type ACLEvent struct {
 	Client *Client
-	Acl    *Acl
+	ACL    *ACL
 }
 
 // BanListEvent is the event that is passed to EventListener.OnBanList.

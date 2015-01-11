@@ -1,25 +1,26 @@
 package gumble
 
-type Acl struct {
+//
+type ACL struct {
 	channel *Channel
-	groups  []*AclGroup
+	groups  []*ACLGroup
 }
 
-// Channel returns the channel to which the Acl is referring.
-func (a *Acl) Channel() *Channel {
+// Channel returns the channel to which the ACL is referring.
+func (a *ACL) Channel() *Channel {
 	return a.channel
 }
 
-// Groups return a slice of Acl groups part of the Acl.
-func (a *Acl) Groups() []*AclGroup {
+// Groups return a slice of ACL groups part of the ACL.
+func (a *ACL) Groups() []*ACLGroup {
 	return a.groups
 }
 
-type AclGroup struct {
+type ACLGroup struct {
 	name string
 }
 
-// Name returns the Acl group name.
-func (ag *AclGroup) Name() string {
+// Name returns the ACL group name.
+func (ag *ACLGroup) Name() string {
 	return ag.name
 }

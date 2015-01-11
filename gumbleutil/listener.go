@@ -16,7 +16,7 @@ type Listener struct {
 	ChannelChange       func(e *gumble.ChannelChangeEvent)
 	PermissionDenied    func(e *gumble.PermissionDeniedEvent)
 	UserList            func(e *gumble.UserListEvent)
-	Acl                 func(e *gumble.AclEvent)
+	ACL                 func(e *gumble.ACLEvent)
 	BanList             func(e *gumble.BanListEvent)
 	ContextActionChange func(e *gumble.ContextActionChangeEvent)
 }
@@ -77,10 +77,10 @@ func (l Listener) OnUserList(e *gumble.UserListEvent) {
 	}
 }
 
-// OnAcl implements gumble.EventListener.OnAcl. Calls l.Acl if it is non-nil.
-func (l Listener) OnAcl(e *gumble.AclEvent) {
-	if l.Acl != nil {
-		l.Acl(e)
+// OnACL implements gumble.EventListener.OnACL. Calls l.ACL if it is non-nil.
+func (l Listener) OnACL(e *gumble.ACLEvent) {
+	if l.ACL != nil {
+		l.ACL(e)
 	}
 }
 
