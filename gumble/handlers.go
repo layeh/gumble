@@ -676,7 +676,7 @@ func handleContextActionModify(c *Client, buffer []byte) error {
 
 	switch *packet.Operation {
 	case MumbleProto.ContextActionModify_Add:
-		if c.contextActions.Exists(*packet.Action) {
+		if ca := c.contextActions[*packet.Action]; ca != nil {
 			return nil
 		}
 		event.Type = ContextActionAdd
@@ -689,12 +689,12 @@ func handleContextActionModify(c *Client, buffer []byte) error {
 		}
 		event.ContextAction = contextAction
 	case MumbleProto.ContextActionModify_Remove:
-		if !c.contextActions.Exists(*packet.Action) {
+		contextAction := c.contextActions[*packet.Action]
+		if contextAction == nil {
 			return nil
 		}
 		event.Type = ContextActionRemove
-		contextAction := c.contextActions[*packet.Action]
-		c.contextActions.delete(*packet.Action)
+		delete(c.contextActions, *packet.Action)
 		event.ContextAction = contextAction
 	default:
 		return errInvalidProtobuf
