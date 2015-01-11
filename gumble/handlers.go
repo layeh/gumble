@@ -746,8 +746,8 @@ func handlePermissionQuery(c *Client, buffer []byte) error {
 	if packet.Flush != nil && *packet.Flush {
 		oldPermissions := c.permissions
 		c.permissions = make(map[uint]*Permission)
-		for channelId, _ := range oldPermissions {
-			channel := c.channels[channelId]
+		for channelID := range oldPermissions {
+			channel := c.channels[channelID]
 			event := ChannelChangeEvent{
 				Client:  c,
 				Type:    ChannelChangePermission,
