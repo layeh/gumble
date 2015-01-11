@@ -14,4 +14,5 @@ const (
 	RequestUserList
 	RequestAcl
 	RequestBanList
+	RequestPermission
 )

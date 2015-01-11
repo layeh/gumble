@@ -133,7 +133,11 @@ func (c *Channel) Find(names ...string) *Channel {
 }
 
 // Request requests channel information that has not yet been sent to the
-// client. The supported request types are: RequestDescription, RequestAcl.
+// client. The supported request types are: RequestAcl, RequestDescription,
+// RequestPermission.
+//
+// Note: the server will not reply to a RequestPermission request if the client
+// has up-to-date permission information.
 func (c *Channel) Request(request Request) {
 	if (request & RequestDescription) != 0 {
 		packet := MumbleProto.RequestBlob{
@@ -145,6 +149,12 @@ func (c *Channel) Request(request Request) {
 		packet := MumbleProto.ACL{
 			ChannelId: &c.id,
 			Query:     proto.Bool(true),
+		}
+		c.client.Send(protoMessage{&packet})
+	}
+	if (request & RequestPermission) != 0 {
+		packet := MumbleProto.PermissionQuery{
+			ChannelId: &c.id,
 		}
 		c.client.Send(protoMessage{&packet})
 	}
@@ -166,4 +176,10 @@ func (c *Channel) Send(message string, recursive bool) {
 // Users returns the users currently in the channel.
 func (c *Channel) Users() Users {
 	return c.users
+}
+
+// Permission returns the permissions the user has in the channel, or nil if
+// the permissions are unknown.
+func (c *Channel) Permission() *Permission {
+	return c.client.permissions[c.ID()]
 }

@@ -111,6 +111,7 @@ const (
 	ChannelChangeName
 	ChannelChangeDescription
 	ChannelChangePosition
+	ChannelChangePermission
 )
 
 // Has returns true if the ChannelChangeType has changeType part of its

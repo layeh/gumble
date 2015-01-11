@@ -220,6 +220,7 @@ func handleChannelRemove(c *Client, buffer []byte) error {
 			return errInvalidProtobuf
 		}
 		delete(c.channels, channelID)
+		delete(c.permissions, channelID)
 		if parent := channel.parent; parent != nil {
 			delete(channel.parent.children, uint(channel.id))
 		}
@@ -737,7 +738,38 @@ func handleVoiceTarget(c *Client, buffer []byte) error {
 }
 
 func handlePermissionQuery(c *Client, buffer []byte) error {
-	return errUnimplementedHandler
+	var packet MumbleProto.PermissionQuery
+	if err := proto.Unmarshal(buffer, &packet); err != nil {
+		return err
+	}
+
+	if packet.Flush != nil && *packet.Flush {
+		oldPermissions := c.permissions
+		c.permissions = make(map[uint]*Permission)
+		for channelId, _ := range oldPermissions {
+			channel := c.channels[channelId]
+			event := ChannelChangeEvent{
+				Client:  c,
+				Type:    ChannelChangePermission,
+				Channel: channel,
+			}
+			c.listeners.OnChannelChange(&event)
+		}
+	}
+	if packet.ChannelId != nil {
+		channel := c.channels[uint(*packet.ChannelId)]
+		if packet.Permissions != nil {
+			p := Permission(*packet.Permissions)
+			c.permissions[channel.ID()] = &p
+			event := ChannelChangeEvent{
+				Client:  c,
+				Type:    ChannelChangePermission,
+				Channel: channel,
+			}
+			c.listeners.OnChannelChange(&event)
+		}
+	}
+	return nil
 }
 
 func handleCodecVersion(c *Client, buffer []byte) error {

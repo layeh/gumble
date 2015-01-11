@@ -57,6 +57,7 @@ type Client struct {
 
 	users          Users
 	channels       Channels
+	permissions    map[uint]*Permission
 	contextActions ContextActions
 
 	audioEncoder  *gopus.Encoder
@@ -100,6 +101,7 @@ func (c *Client) Connect() error {
 	c.audioEncoder = encoder
 	c.users = Users{}
 	c.channels = Channels{}
+	c.permissions = make(map[uint]*Permission)
 	c.contextActions = ContextActions{}
 	c.state = StateConnected
 
