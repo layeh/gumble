@@ -721,6 +721,9 @@ func handleQueryUsers(c *Client, buffer []byte) error {
 	}
 
 	acl := c.tmpACL
+	if acl == nil {
+		return errIncompleteProtobuf
+	}
 	c.tmpACL = nil
 
 	userMap := make(map[uint32]string)
