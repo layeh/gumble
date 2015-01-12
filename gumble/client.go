@@ -60,6 +60,8 @@ type Client struct {
 	permissions    map[uint]*Permission
 	contextActions ContextActions
 
+	tmpACL *ACL
+
 	audioEncoder  *gopus.Encoder
 	audioSequence int
 	audioTarget   *VoiceTarget

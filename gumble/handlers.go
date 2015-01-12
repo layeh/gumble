@@ -631,29 +631,126 @@ func handleACL(c *Client, buffer []byte) error {
 		return err
 	}
 
-	event := ACLEvent{
-		Client: c,
-		ACL:    &ACL{},
+	acl := &ACL{
+		inherits: packet.GetInheritAcls(),
 	}
-	if packet.ChannelId != nil {
-		event.ACL.channel = c.channels[uint(*packet.ChannelId)]
+	if packet.ChannelId == nil {
+		return errInvalidProtobuf
+	}
+	acl.channel = c.channels[uint(*packet.ChannelId)]
+	if acl.channel == nil {
+		return errInvalidProtobuf
 	}
 
 	if packet.Groups != nil {
-		event.ACL.groups = make([]*ACLGroup, 0, len(packet.Groups))
+		acl.groups = make([]*ACLGroup, 0, len(packet.Groups))
 		for _, group := range packet.Groups {
-			event.ACL.groups = append(event.ACL.groups, &ACLGroup{
-				name: *group.Name,
-			})
+			aclGroup := &ACLGroup{
+				name:         *group.Name,
+				inherited:    group.GetInherited(),
+				inheritUsers: group.GetInherit(),
+				inheritable:  group.GetInheritable(),
+			}
+			if group.Add != nil {
+				aclGroup.usersAdd = make(map[uint32]*ACLUser)
+				for _, userID := range group.Add {
+					aclGroup.usersAdd[userID] = &ACLUser{
+						userID: userID,
+					}
+				}
+			}
+			if group.Remove != nil {
+				aclGroup.usersRemove = make(map[uint32]*ACLUser)
+				for _, userID := range group.Remove {
+					aclGroup.usersRemove[userID] = &ACLUser{
+						userID: userID,
+					}
+				}
+			}
+			if group.InheritedMembers != nil {
+				aclGroup.usersInherited = make(map[uint32]*ACLUser)
+				for _, userID := range group.InheritedMembers {
+					aclGroup.usersInherited[userID] = &ACLUser{
+						userID: userID,
+					}
+				}
+			}
+			acl.groups = append(acl.groups, aclGroup)
 		}
 	}
-
-	c.listeners.OnACL(&event)
+	if packet.Acls != nil {
+		acl.rules = make([]*ACLRule, 0, len(packet.Acls))
+		for _, rule := range packet.Acls {
+			aclRule := &ACLRule{
+				appliesCurrent:  rule.GetApplyHere(),
+				appliesChildren: rule.GetApplySubs(),
+				inherited:       rule.GetInherited(),
+				granted:         Permission(rule.GetGrant()),
+				denied:          Permission(rule.GetDeny()),
+			}
+			if rule.UserId != nil {
+				aclRule.user = &ACLUser{
+					userID: *rule.UserId,
+				}
+			} else if rule.Group != nil {
+				var group *ACLGroup
+				for _, g := range acl.groups {
+					if g.name == *rule.Group {
+						group = g
+						break
+					}
+				}
+				if group == nil {
+					group = &ACLGroup{
+						name: *rule.Group,
+					}
+				}
+				aclRule.group = group
+			}
+			acl.rules = append(acl.rules, aclRule)
+		}
+	}
+	c.tmpACL = acl
 	return nil
 }
 
 func handleQueryUsers(c *Client, buffer []byte) error {
-	return errUnimplementedHandler
+	var packet MumbleProto.QueryUsers
+	if err := proto.Unmarshal(buffer, &packet); err != nil {
+		return err
+	}
+
+	acl := c.tmpACL
+	c.tmpACL = nil
+
+	userMap := make(map[uint32]string)
+	for i := 0; i < len(packet.Ids) && i < len(packet.Names); i++ {
+		userMap[packet.Ids[i]] = packet.Names[i]
+	}
+
+	for _, group := range acl.groups {
+		for _, user := range group.usersAdd {
+			user.name = userMap[user.userID]
+		}
+		for _, user := range group.usersRemove {
+			user.name = userMap[user.userID]
+		}
+		for _, user := range group.usersInherited {
+			user.name = userMap[user.userID]
+		}
+	}
+	for _, rule := range acl.rules {
+		if rule.user != nil {
+			rule.user.name = userMap[rule.user.userID]
+		}
+	}
+
+	event := ACLEvent{
+		Client: c,
+		ACL:    acl,
+	}
+	c.listeners.OnACL(&event)
+	return nil
 }
 
 func handleCryptSetup(c *Client, buffer []byte) error {

@@ -42,6 +42,14 @@ func (ru *RegisteredUser) Register() {
 	ru.deregister = false
 }
 
+// ACLUser returns an ACLUser for the given registered user.
+func (ru *RegisteredUser) ACLUser() *ACLUser {
+	return &ACLUser{
+		userID: ru.userID,
+		name:   ru.name,
+	}
+}
+
 // RegisteredUsers is a list of users who are registered on the server.
 //
 // Whenever a registered user is changed, it does not come into effect until
