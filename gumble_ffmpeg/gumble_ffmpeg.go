@@ -6,6 +6,7 @@ import (
 	"io"
 	"os/exec"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/layeh/gumble/gumble"
@@ -14,48 +15,54 @@ import (
 type Stream struct {
 	Done func()
 
-	client     *gumble.Client
-	cmd        *exec.Cmd
-	pipe       io.ReadCloser
-	sourceStop chan bool
-	volume     float32
+	client *gumble.Client
+	cmd    *exec.Cmd
+	pipe   io.ReadCloser
+	volume float32
+
+	stop          chan bool
+	stopWaitGroup sync.WaitGroup
 }
 
 func New(client *gumble.Client) (*Stream, error) {
 	stream := &Stream{
 		client: client,
 		volume: 1.0,
+		stop:   make(chan bool),
 	}
 	return stream, nil
 }
 
 func (s *Stream) Play(file string) error {
-	if s.sourceStop != nil {
+	if s.IsPlaying() {
 		return errors.New("already playing")
 	}
-	s.cmd = exec.Command("ffmpeg", "-i", file, "-ac", "1", "-ar", strconv.Itoa(gumble.AudioSampleRate), "-f", "s16le", "-")
-	if pipe, err := s.cmd.StdoutPipe(); err != nil {
-		s.cmd = nil
+	cmd := exec.Command("ffmpeg", "-i", file, "-ac", "1", "-ar", strconv.Itoa(gumble.AudioSampleRate), "-f", "s16le", "-")
+	if pipe, err := cmd.StdoutPipe(); err != nil {
 		return err
 	} else {
 		s.pipe = pipe
 	}
-	if err := s.cmd.Start(); err != nil {
+	if err := cmd.Start(); err != nil {
 		return err
 	}
-	s.sourceStop = make(chan bool)
+	s.stopWaitGroup.Add(1)
+	s.cmd = cmd
 	go s.sourceRoutine()
 	return nil
 }
 
 func (s *Stream) IsPlaying() bool {
-	return s.sourceStop != nil
+	return s.cmd != nil
 }
 
 func (s *Stream) Stop() error {
-	if s.sourceStop != nil {
-		close(s.sourceStop)
+	if !s.IsPlaying() {
+		return errors.New("nothing playing")
 	}
+
+	s.stop <- true
+	s.stopWaitGroup.Wait()
 	return nil
 }
 
@@ -69,25 +76,24 @@ func (s *Stream) SetVolume(volume float32) {
 
 func (s *Stream) sourceRoutine() {
 	ticker := time.NewTicker(10 * time.Millisecond)
-	defer ticker.Stop()
 
 	defer func() {
+		ticker.Stop()
 		s.cmd.Process.Kill()
 		s.cmd.Wait()
 		s.cmd = nil
-		s.sourceStop = nil
+		s.stopWaitGroup.Done()
 		if done := s.Done; done != nil {
 			done()
 		}
 	}()
 
-	stop := s.sourceStop
 	int16Buffer := make([]int16, gumble.AudioDefaultFrameSize)
 	byteBuffer := make([]byte, gumble.AudioDefaultFrameSize*2)
 
 	for {
 		select {
-		case <-stop:
+		case <-s.stop:
 			return
 		case <-ticker.C:
 			if _, err := io.ReadFull(s.pipe, byteBuffer); err != nil {
