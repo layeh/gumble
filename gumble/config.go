@@ -24,7 +24,7 @@ type Config struct {
 	// values are 10ms, 20ms, 40ms, and 60ms.
 	AudioInterval time.Duration
 
-	// AudioDataBytes is the number of bytes that an audio frame can use
+	// AudioDataBytes is the number of bytes that an audio frame can use.
 	AudioDataBytes int
 
 	TLSConfig tls.Config
