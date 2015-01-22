@@ -17,11 +17,9 @@ type Stream struct {
 	client *gumble.Client
 	link   gumble.Detacher
 
-	frameSize int
-	interval  time.Duration
-
-	deviceSource *openal.CaptureDevice
-	sourceStop   chan bool
+	deviceSource    *openal.CaptureDevice
+	sourceFrameSize int
+	sourceStop      chan bool
 
 	deviceSink  *openal.Device
 	contextSink *openal.Context
@@ -31,13 +29,12 @@ type Stream struct {
 
 func New(client *gumble.Client) (*Stream, error) {
 	s := &Stream{
-		client:      client,
-		userStreams: make(map[uint]openal.Source),
-		frameSize:   client.Config().GetAudioFrameSize(),
-		interval:    client.Config().GetAudioInterval(),
+		client:          client,
+		userStreams:     make(map[uint]openal.Source),
+		sourceFrameSize: client.Config().GetAudioFrameSize(),
 	}
 
-	s.deviceSource = openal.CaptureOpenDevice("", gumble.AudioSampleRate, openal.FormatMono16, uint32(s.frameSize))
+	s.deviceSource = openal.CaptureOpenDevice("", gumble.AudioSampleRate, openal.FormatMono16, uint32(s.sourceFrameSize))
 
 	s.deviceSink = openal.OpenDevice("")
 	s.contextSink = s.deviceSink.CreateContext()
@@ -116,19 +113,28 @@ func (s *Stream) OnAudioPacket(e *gumble.AudioPacketEvent) {
 }
 
 func (s *Stream) sourceRoutine() {
-	ticker := time.NewTicker(s.interval)
+	interval := s.client.Config().GetAudioInterval()
+	frameSize := s.client.Config().GetAudioFrameSize()
+
+	if frameSize != s.sourceFrameSize {
+		s.deviceSource.CaptureCloseDevice()
+		s.sourceFrameSize = frameSize
+		s.deviceSource = openal.CaptureOpenDevice("", gumble.AudioSampleRate, openal.FormatMono16, uint32(s.sourceFrameSize))
+	}
+
+	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
 	stop := s.sourceStop
-	int16Buffer := make([]int16, s.frameSize)
+	int16Buffer := make([]int16, frameSize)
 
 	for {
 		select {
 		case <-stop:
 			return
 		case <-ticker.C:
-			buff := s.deviceSource.CaptureSamples(uint32(s.frameSize))
-			if len(buff) != s.frameSize*2 {
+			buff := s.deviceSource.CaptureSamples(uint32(frameSize))
+			if len(buff) != frameSize*2 {
 				continue
 			}
 			for i := range int16Buffer {
