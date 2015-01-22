@@ -1,18 +1,21 @@
 package gumbleutil
 
 import (
+	"time"
+
+	"github.com/layeh/gopus"
 	"github.com/layeh/gumble/gumble"
 )
 
 var autoBitrate = &Listener{
 	Connect: func(e *gumble.ConnectEvent) {
 		if e.MaximumBitrate > 0 {
-			dataBytes := e.Client.Config().AudioDataBytes
-			if dataBytes <= 0 {
-				dataBytes = gumble.AudioDefaultDataBytes
-			}
-			bitrate := e.MaximumBitrate - (20 + 8 + 4 + ((1 + 5 + 2 + dataBytes) / 100) * 25) * 8 * 100
-			e.Client.AudioEncoder().SetBitrate(bitrate)
+			const safety = 5
+			interval := e.Client.Config().GetAudioInterval()
+			dataBytes := (e.MaximumBitrate / (8 * (int(time.Second/interval) + safety))) - 32 - 10
+
+			e.Client.Config().AudioDataBytes = dataBytes
+			e.Client.AudioEncoder().SetBitrate(gopus.BitrateMaximum)
 		}
 	},
 }
