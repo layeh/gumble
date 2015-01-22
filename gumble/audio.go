@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"io"
 	"math"
+	"time"
 
 	"github.com/layeh/gumble/gumble/varint"
 )
@@ -13,6 +14,10 @@ const (
 	// AudioSampleRate is the audio sample rate (in hertz) for incoming and
 	// outgoing audio.
 	AudioSampleRate = 48000
+
+	// AudioDefaultInterval is the default interval that audio packets are sent
+	// at.
+	AudioDefaultInterval = 10 * time.Millisecond
 
 	// AudioDefaultFrameSize is the number of audio frames that should be sent in
 	// a 10ms window.
@@ -24,7 +29,7 @@ const (
 
 	// AudioDefaultDataBytes is the default number of bytes that an audio frame
 	// can use.
-	AudioDefaultDataBytes = 128
+	AudioDefaultDataBytes = 40
 )
 
 // AudioListener is the interface that must be implemented by types wishing to
@@ -69,10 +74,7 @@ func writeAudioTo(client *Client, w io.Writer, ab AudioBuffer, pab *PositionalAu
 	var written int64
 
 	// Create Opus buffer
-	dataBytes := client.config.AudioDataBytes
-	if dataBytes <= 0 {
-		dataBytes = AudioDefaultDataBytes
-	}
+	dataBytes := client.config.GetAudioDataBytes()
 	opus, err := client.audioEncoder.Encode(ab, len(ab), dataBytes)
 	if err != nil {
 		return 0, err

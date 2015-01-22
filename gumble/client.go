@@ -91,8 +91,7 @@ func (c *Client) Connect() error {
 	if err != nil {
 		return err
 	}
-	encoder.SetBitrate(40000)
-	encoder.SetVbr(false)
+	encoder.SetBitrate(gopus.BitrateMaximum)
 	c.audioSequence = 0
 	c.audioTarget = nil
 

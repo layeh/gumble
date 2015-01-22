@@ -20,15 +20,20 @@ type Stream struct {
 	pipe   io.ReadCloser
 	volume float32
 
+	frameSize int
+	interval  time.Duration
+
 	stop          chan bool
 	stopWaitGroup sync.WaitGroup
 }
 
 func New(client *gumble.Client) (*Stream, error) {
 	stream := &Stream{
-		client: client,
-		volume: 1.0,
-		stop:   make(chan bool),
+		client:    client,
+		volume:    1.0,
+		stop:      make(chan bool),
+		interval:  client.Config().GetAudioInterval(),
+		frameSize: client.Config().GetAudioFrameSize(),
 	}
 	return stream, nil
 }
@@ -75,7 +80,7 @@ func (s *Stream) SetVolume(volume float32) {
 }
 
 func (s *Stream) sourceRoutine() {
-	ticker := time.NewTicker(10 * time.Millisecond)
+	ticker := time.NewTicker(s.interval)
 
 	defer func() {
 		ticker.Stop()
@@ -88,8 +93,8 @@ func (s *Stream) sourceRoutine() {
 		}
 	}()
 
-	int16Buffer := make([]int16, gumble.AudioDefaultFrameSize)
-	byteBuffer := make([]byte, gumble.AudioDefaultFrameSize*2)
+	int16Buffer := make([]int16, s.frameSize)
+	byteBuffer := make([]byte, s.frameSize*2)
 
 	for {
 		select {

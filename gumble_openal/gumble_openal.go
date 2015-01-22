@@ -17,6 +17,9 @@ type Stream struct {
 	client *gumble.Client
 	link   gumble.Detacher
 
+	frameSize int
+	interval  time.Duration
+
 	deviceSource *openal.CaptureDevice
 	sourceStop   chan bool
 
@@ -30,9 +33,11 @@ func New(client *gumble.Client) (*Stream, error) {
 	s := &Stream{
 		client:      client,
 		userStreams: make(map[uint]openal.Source),
+		frameSize:   client.Config().GetAudioFrameSize(),
+		interval:    client.Config().GetAudioInterval(),
 	}
 
-	s.deviceSource = openal.CaptureOpenDevice("", gumble.AudioSampleRate, openal.FormatMono16, gumble.AudioDefaultFrameSize)
+	s.deviceSource = openal.CaptureOpenDevice("", gumble.AudioSampleRate, openal.FormatMono16, uint32(s.frameSize))
 
 	s.deviceSink = openal.OpenDevice("")
 	s.contextSink = s.deviceSink.CreateContext()
@@ -111,19 +116,19 @@ func (s *Stream) OnAudioPacket(e *gumble.AudioPacketEvent) {
 }
 
 func (s *Stream) sourceRoutine() {
-	ticker := time.NewTicker(10 * time.Millisecond)
+	ticker := time.NewTicker(s.interval)
 	defer ticker.Stop()
 
 	stop := s.sourceStop
-	int16Buffer := make([]int16, gumble.AudioDefaultFrameSize)
+	int16Buffer := make([]int16, s.frameSize)
 
 	for {
 		select {
 		case <-stop:
 			return
 		case <-ticker.C:
-			buff := s.deviceSource.CaptureSamples(gumble.AudioDefaultFrameSize)
-			if len(buff) != gumble.AudioDefaultFrameSize*2 {
+			buff := s.deviceSource.CaptureSamples(uint32(s.frameSize))
+			if len(buff) != s.frameSize*2 {
 				continue
 			}
 			for i := range int16Buffer {
