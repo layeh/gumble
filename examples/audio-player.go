@@ -23,6 +23,8 @@ func main() {
 			os.Exit(1)
 		}
 
+		client.Attach(gumbleutil.AutoBitrate)
+
 		for _, file := range flag.Args() {
 			key := filepath.Base(file)
 			files[key] = file
