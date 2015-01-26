@@ -12,8 +12,13 @@ import (
 	"github.com/layeh/gumble/gumble"
 )
 
+const (
+	DefaultCommand = "ffmpeg"
+)
+
 type Stream struct {
-	Done func()
+	Done    func()
+	Command string
 
 	client *gumble.Client
 	cmd    *exec.Cmd
@@ -37,7 +42,11 @@ func (s *Stream) Play(file string) error {
 	if s.IsPlaying() {
 		return errors.New("already playing")
 	}
-	cmd := exec.Command("ffmpeg", "-i", file, "-ac", "1", "-ar", strconv.Itoa(gumble.AudioSampleRate), "-f", "s16le", "-")
+	command := s.Command
+	if command == "" {
+		command = DefaultCommand
+	}
+	cmd := exec.Command(command, "-i", file, "-ac", "1", "-ar", strconv.Itoa(gumble.AudioSampleRate), "-f", "s16le", "-")
 	if pipe, err := cmd.StdoutPipe(); err != nil {
 		return err
 	} else {
