@@ -15,7 +15,7 @@ func main() {
 	files := make(map[string]string)
 	var stream *gumble_ffmpeg.Stream
 
-	gumbleutil.Main(func(_ *gumble.Config, client *gumble.Client) {
+	gumbleutil.Main(func(client *gumble.Client) {
 		var err error
 		stream, err = gumble_ffmpeg.New(client)
 		if err != nil {

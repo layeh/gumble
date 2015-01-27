@@ -14,7 +14,7 @@ import (
 // --certificate, and --key.
 //
 // If init is non-nil, it is called before attempting to connect to the server.
-func Main(init func(config *gumble.Config, client *gumble.Client), listener gumble.EventListener) {
+func Main(init func(client *gumble.Client), listener gumble.EventListener) {
 	server := flag.String("server", "localhost:64738", "Mumble server address")
 	username := flag.String("username", "gumble-bot", "client username")
 	password := flag.String("password", "", "client password")
@@ -56,7 +56,7 @@ func Main(init func(config *gumble.Config, client *gumble.Client), listener gumb
 		},
 	})
 	if init != nil {
-		init(&config, client)
+		init(client)
 	}
 	if err := client.Connect(); err != nil {
 		fmt.Printf("%s: %s\n", os.Args[0], err)
