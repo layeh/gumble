@@ -17,7 +17,6 @@ const (
 )
 
 type Stream struct {
-	Done    func()
 	Command string
 	Volume  float32
 
@@ -41,7 +40,7 @@ func New(client *gumble.Client) (*Stream, error) {
 	return stream, nil
 }
 
-func (s *Stream) Play(file string) error {
+func (s *Stream) Play(file string, callbacks... func()) error {
 	s.playLock.Lock()
 	defer s.playLock.Unlock()
 
@@ -59,7 +58,7 @@ func (s *Stream) Play(file string) error {
 	}
 	s.stopWaitGroup.Add(1)
 	s.cmd = cmd
-	go s.sourceRoutine()
+	go s.sourceRoutine(callbacks)
 	return nil
 }
 
@@ -81,7 +80,7 @@ func (s *Stream) Stop() error {
 	return nil
 }
 
-func (s *Stream) sourceRoutine() {
+func (s *Stream) sourceRoutine(callbacks []func()) {
 	interval := s.client.Config().GetAudioInterval()
 	frameSize := s.client.Config().GetAudioFrameSize()
 
@@ -93,8 +92,8 @@ func (s *Stream) sourceRoutine() {
 		s.cmd.Wait()
 		s.cmd = nil
 		s.stopWaitGroup.Done()
-		if done := s.Done; done != nil {
-			done()
+		for _, callback := range callbacks {
+			callback()
 		}
 	}()
 
