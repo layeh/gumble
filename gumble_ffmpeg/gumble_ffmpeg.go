@@ -20,6 +20,8 @@ type Stream struct {
 	Done    func()
 	Command string
 
+	playLock sync.Mutex
+
 	client *gumble.Client
 	cmd    *exec.Cmd
 	pipe   io.ReadCloser
@@ -39,6 +41,9 @@ func New(client *gumble.Client) (*Stream, error) {
 }
 
 func (s *Stream) Play(file string) error {
+	s.playLock.Lock()
+	defer s.playLock.Unlock()
+
 	if s.IsPlaying() {
 		return errors.New("already playing")
 	}
