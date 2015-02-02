@@ -19,13 +19,13 @@ const (
 type Stream struct {
 	Done    func()
 	Command string
+	Volume  float32
 
 	playLock sync.Mutex
 
 	client *gumble.Client
 	cmd    *exec.Cmd
 	pipe   io.ReadCloser
-	volume float32
 
 	stop          chan bool
 	stopWaitGroup sync.WaitGroup
@@ -34,7 +34,7 @@ type Stream struct {
 func New(client *gumble.Client) (*Stream, error) {
 	stream := &Stream{
 		client: client,
-		volume: 1.0,
+		Volume: 1.0,
 		stop:   make(chan bool),
 	}
 	return stream, nil
@@ -84,14 +84,6 @@ func (s *Stream) Stop() error {
 	return nil
 }
 
-func (s *Stream) Volume() float32 {
-	return s.volume
-}
-
-func (s *Stream) SetVolume(volume float32) {
-	s.volume = volume
-}
-
 func (s *Stream) sourceRoutine() {
 	interval := s.client.Config().GetAudioInterval()
 	frameSize := s.client.Config().GetAudioFrameSize()
@@ -122,7 +114,7 @@ func (s *Stream) sourceRoutine() {
 			}
 			for i := range int16Buffer {
 				float := float32(int16(binary.LittleEndian.Uint16(byteBuffer[i*2 : (i+1)*2])))
-				int16Buffer[i] = int16(s.volume * float)
+				int16Buffer[i] = int16(s.Volume * float)
 			}
 			s.client.Send(gumble.AudioBuffer(int16Buffer))
 		}
