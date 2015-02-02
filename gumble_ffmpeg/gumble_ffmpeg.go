@@ -33,9 +33,10 @@ type Stream struct {
 
 func New(client *gumble.Client) (*Stream, error) {
 	stream := &Stream{
-		client: client,
-		Volume: 1.0,
-		stop:   make(chan bool),
+		client:  client,
+		Volume:  1.0,
+		Command: DefaultCommand,
+		stop:    make(chan bool),
 	}
 	return stream, nil
 }
@@ -47,11 +48,7 @@ func (s *Stream) Play(file string) error {
 	if s.IsPlaying() {
 		return errors.New("already playing")
 	}
-	command := s.Command
-	if command == "" {
-		command = DefaultCommand
-	}
-	cmd := exec.Command(command, "-i", file, "-ac", "1", "-ar", strconv.Itoa(gumble.AudioSampleRate), "-f", "s16le", "-")
+	cmd := exec.Command(s.Command, "-i", file, "-ac", "1", "-ar", strconv.Itoa(gumble.AudioSampleRate), "-f", "s16le", "-")
 	if pipe, err := cmd.StdoutPipe(); err != nil {
 		return err
 	} else {
