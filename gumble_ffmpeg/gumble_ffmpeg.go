@@ -70,6 +70,10 @@ func (s *Stream) IsPlaying() bool {
 	return s.cmd != nil
 }
 
+func (s *Stream) Wait() {
+	s.stopWaitGroup.Wait()
+}
+
 func (s *Stream) Stop() error {
 	if !s.IsPlaying() {
 		return errors.New("nothing playing")
