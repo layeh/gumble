@@ -1,8 +1,6 @@
 package gumble
 
 import (
-	"io"
-
 	"github.com/layeh/gumble/gumble/MumbleProto"
 )
 
@@ -56,7 +54,7 @@ func (ru *RegisteredUser) ACLUser() *ACLUser {
 // the registered user list is sent back to the server.
 type RegisteredUsers []*RegisteredUser
 
-func (pm RegisteredUsers) writeTo(client *Client, w io.Writer) (int64, error) {
+func (pm RegisteredUsers) writeMessage(client *Client) error {
 	packet := MumbleProto.UserList{}
 
 	for _, user := range pm {
@@ -72,8 +70,8 @@ func (pm RegisteredUsers) writeTo(client *Client, w io.Writer) (int64, error) {
 	}
 
 	if len(packet.Users) <= 0 {
-		return 0, nil
+		return nil
 	}
 	proto := protoMessage{&packet}
-	return proto.writeTo(client, w)
+	return proto.writeMessage(client)
 }

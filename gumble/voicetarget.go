@@ -1,8 +1,6 @@
 package gumble
 
 import (
-	"io"
-
 	"github.com/golang/protobuf/proto"
 	"github.com/layeh/gumble/gumble/MumbleProto"
 )
@@ -62,7 +60,7 @@ func (vt *VoiceTarget) AddChannel(channel *Channel, recursive, links bool) {
 	})
 }
 
-func (vt *VoiceTarget) writeTo(client *Client, w io.Writer) (int64, error) {
+func (vt *VoiceTarget) writeMessage(client *Client) error {
 	packet := MumbleProto.VoiceTarget{
 		Id:      proto.Uint32(uint32(vt.id)),
 		Targets: make([]*MumbleProto.VoiceTarget_Target, 0, len(vt.users)+len(vt.channels)),
@@ -81,5 +79,5 @@ func (vt *VoiceTarget) writeTo(client *Client, w io.Writer) (int64, error) {
 	}
 
 	proto := protoMessage{&packet}
-	return proto.writeTo(client, w)
+	return proto.writeMessage(client)
 }

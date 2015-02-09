@@ -175,7 +175,7 @@ func handleReject(c *Client, buffer []byte) error {
 	if packet.Reason != nil {
 		c.disconnectEvent.String = *packet.Reason
 	}
-	c.connection.Close()
+	c.conn.Close()
 	return nil
 }
 

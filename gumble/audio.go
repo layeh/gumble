@@ -1,7 +1,6 @@
 package gumble
 
 import (
-	"io"
 	"math"
 	"time"
 )
@@ -50,8 +49,8 @@ type PositionalAudioBuffer struct {
 	AudioBuffer
 }
 
-func (pab PositionalAudioBuffer) writeTo(client *Client, w io.Writer) (int64, error) {
-	return writeAudioTo(client, w, pab.AudioBuffer, &pab)
+func (pab PositionalAudioBuffer) writeMessage(client *Client) error {
+	return writeAudioTo(client, pab.AudioBuffer, &pab)
 }
 
 // AudioPacket contains incoming audio data and information.
@@ -62,15 +61,15 @@ type AudioPacket struct {
 	PositionalAudioBuffer
 }
 
-func (ab AudioBuffer) writeTo(client *Client, w io.Writer) (int64, error) {
-	return writeAudioTo(client, w, ab, nil)
+func (ab AudioBuffer) writeMessage(client *Client) error {
+	return writeAudioTo(client, ab, nil)
 }
 
-func writeAudioTo(client *Client, w io.Writer, ab AudioBuffer, pab *PositionalAudioBuffer) (int64, error) {
+func writeAudioTo(client *Client, ab AudioBuffer, pab *PositionalAudioBuffer) error {
 	dataBytes := client.config.GetAudioDataBytes()
 	opus, err := client.audioEncoder.Encode(ab, len(ab), dataBytes)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	var targetID int
@@ -80,7 +79,7 @@ func writeAudioTo(client *Client, w io.Writer, ab AudioBuffer, pab *PositionalAu
 	seq := client.audioSequence
 	client.audioSequence = (client.audioSequence + 1) % math.MaxInt32
 	if pab == nil {
-		return 0, client.connection.WriteAudio(4, targetID, seq, opus, nil, nil, nil)
+		return client.conn.WriteAudio(4, targetID, seq, opus, nil, nil, nil)
 	}
-	return 0, client.connection.WriteAudio(4, targetID, seq, opus, &pab.X, &pab.Y, &pab.Z)
+	return client.conn.WriteAudio(4, targetID, seq, opus, &pab.X, &pab.Y, &pab.Z)
 }

@@ -1,7 +1,6 @@
 package gumble
 
 import (
-	"io"
 	"net"
 	"time"
 
@@ -109,7 +108,7 @@ func (b *Ban) Ban() {
 	b.unban = false
 }
 
-func (bl BanList) writeTo(client *Client, w io.Writer) (int64, error) {
+func (bl BanList) writeMessage(client *Client) error {
 	packet := MumbleProto.BanList{
 		Query: proto.Bool(false),
 	}
@@ -127,5 +126,5 @@ func (bl BanList) writeTo(client *Client, w io.Writer) (int64, error) {
 	}
 
 	proto := protoMessage{&packet}
-	return proto.writeTo(client, w)
+	return proto.writeMessage(client)
 }

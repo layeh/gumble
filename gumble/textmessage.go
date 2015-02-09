@@ -1,8 +1,6 @@
 package gumble
 
 import (
-	"io"
-
 	"github.com/layeh/gumble/gumble/MumbleProto"
 )
 
@@ -25,7 +23,7 @@ type TextMessage struct {
 	Message string
 }
 
-func (tm *TextMessage) writeTo(client *Client, w io.Writer) (int64, error) {
+func (tm *TextMessage) writeMessage(client *Client) error {
 	packet := MumbleProto.TextMessage{
 		Message: &tm.Message,
 	}
@@ -48,5 +46,5 @@ func (tm *TextMessage) writeTo(client *Client, w io.Writer) (int64, error) {
 		}
 	}
 	proto := protoMessage{&packet}
-	return proto.writeTo(client, w)
+	return proto.writeMessage(client)
 }

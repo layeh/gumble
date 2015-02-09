@@ -41,8 +41,8 @@ type Client struct {
 		version Version
 	}
 
-	connection *Conn
-	tls        tls.Config
+	conn *Conn
+	tls  tls.Config
 
 	users          Users
 	channels       Channels
@@ -87,7 +87,7 @@ func (c *Client) Connect() error {
 	if err != nil {
 		return err
 	}
-	c.connection = NewConn(tlsConn)
+	c.conn = NewConn(tlsConn)
 
 	c.audioEncoder = encoder
 	c.users = Users{}
@@ -170,7 +170,7 @@ func (c *Client) readRoutine() {
 	}
 
 	for {
-		pType, data, err := c.connection.ReadPacket()
+		pType, data, err := c.conn.ReadPacket()
 		if err != nil {
 			break
 		}
@@ -213,18 +213,18 @@ func (c *Client) Request(request Request) {
 
 // Disconnect disconnects the client from the server.
 func (c *Client) Disconnect() error {
-	if c.connection == nil {
+	if c.conn == nil {
 		return errors.New("client is already disconnected")
 	}
 	c.disconnectEvent.Type = DisconnectUser
-	c.connection.Close()
+	c.conn.Close()
 	return nil
 }
 
 // Conn returns the underlying net.Conn to the server. Returns nil if the
 // client is disconnected.
 func (c *Client) Conn() net.Conn {
-	return c.connection
+	return c.conn
 }
 
 // State returns the current state of the client.
@@ -264,7 +264,7 @@ func (c *Client) SetVoiceTarget(target *VoiceTarget) {
 
 // Send will send a message to the server.
 func (c *Client) Send(message Message) error {
-	if _, err := message.writeTo(c, c.connection); err != nil {
+	if err := message.writeMessage(c); err != nil {
 		return err
 	}
 	return nil

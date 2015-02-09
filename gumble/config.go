@@ -2,7 +2,6 @@ package gumble
 
 import (
 	"crypto/tls"
-	"io"
 	"net"
 	"time"
 
@@ -59,10 +58,10 @@ func (c *Config) GetAudioFrameSize() int {
 // gain access to restricted channels.
 type AccessTokens []string
 
-func (at AccessTokens) writeTo(client *Client, w io.Writer) (int64, error) {
+func (at AccessTokens) writeMessage(client *Client) error {
 	packet := MumbleProto.Authenticate{
 		Tokens: at,
 	}
 	proto := protoMessage{&packet}
-	return proto.writeTo(client, w)
+	return proto.writeMessage(client)
 }
