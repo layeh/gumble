@@ -1,13 +1,9 @@
 package gumble
 
 import (
-	"bytes"
-	"encoding/binary"
 	"io"
 	"math"
 	"time"
-
-	"github.com/layeh/gumble/gumble/varint"
 )
 
 const (
@@ -71,74 +67,20 @@ func (ab AudioBuffer) writeTo(client *Client, w io.Writer) (int64, error) {
 }
 
 func writeAudioTo(client *Client, w io.Writer, ab AudioBuffer, pab *PositionalAudioBuffer) (int64, error) {
-	var written int64
-
-	// Create Opus buffer
 	dataBytes := client.config.GetAudioDataBytes()
 	opus, err := client.audioEncoder.Encode(ab, len(ab), dataBytes)
 	if err != nil {
 		return 0, err
 	}
 
-	// Create audio header
-	var header bytes.Buffer
 	var targetID int
 	if target := client.audioTarget; target != nil {
 		targetID = target.id
 	}
-	formatTarget := byte(4)<<5 | byte(targetID)
-	if err := header.WriteByte(formatTarget); err != nil {
-		return 0, err
-	}
-	if _, err := varint.WriteTo(&header, int64(client.audioSequence)); err != nil {
-		return 0, err
-	}
-	if _, err := varint.WriteTo(&header, int64(len(opus))); err != nil {
-		return 0, err
-	}
-
-	var positionalLength int
-	if pab != nil {
-		positionalLength = 3 * 4
-	}
-
-	// Write packet header
-	ni, err := writeTcpHeader(w, 1, header.Len()+len(opus)+positionalLength)
-	if err != nil {
-		return int64(ni), err
-	}
-	written += int64(ni)
-
-	// Write audio header
-	n, err := header.WriteTo(w)
-	if err != nil {
-		return (written + n), err
-	}
-	written += n
-
-	// Write audio data
-	ni, err = w.Write(opus)
-	if err != nil {
-		return (written + int64(ni)), err
-	}
-	written += int64(ni)
-
-	// Write positional audio information
-	if pab != nil {
-		if err := binary.Write(w, binary.LittleEndian, pab.X); err != nil {
-			return written, err
-		}
-		written += 4
-		if err := binary.Write(w, binary.LittleEndian, pab.Y); err != nil {
-			return written, err
-		}
-		written += 4
-		if err := binary.Write(w, binary.LittleEndian, pab.Z); err != nil {
-			return written, err
-		}
-		written += 4
-	}
-
+	seq := client.audioSequence
 	client.audioSequence = (client.audioSequence + 1) % math.MaxInt32
-	return written, nil
+	if pab == nil {
+		return 0, client.connection.WriteAudio(4, targetID, seq, opus, nil, nil, nil)
+	}
+	return 0, client.connection.WriteAudio(4, targetID, seq, opus, &pab.X, &pab.Y, &pab.Z)
 }

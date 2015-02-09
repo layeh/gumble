@@ -2,9 +2,7 @@ package gumble
 
 import (
 	"crypto/tls"
-	"encoding/binary"
 	"errors"
-	"io"
 	"net"
 	"runtime"
 	"sync"
@@ -31,14 +29,6 @@ const (
 	StateSynced
 )
 
-// PingInterval is the interval at which ping packets are be sent by the client
-// to the server.
-const pingInterval time.Duration = time.Second * 10
-
-// maximumPacketSize is the maximum length in bytes of a packet that will be
-// accepted from the server.
-const maximumPacketSize = 1024 * 1024 * 10 // 10 megabytes
-
 // Client is the type used to create a connection to a server.
 type Client struct {
 	config *Config
@@ -52,7 +42,7 @@ type Client struct {
 		version Version
 	}
 
-	connection *tls.Conn
+	connection *Conn
 	tls        tls.Config
 
 	users          Users
@@ -95,10 +85,12 @@ func (c *Client) Connect() error {
 	c.audioSequence = 0
 	c.audioTarget = nil
 
-	c.connection, err = tls.DialWithDialer(&c.config.Dialer, "tcp", c.config.Address, &c.config.TLSConfig)
+	tlsConn, err := tls.DialWithDialer(&c.config.Dialer, "tcp", c.config.Address, &c.config.TLSConfig)
 	if err != nil {
 		return err
 	}
+	c.connection = NewConn(tlsConn)
+
 	c.audioEncoder = encoder
 	c.users = Users{}
 	c.channels = Channels{}
@@ -154,7 +146,7 @@ func (c *Client) AttachAudio(listener AudioListener) Detacher {
 
 // pingRoutine sends ping packets to the server at regular intervals.
 func (c *Client) pingRoutine() {
-	ticker := time.NewTicker(pingInterval)
+	ticker := time.NewTicker(time.Second * 10)
 	defer ticker.Stop()
 
 	pingPacket := MumbleProto.Ping{
@@ -179,32 +171,13 @@ func (c *Client) readRoutine() {
 		Client: c,
 	}
 
-	conn := c.connection
-	data := make([]byte, 1024)
-
 	for {
-		var pType uint16
-		var pLength uint32
-
-		conn.SetReadDeadline(time.Now().Add(pingInterval * 2))
-		if err := binary.Read(conn, binary.BigEndian, &pType); err != nil {
-			break
-		}
-		if err := binary.Read(conn, binary.BigEndian, &pLength); err != nil {
-			break
-		}
-		pLengthInt := int(pLength)
-		if pLengthInt > maximumPacketSize {
-			break
-		}
-		if pLengthInt > cap(data) {
-			data = make([]byte, pLengthInt)
-		}
-		if _, err := io.ReadFull(conn, data[:pLengthInt]); err != nil {
+		pType, data, err := c.connection.ReadPacket()
+		if err != nil {
 			break
 		}
 		if handle, ok := handlers[pType]; ok {
-			handle(c, data[:pLengthInt])
+			handle(c, data)
 		}
 	}
 
@@ -293,9 +266,6 @@ func (c *Client) SetVoiceTarget(target *VoiceTarget) {
 
 // Send will send a message to the server.
 func (c *Client) Send(message Message) error {
-	c.sendMutex.Lock()
-	defer c.sendMutex.Unlock()
-
 	if _, err := message.writeTo(c, c.connection); err != nil {
 		return err
 	}
