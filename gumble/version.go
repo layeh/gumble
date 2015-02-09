@@ -30,7 +30,3 @@ func (v *Version) SemanticVersion() (major, minor, patch uint) {
 	patch = uint(v.version) & 0xFF
 	return
 }
-
-func (v *Version) setSemanticVersion(major, minor, patch uint) {
-	v.version = uint32(major&0xFFFF)<<16 | uint32(minor&0xFF)<<8 | uint32(patch&0xFF)
-}

@@ -28,6 +28,9 @@ const (
 	StateSynced
 )
 
+// ClientVersion is the protocol version that Client implements.
+const ClientVersion = 1<<16 | 2<<8 | 4
+
 // Client is the type used to create a connection to a server.
 type Client struct {
 	config *Config
@@ -102,18 +105,11 @@ func (c *Client) Connect() error {
 	go c.pingRoutine()
 
 	// Initial packets
-	version := Version{
-		release:   "gumble",
-		os:        runtime.GOOS,
-		osVersion: runtime.GOARCH,
-	}
-	version.setSemanticVersion(1, 2, 4)
-
 	versionPacket := MumbleProto.Version{
-		Version:   &version.version,
-		Release:   &version.release,
-		Os:        &version.os,
-		OsVersion: &version.osVersion,
+		Version:   proto.Uint32(ClientVersion),
+		Release:   proto.String("gumble"),
+		Os:        proto.String(runtime.GOOS),
+		OsVersion: proto.String(runtime.GOARCH),
 	}
 	authenticationPacket := MumbleProto.Authenticate{
 		Username: &c.config.Username,
