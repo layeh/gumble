@@ -5,7 +5,6 @@ import (
 	"errors"
 	"net"
 	"runtime"
-	"sync"
 	"time"
 
 	"github.com/golang/protobuf/proto"
@@ -58,7 +57,6 @@ type Client struct {
 
 	end             chan bool
 	disconnectEvent DisconnectEvent
-	sendMutex       sync.Mutex
 }
 
 // NewClient creates a new gumble client. Returns nil if config is nil.
