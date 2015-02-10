@@ -14,16 +14,15 @@ import (
 	"github.com/layeh/gumble/gumble/varint"
 )
 
-// Conn represents a connect to a Mumble client/server.
+// Conn represents a connection to a Mumble client/server.
 type Conn struct {
+	sync.Mutex
 	net.Conn
 
 	MaximumPacketBytes int
 	Timeout            time.Duration
 
 	buffer []byte
-
-	writeLock sync.Mutex
 }
 
 // NewConn creates a new Conn with the given net.Conn.
@@ -82,8 +81,8 @@ func (c *Conn) WriteAudio(format, target, sequence int, data []byte, X, Y, Z *fl
 		positionalLength = 3 * 4
 	}
 
-	c.writeLock.Lock()
-	defer c.writeLock.Unlock()
+	c.Lock()
+	defer c.Unlock()
 
 	if err := c.writeHeader(1, uint32(header.Len()+len(data)+positionalLength)); err != nil {
 		return err
@@ -112,8 +111,8 @@ func (c *Conn) WriteAudio(format, target, sequence int, data []byte, X, Y, Z *fl
 
 // WritePacket writes a data packet of the given type to the connection.
 func (c *Conn) WritePacket(ptype uint16, data []byte) error {
-	c.writeLock.Lock()
-	defer c.writeLock.Unlock()
+	c.Lock()
+	defer c.Unlock()
 	if err := c.writeHeader(uint16(ptype), uint32(len(data))); err != nil {
 		return err
 	}
