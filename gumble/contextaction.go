@@ -20,30 +20,18 @@ const (
 type ContextAction struct {
 	client *Client
 
-	contextType ContextActionType
-	name        string
-	label       string
-}
-
-// Type returns the context action type.
-func (ca *ContextAction) Type() ContextActionType {
-	return ca.contextType
-}
-
-// Name returns the name of the context action.
-func (ca *ContextAction) Name() string {
-	return ca.name
-}
-
-// Label returns the user-friendly description of the context action.
-func (ca *ContextAction) Label() string {
-	return ca.label
+	// The context action type.
+	Type ContextActionType
+	// The name of the context action.
+	Name string
+	// The user-friendly description of the context action.
+	Label string
 }
 
 // Trigger will trigger the context action in the context of the server.
 func (ca *ContextAction) Trigger() {
 	packet := MumbleProto.ContextAction{
-		Action: &ca.name,
+		Action: &ca.Name,
 	}
 	ca.client.Send(protoMessage{&packet})
 }
@@ -52,8 +40,8 @@ func (ca *ContextAction) Trigger() {
 // user.
 func (ca *ContextAction) TriggerUser(user *User) {
 	packet := MumbleProto.ContextAction{
-		Session: &user.session,
-		Action:  &ca.name,
+		Session: &user.Session,
+		Action:  &ca.Name,
 	}
 	ca.client.Send(protoMessage{&packet})
 }
@@ -62,8 +50,8 @@ func (ca *ContextAction) TriggerUser(user *User) {
 // channel.
 func (ca *ContextAction) TriggerChannel(channel *Channel) {
 	packet := MumbleProto.ContextAction{
-		ChannelId: &channel.id,
-		Action:    &ca.name,
+		ChannelId: &channel.ID,
+		Action:    &ca.Name,
 	}
 	ca.client.Send(protoMessage{&packet})
 }

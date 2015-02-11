@@ -6,26 +6,18 @@ import (
 
 // RegisteredUser represents a registered user on the server.
 type RegisteredUser struct {
-	userID uint32
-	name   string
+	// The registered user's ID.
+	UserID uint32
+	// The registered user's name.
+	Name string
 
 	changed    bool
 	deregister bool
 }
 
-// UserID returns the registered user's ID
-func (ru *RegisteredUser) UserID() uint {
-	return uint(ru.userID)
-}
-
-// Name returns the registered user's name
-func (ru *RegisteredUser) Name() string {
-	return ru.name
-}
-
 // SetName sets the new name for the user.
 func (ru *RegisteredUser) SetName(name string) {
-	ru.name = name
+	ru.Name = name
 	ru.changed = true
 }
 
@@ -43,8 +35,8 @@ func (ru *RegisteredUser) Register() {
 // ACLUser returns an ACLUser for the given registered user.
 func (ru *RegisteredUser) ACLUser() *ACLUser {
 	return &ACLUser{
-		userID: ru.userID,
-		name:   ru.name,
+		UserID: ru.UserID,
+		Name:   ru.Name,
 	}
 }
 
@@ -60,10 +52,10 @@ func (pm RegisteredUsers) writeMessage(client *Client) error {
 	for _, user := range pm {
 		if user.deregister || user.changed {
 			userListUser := &MumbleProto.UserList_User{
-				UserId: &user.userID,
+				UserId: &user.UserID,
 			}
 			if !user.deregister {
-				userListUser.Name = &user.name
+				userListUser.Name = &user.Name
 			}
 			packet.Users = append(packet.Users, userListUser)
 		}

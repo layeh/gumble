@@ -5,7 +5,7 @@ type ContextActions map[string]*ContextAction
 
 func (ca ContextActions) create(action string) *ContextAction {
 	contextAction := &ContextAction{
-		name: action,
+		Name: action,
 	}
 	ca[action] = contextAction
 	return contextAction

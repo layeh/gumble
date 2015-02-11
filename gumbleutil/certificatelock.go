@@ -45,7 +45,7 @@ func CertificateLockFile(client *gumble.Client, config *gumble.Config, filename 
 
 	return client.Attach(Listener{
 		Connect: func(e *gumble.ConnectEvent) {
-			tlsClient, ok := e.Client.Conn().(*tls.Conn)
+			tlsClient, ok := e.Client.Conn.Conn.(*tls.Conn)
 			if !ok {
 				return
 			}

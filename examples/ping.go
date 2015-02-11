@@ -19,12 +19,11 @@ func main() {
 		fmt.Fprintf(os.Stderr, "%s: %s\n", os.Args[0], err)
 		os.Exit(1)
 	}
-	version := resp.Version()
-	major, minor, patch := version.SemanticVersion()
-	fmt.Printf("Address:         %s\n", resp.Address())
-	fmt.Printf("Ping:            %s\n", resp.Ping())
+	major, minor, patch := resp.Version.SemanticVersion()
+	fmt.Printf("Address:         %s\n", resp.Address)
+	fmt.Printf("Ping:            %s\n", resp.Ping)
 	fmt.Printf("Version:         %d.%d.%d\n", major, minor, patch)
-	fmt.Printf("Connected Users: %d\n", resp.ConnectedUsers())
-	fmt.Printf("Maximum Users:   %d\n", resp.MaximumUsers())
-	fmt.Printf("Maximum Bitrate: %d\n", resp.MaximumBitrate())
+	fmt.Printf("Connected Users: %d\n", resp.ConnectedUsers)
+	fmt.Printf("Maximum Users:   %d\n", resp.MaximumUsers)
+	fmt.Printf("Maximum Bitrate: %d\n", resp.MaximumBitrate)
 }

@@ -11,11 +11,11 @@ var autoBitrate = &Listener{
 	Connect: func(e *gumble.ConnectEvent) {
 		if e.MaximumBitrate > 0 {
 			const safety = 5
-			interval := e.Client.Config().GetAudioInterval()
+			interval := e.Client.Config.GetAudioInterval()
 			dataBytes := (e.MaximumBitrate / (8 * (int(time.Second/interval) + safety))) - 32 - 10
 
-			e.Client.Config().AudioDataBytes = dataBytes
-			e.Client.AudioEncoder().SetBitrate(gopus.BitrateMaximum)
+			e.Client.Config.AudioDataBytes = dataBytes
+			e.Client.AudioEncoder.SetBitrate(gopus.BitrateMaximum)
 		}
 	},
 }

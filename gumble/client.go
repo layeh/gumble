@@ -3,7 +3,6 @@ package gumble
 import (
 	"crypto/tls"
 	"errors"
-	"net"
 	"runtime"
 	"time"
 
@@ -33,30 +32,40 @@ const ClientVersion = 1<<16 | 2<<8 | 4
 
 // Client is the type used to create a connection to a server.
 type Client struct {
-	config *Config
+	// The current state of the client.
+	State State
+	// The User associated with the client (nil if the client has not yet been
+	// synced).
+	Self *User
+	// The client's configuration.
+	Config *Config
+	// The underlying Conn to the server.
+	*Conn
 
 	listeners      eventMultiplexer
 	audioListeners audioEventMultiplexer
 
-	state  State
-	self   *User
 	server struct {
 		version Version
 	}
 
-	conn *Conn
-	tls  tls.Config
+	// The users currently connected to the server.
+	Users Users
+	// The connected server's channels.
+	Channels    Channels
+	permissions map[uint32]*Permission
+	tmpACL      *ACL
 
-	users          Users
-	channels       Channels
-	permissions    map[uint]*Permission
-	contextActions ContextActions
+	// A collection containing the server's context actions.
+	ContextActions ContextActions
 
-	tmpACL *ACL
-
-	audioEncoder  *gopus.Encoder
+	// The audio encoder used when sending audio to the server.
+	AudioEncoder  *gopus.Encoder
 	audioSequence int
-	audioTarget   *VoiceTarget
+	// To whom transmitted audio will be sent. The VoiceTarget must have already
+	// been sent to the server for targeting to work correctly. Setting to nil
+	// will disable voice targeting (i.e. switch back to regular speaking).
+	VoiceTarget *VoiceTarget
 
 	end             chan bool
 	disconnectEvent DisconnectEvent
@@ -68,14 +77,14 @@ func NewClient(config *Config) *Client {
 		return nil
 	}
 	client := &Client{
-		config: config,
+		Config: config,
 	}
 	return client
 }
 
 // Connect connects to the server.
 func (c *Client) Connect() error {
-	if c.state != StateDisconnected {
+	if c.State != StateDisconnected {
 		return errors.New("client is already connected")
 	}
 	encoder, err := gopus.NewEncoder(AudioSampleRate, 1, gopus.Voip)
@@ -84,20 +93,20 @@ func (c *Client) Connect() error {
 	}
 	encoder.SetBitrate(gopus.BitrateMaximum)
 	c.audioSequence = 0
-	c.audioTarget = nil
+	c.VoiceTarget = nil
 
-	tlsConn, err := tls.DialWithDialer(&c.config.Dialer, "tcp", c.config.Address, &c.config.TLSConfig)
+	tlsConn, err := tls.DialWithDialer(&c.Config.Dialer, "tcp", c.Config.Address, &c.Config.TLSConfig)
 	if err != nil {
 		return err
 	}
-	c.conn = NewConn(tlsConn)
+	c.Conn = NewConn(tlsConn)
 
-	c.audioEncoder = encoder
-	c.users = Users{}
-	c.channels = Channels{}
-	c.permissions = make(map[uint]*Permission)
-	c.contextActions = ContextActions{}
-	c.state = StateConnected
+	c.AudioEncoder = encoder
+	c.Users = Users{}
+	c.Channels = Channels{}
+	c.permissions = make(map[uint32]*Permission)
+	c.ContextActions = ContextActions{}
+	c.State = StateConnected
 
 	// Channels and goroutines
 	c.end = make(chan bool)
@@ -112,19 +121,14 @@ func (c *Client) Connect() error {
 		OsVersion: proto.String(runtime.GOARCH),
 	}
 	authenticationPacket := MumbleProto.Authenticate{
-		Username: &c.config.Username,
-		Password: &c.config.Password,
+		Username: &c.Config.Username,
+		Password: &c.Config.Password,
 		Opus:     proto.Bool(true),
-		Tokens:   c.config.Tokens,
+		Tokens:   c.Config.Tokens,
 	}
 	c.Send(protoMessage{&versionPacket})
 	c.Send(protoMessage{&authenticationPacket})
 	return nil
-}
-
-// Config returns the client's configuration.
-func (c *Client) Config() *Config {
-	return c.config
 }
 
 // Attach adds an event listener that will receive incoming connection events.
@@ -166,7 +170,7 @@ func (c *Client) readRoutine() {
 	}
 
 	for {
-		pType, data, err := c.conn.ReadPacket()
+		pType, data, err := c.Conn.ReadPacket()
 		if err != nil {
 			break
 		}
@@ -178,16 +182,10 @@ func (c *Client) readRoutine() {
 	close(c.end)
 	c.listeners.OnDisconnect(&c.disconnectEvent)
 	*c = Client{
-		config:         c.config,
+		Config:         c.Config,
 		listeners:      c.listeners,
 		audioListeners: c.audioListeners,
 	}
-}
-
-// AudioEncoder returns the audio encoder used when sending audio to the
-// server.
-func (c *Client) AudioEncoder() *gopus.Encoder {
-	return c.audioEncoder
 }
 
 // Request requests that specific server information be sent to the client. The
@@ -209,53 +207,12 @@ func (c *Client) Request(request Request) {
 
 // Disconnect disconnects the client from the server.
 func (c *Client) Disconnect() error {
-	if c.conn == nil {
+	if c.Conn == nil {
 		return errors.New("client is already disconnected")
 	}
 	c.disconnectEvent.Type = DisconnectUser
-	c.conn.Close()
+	c.Conn.Close()
 	return nil
-}
-
-// Conn returns the underlying net.Conn to the server. Returns nil if the
-// client is disconnected.
-func (c *Client) Conn() net.Conn {
-	return c.conn
-}
-
-// State returns the current state of the client.
-func (c *Client) State() State {
-	return c.state
-}
-
-// Self returns a pointer to the User associated with the client. The function
-// will return nil if the client has not yet been synced.
-func (c *Client) Self() *User {
-	return c.self
-}
-
-// Users returns a collection containing the users currently connected to the
-// server.
-func (c *Client) Users() Users {
-	return c.users
-}
-
-// Channels returns a collection containing the server's channels.
-func (c *Client) Channels() Channels {
-	return c.channels
-}
-
-// ContextActions returns a collection containing the server's context actions.
-func (c *Client) ContextActions() ContextActions {
-	return c.contextActions
-}
-
-// SetVoiceTarget sets to whom transmitted audio will be sent. The VoiceTarget
-// must have already been sent to the server for targeting to work correctly.
-// Passing nil will disable voice targeting (i.e. switch back to regular
-// speaking).
-func (c *Client) SetVoiceTarget(target *VoiceTarget) {
-	c.audioTarget = target
 }
 
 // Send will send a message to the server.

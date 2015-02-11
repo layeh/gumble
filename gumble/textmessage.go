@@ -30,19 +30,19 @@ func (tm *TextMessage) writeMessage(client *Client) error {
 	if tm.Users != nil {
 		packet.Session = make([]uint32, len(tm.Users))
 		for i, user := range tm.Users {
-			packet.Session[i] = user.session
+			packet.Session[i] = user.Session
 		}
 	}
 	if tm.Channels != nil {
 		packet.ChannelId = make([]uint32, len(tm.Channels))
 		for i, channel := range tm.Channels {
-			packet.ChannelId[i] = channel.id
+			packet.ChannelId[i] = channel.ID
 		}
 	}
 	if tm.Trees != nil {
 		packet.TreeId = make([]uint32, len(tm.Trees))
 		for i, channel := range tm.Trees {
-			packet.TreeId[i] = channel.id
+			packet.TreeId[i] = channel.ID
 		}
 	}
 	proto := protoMessage{&packet}

@@ -2,17 +2,17 @@ package gumble
 
 // Users is a map of server users.
 //
-// When accessed through client.Users(), it contains all users currently on the
+// When accessed through client.Users, it contains all users currently on the
 // server. When accessed through a specific channel
-// (e.g. client.Channels()[0].Users()), it contains only the users in the
+// (e.g. client.Channels[0].Users), it contains only the users in the
 // channel.
-type Users map[uint]*User
+type Users map[uint32]*User
 
 // create adds a new user with the given session to the collection. If a user
 // with the given session already exists, it is overwritten.
-func (u Users) create(session uint) *User {
+func (u Users) create(session uint32) *User {
 	user := &User{
-		session: uint32(session),
+		Session: session,
 	}
 	u[session] = user
 	return user
@@ -22,7 +22,7 @@ func (u Users) create(session uint) *User {
 // with the given name.
 func (u Users) Find(name string) *User {
 	for _, user := range u {
-		if user.name == name {
+		if user.Name == name {
 			return user
 		}
 	}

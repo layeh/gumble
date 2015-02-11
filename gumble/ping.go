@@ -12,44 +12,19 @@ import (
 // PingResponse contains information about a server that responded to a UDP
 // ping packet.
 type PingResponse struct {
-	address        *net.UDPAddr
-	ping           time.Duration
-	version        Version
-	connectedUsers int
-	maximumUsers   int
-	maximumBitrate int
-}
-
-// Address returns the the address of the pinged server.
-func (pr *PingResponse) Address() *net.UDPAddr {
-	return pr.address
-}
-
-// Ping returns the round-trip time from the client to the server.
-func (pr *PingResponse) Ping() time.Duration {
-	return pr.ping
-}
-
-// Version returns the server's version. Only the .Version() and
-// .SemanticVersion() methods of the returned value will return valid values.
-func (pr *PingResponse) Version() Version {
-	return pr.version
-}
-
-// ConnectedUsers returns the number users currently connected to the server.
-func (pr *PingResponse) ConnectedUsers() int {
-	return pr.connectedUsers
-}
-
-// MaximumUsers returns the maximum number of users that can connect to the
-// server.
-func (pr *PingResponse) MaximumUsers() int {
-	return pr.maximumUsers
-}
-
-// MaximumBitrate returns the maximum audio bitrate per user for the server.
-func (pr *PingResponse) MaximumBitrate() int {
-	return pr.maximumBitrate
+	// The address of the pinged server.
+	Address *net.UDPAddr
+	// The round-trip time from the client to the server.
+	Ping time.Duration
+	// The server's version. Only the Version field and SemanticVersion method of
+	// the value will be valid.
+	Version Version
+	// The number users currently connected to the server.
+	ConnectedUsers int
+	// The maximum number of users that can connect to the server.
+	MaximumUsers int
+	// The maximum audio bitrate per user for the server.
+	MaximumBitrate int
 }
 
 // Ping sends a UDP ping packet to the given server. Returns a PingResponse and
@@ -85,14 +60,14 @@ func Ping(address string, timeout time.Duration) (*PingResponse, error) {
 		}
 
 		return &PingResponse{
-			address: addr,
-			ping:    time.Since(start),
-			version: Version{
-				version: binary.BigEndian.Uint32(incoming[0:]),
+			Address: addr,
+			Ping:    time.Since(start),
+			Version: Version{
+				Version: binary.BigEndian.Uint32(incoming[0:]),
 			},
-			connectedUsers: int(binary.BigEndian.Uint32(incoming[12:])),
-			maximumUsers:   int(binary.BigEndian.Uint32(incoming[16:])),
-			maximumBitrate: int(binary.BigEndian.Uint32(incoming[20:])),
+			ConnectedUsers: int(binary.BigEndian.Uint32(incoming[12:])),
+			MaximumUsers:   int(binary.BigEndian.Uint32(incoming[16:])),
+			MaximumBitrate: int(binary.BigEndian.Uint32(incoming[20:])),
 		}, nil
 	}
 }

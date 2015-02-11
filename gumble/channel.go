@@ -9,54 +9,37 @@ import (
 type Channel struct {
 	client *Client
 
-	id              uint32
-	parent          *Channel
-	children        Channels
-	users           Users
-	name            string
-	description     string
-	descriptionHash []byte
-	position        int32
-	temporary       bool
-}
-
-// ID returns the channel's unique ID.
-func (c *Channel) ID() uint {
-	return uint(c.id)
-}
-
-// Parent returns a pointer to the parent channel, or nil if the channel is the
-// root of the server.
-func (c *Channel) Parent() *Channel {
-	return c.parent
-}
-
-// DescriptionHash returns the channel's description hash. This function can
-// return nil.
-func (c *Channel) DescriptionHash() []byte {
-	return c.descriptionHash
-}
-
-// Position returns the position at which the channel should be displayed in
-// an ordered list.
-func (c *Channel) Position() int {
-	return int(c.position)
-}
-
-// IsTemporary returns true if the channel is temporary.
-func (c *Channel) IsTemporary() bool {
-	return c.temporary
+	// The channel's unique ID.
+	ID uint32
+	// The channel's name.
+	Name string
+	// The channel's parent. Contains nil if the channel is the root channel.
+	Parent *Channel
+	// The channels directly underneath the channel.
+	Children Channels
+	// The users currently in the channel.
+	Users Users
+	// The channel's description. Contains the empty string if the channel does
+	// not have a description, or if it needs to be requested.
+	Description string
+	// The channel's description hash. Contains nil if Channel.Description has
+	// been populated.
+	DescriptionHash []byte
+	// The position at which the channel should be displayed in an ordered list.
+	Position int32
+	// Is the channel temporary?
+	Temporary bool
 }
 
 // IsRoot returns true if the channel is the server's root channel.
 func (c *Channel) IsRoot() bool {
-	return c.id == 0
+	return c.ID == 0
 }
 
 // Add will add a sub-channel to the given channel.
 func (c *Channel) Add(name string, temporary bool) {
 	packet := MumbleProto.ChannelState{
-		Parent:    &c.id,
+		Parent:    &c.ID,
 		Name:      &name,
 		Temporary: proto.Bool(temporary),
 	}
@@ -67,44 +50,28 @@ func (c *Channel) Add(name string, temporary bool) {
 // channel tree.
 func (c *Channel) Remove() {
 	packet := MumbleProto.ChannelRemove{
-		ChannelId: &c.id,
+		ChannelId: &c.ID,
 	}
 	c.client.Send(protoMessage{&packet})
-}
-
-// Name returns the channel name.
-func (c *Channel) Name() string {
-	return c.name
 }
 
 // SetName will set the name of the channel. This will have no effect if the
 // channel is the server's root channel.
 func (c *Channel) SetName(name string) {
 	packet := MumbleProto.ChannelState{
-		ChannelId: &c.id,
+		ChannelId: &c.ID,
 		Name:      &name,
 	}
 	c.client.Send(protoMessage{&packet})
 }
 
-// Description returns the channel's description.
-func (c *Channel) Description() string {
-	return c.description
-}
-
 // SetDescription will set the description of the channel.
 func (c *Channel) SetDescription(description string) {
 	packet := MumbleProto.ChannelState{
-		ChannelId:   &c.id,
+		ChannelId:   &c.ID,
 		Description: &description,
 	}
 	c.client.Send(protoMessage{&packet})
-}
-
-// Channels returns a container containing the channels directly underneath the
-// current channel.
-func (c *Channel) Channels() Channels {
-	return c.children
 }
 
 // Find returns a channel whose path (by channel name) from the current channel
@@ -124,8 +91,8 @@ func (c *Channel) Find(names ...string) *Channel {
 	if names == nil || len(names) == 0 {
 		return c
 	}
-	for _, child := range c.children {
-		if child.name == names[0] {
+	for _, child := range c.Children {
+		if child.Name == names[0] {
 			return child.Find(names[1:]...)
 		}
 	}
@@ -141,20 +108,20 @@ func (c *Channel) Find(names ...string) *Channel {
 func (c *Channel) Request(request Request) {
 	if (request & RequestDescription) != 0 {
 		packet := MumbleProto.RequestBlob{
-			ChannelDescription: []uint32{c.id},
+			ChannelDescription: []uint32{c.ID},
 		}
 		c.client.Send(protoMessage{&packet})
 	}
 	if (request & RequestACL) != 0 {
 		packet := MumbleProto.ACL{
-			ChannelId: &c.id,
+			ChannelId: &c.ID,
 			Query:     proto.Bool(true),
 		}
 		c.client.Send(protoMessage{&packet})
 	}
 	if (request & RequestPermission) != 0 {
 		packet := MumbleProto.PermissionQuery{
-			ChannelId: &c.id,
+			ChannelId: &c.ID,
 		}
 		c.client.Send(protoMessage{&packet})
 	}
@@ -173,13 +140,8 @@ func (c *Channel) Send(message string, recursive bool) {
 	c.client.Send(&textMessage)
 }
 
-// Users returns the users currently in the channel.
-func (c *Channel) Users() Users {
-	return c.users
-}
-
 // Permission returns the permissions the user has in the channel, or nil if
 // the permissions are unknown.
 func (c *Channel) Permission() *Permission {
-	return c.client.permissions[c.ID()]
+	return c.client.permissions[c.ID]
 }

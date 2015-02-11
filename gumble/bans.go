@@ -17,10 +17,10 @@ type BanList []*Ban
 // Add creates a new ban list entry with the given parameters.
 func (bl *BanList) Add(address net.IP, mask net.IPMask, reason string, duration time.Duration) *Ban {
 	ban := &Ban{
-		address:  address,
-		mask:     mask,
-		reason:   reason,
-		duration: duration,
+		Address:  address,
+		Mask:     mask,
+		Reason:   reason,
+		Duration: duration,
 	}
 	*bl = append(*bl, ban)
 	return ban
@@ -31,70 +31,42 @@ func (bl *BanList) Add(address net.IP, mask net.IPMask, reason string, duration 
 // This type should not be initialized manually. Instead, create new ban
 // entries using BanList.Add().
 type Ban struct {
-	address  net.IP
-	mask     net.IPMask
-	name     string
-	hash     string
-	reason   string
-	start    time.Time
-	duration time.Duration
+	// The banned IP address.
+	Address net.IP
+	// The IP mask that the ban applies to.
+	Mask net.IPMask
+	// The name of the banned user.
+	Name string
+	// The certificate hash of the banned user.
+	Hash string
+	// The reason for the ban.
+	Reason string
+	// The start time from which the ban applies.
+	Start time.Time
+	// How long the ban is for.
+	Duration time.Duration
 
 	unban bool
 }
 
-// Address returns the IP address that was banned.
-func (b *Ban) Address() net.IP {
-	return b.address
-}
-
 // SetAddress sets the banned IP address.
 func (b *Ban) SetAddress(address net.IP) {
-	b.address = address
-}
-
-// Mask returns the IP mask that the ban applies to.
-func (b *Ban) Mask() net.IPMask {
-	return b.mask
+	b.Address = address
 }
 
 // SetMask sets the IP mask that the ban applies to.
 func (b *Ban) SetMask(mask net.IPMask) {
-	b.mask = mask
-}
-
-// Name returns the name of the banned user.
-func (b *Ban) Name() string {
-	return b.name
-}
-
-// Hash returns the certificate hash of the banned user.
-func (b *Ban) Hash() string {
-	return b.hash
-}
-
-// Reason returns the reason for the ban.
-func (b *Ban) Reason() string {
-	return b.reason
+	b.Mask = mask
 }
 
 // SetReason changes the reason for the ban.
 func (b *Ban) SetReason(reason string) {
-	b.reason = reason
-}
-
-// Start returns the start time at which the ban applies.
-func (b *Ban) Start() time.Time {
-	return b.start
-}
-
-// Duration returns how long the ban is for.
-func (b *Ban) Duration() time.Duration {
-	return b.duration
+	b.Reason = reason
 }
 
 // SetDuration changes the duration of the ban.
 func (b *Ban) SetDuration(duration time.Duration) {
-	b.duration = duration
+	b.Duration = duration
 }
 
 // Unban will unban the user from the server.
@@ -115,12 +87,12 @@ func (bl BanList) writeMessage(client *Client) error {
 
 	for _, ban := range bl {
 		if !ban.unban {
-			maskSize, _ := ban.mask.Size()
+			maskSize, _ := ban.Mask.Size()
 			packet.Bans = append(packet.Bans, &MumbleProto.BanList_BanEntry{
-				Address:  ban.address,
+				Address:  ban.Address,
 				Mask:     proto.Uint32(uint32(maskSize)),
-				Reason:   &ban.reason,
-				Duration: proto.Uint32(uint32(ban.duration * time.Second)),
+				Reason:   &ban.Reason,
+				Duration: proto.Uint32(uint32(ban.Duration / time.Second)),
 			})
 		}
 	}

@@ -2,19 +2,19 @@ package gumble
 
 // Channels is a map of server channels.
 //
-// When accessed through client.Channels(), it contains all channels on the
+// When accessed through Client.Channels, it contains all channels on the
 // server. When accessed through a specific channel
-// (e.g. client.Channels()[0].Channels()), it contains only the children of the
+// (e.g. client.Channels[0].Children), it contains only the children of the
 // channel.
-type Channels map[uint]*Channel
+type Channels map[uint32]*Channel
 
 // create adds a new channel with the given id to the collection. If a channel
 // with the given id already exists, it is overwritten.
-func (c Channels) create(id uint) *Channel {
+func (c Channels) create(id uint32) *Channel {
 	channel := &Channel{
-		id:       uint32(id),
-		children: Channels{},
-		users:    Users{},
+		ID:       id,
+		Children: Channels{},
+		Users:    Users{},
 	}
 	c[id] = channel
 	return channel

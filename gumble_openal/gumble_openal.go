@@ -23,15 +23,15 @@ type Stream struct {
 
 	deviceSink  *openal.Device
 	contextSink *openal.Context
-	userStreams map[uint]openal.Source
+	userStreams map[uint32]openal.Source
 	buffer      []byte
 }
 
 func New(client *gumble.Client) (*Stream, error) {
 	s := &Stream{
 		client:          client,
-		userStreams:     make(map[uint]openal.Source),
-		sourceFrameSize: client.Config().GetAudioFrameSize(),
+		userStreams:     make(map[uint32]openal.Source),
+		sourceFrameSize: client.Config.GetAudioFrameSize(),
 	}
 
 	s.deviceSource = openal.CaptureOpenDevice("", gumble.AudioSampleRate, openal.FormatMono16, uint32(s.sourceFrameSize))
@@ -88,9 +88,9 @@ func (s *Stream) OnAudioPacket(e *gumble.AudioPacketEvent) {
 		return
 	}
 	var source openal.Source
-	if userSource, ok := s.userStreams[packet.Sender.Session()]; !ok {
+	if userSource, ok := s.userStreams[packet.Sender.Session]; !ok {
 		source = openal.NewSource()
-		s.userStreams[packet.Sender.Session()] = source
+		s.userStreams[packet.Sender.Session] = source
 	} else {
 		source = userSource
 	}
@@ -113,8 +113,8 @@ func (s *Stream) OnAudioPacket(e *gumble.AudioPacketEvent) {
 }
 
 func (s *Stream) sourceRoutine() {
-	interval := s.client.Config().GetAudioInterval()
-	frameSize := s.client.Config().GetAudioFrameSize()
+	interval := s.client.Config.GetAudioInterval()
+	frameSize := s.client.Config.GetAudioFrameSize()
 
 	if frameSize != s.sourceFrameSize {
 		s.deviceSource.CaptureCloseDevice()

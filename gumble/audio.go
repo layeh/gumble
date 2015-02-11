@@ -66,20 +66,20 @@ func (ab AudioBuffer) writeMessage(client *Client) error {
 }
 
 func writeAudioTo(client *Client, ab AudioBuffer, pab *PositionalAudioBuffer) error {
-	dataBytes := client.config.GetAudioDataBytes()
-	opus, err := client.audioEncoder.Encode(ab, len(ab), dataBytes)
+	dataBytes := client.Config.GetAudioDataBytes()
+	opus, err := client.AudioEncoder.Encode(ab, len(ab), dataBytes)
 	if err != nil {
 		return err
 	}
 
 	var targetID int
-	if target := client.audioTarget; target != nil {
-		targetID = target.id
+	if target := client.VoiceTarget; target != nil {
+		targetID = int(target.ID)
 	}
 	seq := client.audioSequence
 	client.audioSequence = (client.audioSequence + 1) % math.MaxInt32
 	if pab == nil {
-		return client.conn.WriteAudio(4, targetID, seq, opus, nil, nil, nil)
+		return client.Conn.WriteAudio(4, targetID, seq, opus, nil, nil, nil)
 	}
-	return client.conn.WriteAudio(4, targetID, seq, opus, &pab.X, &pab.Y, &pab.Z)
+	return client.Conn.WriteAudio(4, targetID, seq, opus, &pab.X, &pab.Y, &pab.Z)
 }

@@ -56,16 +56,16 @@ var handlers = map[uint16]handlerFunc{
 func parseVersion(packet *MumbleProto.Version) Version {
 	var version Version
 	if packet.Version != nil {
-		version.version = *packet.Version
+		version.Version = *packet.Version
 	}
 	if packet.Release != nil {
-		version.release = *packet.Release
+		version.Release = *packet.Release
 	}
 	if packet.Os != nil {
-		version.os = *packet.Os
+		version.OS = *packet.Os
 	}
 	if packet.OsVersion != nil {
-		version.osVersion = *packet.OsVersion
+		version.OSVersion = *packet.OsVersion
 	}
 	return version
 }
@@ -107,7 +107,7 @@ func handleUdpTunnel(c *Client, buffer []byte) error {
 	if err != nil {
 		return err
 	}
-	user = c.users[uint(session)]
+	user = c.Users[uint32(session)]
 	if user == nil {
 		return errInvalidProtobuf
 	}
@@ -175,7 +175,7 @@ func handleReject(c *Client, buffer []byte) error {
 	if packet.Reason != nil {
 		c.disconnectEvent.String = *packet.Reason
 	}
-	c.conn.Close()
+	c.Conn.Close()
 	return nil
 }
 
@@ -189,7 +189,7 @@ func handleServerSync(c *Client, buffer []byte) error {
 	}
 
 	if packet.Session != nil {
-		c.self = c.users[uint(*packet.Session)]
+		c.Self = c.Users[*packet.Session]
 	}
 	if packet.WelcomeText != nil {
 		event.WelcomeMessage = *packet.WelcomeText
@@ -197,7 +197,7 @@ func handleServerSync(c *Client, buffer []byte) error {
 	if packet.MaxBandwidth != nil {
 		event.MaximumBitrate = int(*packet.MaxBandwidth)
 	}
-	c.state = StateSynced
+	c.State = StateSynced
 
 	c.listeners.OnConnect(&event)
 	return nil
@@ -214,19 +214,19 @@ func handleChannelRemove(c *Client, buffer []byte) error {
 	}
 	var channel *Channel
 	{
-		channelID := uint(*packet.ChannelId)
-		channel = c.channels[channelID]
+		channelID := *packet.ChannelId
+		channel = c.Channels[channelID]
 		if channel == nil {
 			return errInvalidProtobuf
 		}
-		delete(c.channels, channelID)
+		delete(c.Channels, channelID)
 		delete(c.permissions, channelID)
-		if parent := channel.parent; parent != nil {
-			delete(channel.parent.children, uint(channel.id))
+		if parent := channel.Parent; parent != nil {
+			delete(parent.Children, channel.ID)
 		}
 	}
 
-	if c.state == StateSynced {
+	if c.State == StateSynced {
 		event := ChannelChangeEvent{
 			Client:  c,
 			Type:    ChannelChangeRemoved,
@@ -249,57 +249,57 @@ func handleChannelState(c *Client, buffer []byte) error {
 	event := ChannelChangeEvent{
 		Client: c,
 	}
-	channelID := uint(*packet.ChannelId)
-	channel := c.channels[channelID]
+	channelID := *packet.ChannelId
+	channel := c.Channels[channelID]
 	if channel == nil {
-		channel = c.channels.create(channelID)
+		channel = c.Channels.create(channelID)
 		channel.client = c
 
 		event.Type |= ChannelChangeCreated
 	}
 	event.Channel = channel
 	if packet.Parent != nil {
-		if channel.parent != nil {
-			delete(channel.parent.children, channelID)
+		if channel.Parent != nil {
+			delete(channel.Parent.Children, channelID)
 		}
-		newParent := c.channels[uint(*packet.Parent)]
-		if newParent != channel.parent {
+		newParent := c.Channels[*packet.Parent]
+		if newParent != channel.Parent {
 			event.Type |= ChannelChangeMoved
 		}
-		channel.parent = newParent
-		if channel.parent != nil {
-			channel.parent.children[uint(channel.id)] = channel
+		channel.Parent = newParent
+		if channel.Parent != nil {
+			channel.Parent.Children[channel.ID] = channel
 		}
 	}
 	if packet.Name != nil {
-		if *packet.Name != channel.name {
+		if *packet.Name != channel.Name {
 			event.Type |= ChannelChangeName
 		}
-		channel.name = *packet.Name
+		channel.Name = *packet.Name
 	}
 	if packet.Description != nil {
-		if *packet.Description != channel.description {
+		if *packet.Description != channel.Description {
 			event.Type |= ChannelChangeDescription
 		}
-		channel.description = *packet.Description
-		channel.descriptionHash = nil
+		channel.Description = *packet.Description
+		channel.DescriptionHash = nil
 	}
 	if packet.Temporary != nil {
-		channel.temporary = *packet.Temporary
+		channel.Temporary = *packet.Temporary
 	}
 	if packet.Position != nil {
-		if *packet.Position != channel.position {
+		if *packet.Position != channel.Position {
 			event.Type |= ChannelChangePosition
 		}
-		channel.position = *packet.Position
+		channel.Position = *packet.Position
 	}
 	if packet.DescriptionHash != nil {
 		event.Type |= ChannelChangeDescription
-		channel.descriptionHash = packet.DescriptionHash
-		channel.description = ""
+		channel.DescriptionHash = packet.DescriptionHash
+		channel.Description = ""
 	}
 
-	if c.state == StateSynced {
+	if c.State == StateSynced {
 		c.listeners.OnChannelChange(&event)
 	}
 	return nil
@@ -319,18 +319,18 @@ func handleUserRemove(c *Client, buffer []byte) error {
 		Type:   UserChangeDisconnected,
 	}
 	{
-		session := uint(*packet.Session)
-		event.User = c.users[session]
+		session := *packet.Session
+		event.User = c.Users[session]
 		if event.User == nil {
 			return errInvalidProtobuf
 		}
-		if event.User.channel != nil {
-			delete(event.User.channel.users, session)
+		if event.User.Channel != nil {
+			delete(event.User.Channel.Users, session)
 		}
-		delete(c.users, session)
+		delete(c.Users, session)
 	}
 	if packet.Actor != nil {
-		event.Actor = c.users[uint(*packet.Actor)]
+		event.Actor = c.Users[*packet.Actor]
 		if event.Actor == nil {
 			return errInvalidProtobuf
 		}
@@ -343,7 +343,7 @@ func handleUserRemove(c *Client, buffer []byte) error {
 		event.Type |= UserChangeBanned
 	}
 
-	if c.state == StateSynced {
+	if c.State == StateSynced {
 		c.listeners.OnUserChange(&event)
 	}
 	return nil
@@ -363,11 +363,11 @@ func handleUserState(c *Client, buffer []byte) error {
 	}
 	var user, actor *User
 	{
-		session := uint(*packet.Session)
-		user = c.users[session]
+		session := *packet.Session
+		user = c.Users[session]
 		if user == nil {
-			user = c.users.create(session)
-			user.channel = c.channels[0]
+			user = c.Users.create(session)
+			user.Channel = c.Channels[0]
 			user.client = c
 
 			event.Type |= UserChangeConnected
@@ -375,123 +375,123 @@ func handleUserState(c *Client, buffer []byte) error {
 			decoder, _ := gopus.NewDecoder(AudioSampleRate, 1)
 			user.decoder = decoder
 
-			if user.channel == nil {
+			if user.Channel == nil {
 				return errInvalidProtobuf
 			}
 			event.Type |= UserChangeChannel
-			user.channel.users[session] = user
+			user.Channel.Users[session] = user
 		}
 	}
 	event.User = user
 	if packet.Actor != nil {
-		actor = c.users[uint(*packet.Actor)]
+		actor = c.Users[*packet.Actor]
 		if actor == nil {
 			return errInvalidProtobuf
 		}
 		event.Actor = actor
 	}
 	if packet.Name != nil {
-		if *packet.Name != user.name {
+		if *packet.Name != user.Name {
 			event.Type |= UserChangeName
 		}
-		user.name = *packet.Name
+		user.Name = *packet.Name
 	}
 	if packet.UserId != nil {
-		if *packet.UserId != user.userID && !event.Type.Has(UserChangeConnected) {
+		if *packet.UserId != user.UserID && !event.Type.Has(UserChangeConnected) {
 			if *packet.UserId != math.MaxUint32 {
 				event.Type |= UserChangeRegistered
-				user.userID = *packet.UserId
+				user.UserID = *packet.UserId
 			} else {
 				event.Type |= UserChangeUnregistered
-				user.userID = 0
+				user.UserID = 0
 			}
 		} else {
-			user.userID = *packet.UserId
+			user.UserID = *packet.UserId
 		}
 	}
 	if packet.ChannelId != nil {
-		if user.channel != nil {
-			delete(user.channel.users, user.Session())
+		if user.Channel != nil {
+			delete(user.Channel.Users, user.Session)
 		}
-		newChannel := c.channels[uint(*packet.ChannelId)]
+		newChannel := c.Channels[*packet.ChannelId]
 		if newChannel == nil {
 			return errInvalidProtobuf
 		}
-		if newChannel != user.channel {
+		if newChannel != user.Channel {
 			event.Type |= UserChangeChannel
-			user.channel = newChannel
+			user.Channel = newChannel
 		}
-		user.channel.users[user.Session()] = user
+		user.Channel.Users[user.Session] = user
 	}
 	if packet.Mute != nil {
-		if *packet.Mute != user.mute {
+		if *packet.Mute != user.Muted {
 			event.Type |= UserChangeAudio
 		}
-		user.mute = *packet.Mute
+		user.Muted = *packet.Mute
 	}
 	if packet.Deaf != nil {
-		if *packet.Deaf != user.deaf {
+		if *packet.Deaf != user.Deafened {
 			event.Type |= UserChangeAudio
 		}
-		user.deaf = *packet.Deaf
+		user.Deafened = *packet.Deaf
 	}
 	if packet.Suppress != nil {
-		if *packet.Suppress != user.suppress {
+		if *packet.Suppress != user.Suppressed {
 			event.Type |= UserChangeAudio
 		}
-		user.suppress = *packet.Suppress
+		user.Suppressed = *packet.Suppress
 	}
 	if packet.SelfMute != nil {
-		if *packet.SelfMute != user.selfMute {
+		if *packet.SelfMute != user.SelfMuted {
 			event.Type |= UserChangeAudio
 		}
-		user.selfMute = *packet.SelfMute
+		user.SelfMuted = *packet.SelfMute
 	}
 	if packet.SelfDeaf != nil {
-		if *packet.SelfDeaf != user.selfDeaf {
+		if *packet.SelfDeaf != user.SelfDeafened {
 			event.Type |= UserChangeAudio
 		}
-		user.selfDeaf = *packet.SelfDeaf
+		user.SelfDeafened = *packet.SelfDeaf
 	}
 	if packet.Texture != nil {
 		event.Type |= UserChangeTexture
-		user.texture = packet.Texture
-		user.textureHash = nil
+		user.Texture = packet.Texture
+		user.TextureHash = nil
 	}
 	if packet.Comment != nil {
-		if *packet.Comment != user.comment {
+		if *packet.Comment != user.Comment {
 			event.Type |= UserChangeComment
 		}
-		user.comment = *packet.Comment
-		user.commentHash = nil
+		user.Comment = *packet.Comment
+		user.CommentHash = nil
 	}
 	if packet.Hash != nil {
-		user.hash = *packet.Hash
+		user.Hash = *packet.Hash
 	}
 	if packet.CommentHash != nil {
 		event.Type |= UserChangeComment
-		user.commentHash = packet.CommentHash
-		user.comment = ""
+		user.CommentHash = packet.CommentHash
+		user.Comment = ""
 	}
 	if packet.TextureHash != nil {
 		event.Type |= UserChangeTexture
-		user.textureHash = packet.TextureHash
-		user.texture = nil
+		user.TextureHash = packet.TextureHash
+		user.Texture = nil
 	}
 	if packet.PrioritySpeaker != nil {
-		if *packet.PrioritySpeaker != user.prioritySpeaker {
+		if *packet.PrioritySpeaker != user.PrioritySpeaker {
 			event.Type |= UserChangePrioritySpeaker
 		}
-		user.prioritySpeaker = *packet.PrioritySpeaker
+		user.PrioritySpeaker = *packet.PrioritySpeaker
 	}
 	if packet.Recording != nil {
-		if *packet.Recording != user.recording {
+		if *packet.Recording != user.Recording {
 			event.Type |= UserChangeRecording
 		}
-		user.recording = *packet.Recording
+		user.Recording = *packet.Recording
 	}
 
-	if c.state == StateSynced {
+	if c.State == StateSynced {
 		c.listeners.OnUserChange(&event)
 	}
 	return nil
@@ -510,29 +510,29 @@ func handleBanList(c *Client, buffer []byte) error {
 
 	for _, banPacket := range packet.Bans {
 		ban := &Ban{
-			address: net.IP(banPacket.Address),
+			Address: net.IP(banPacket.Address),
 		}
 		if banPacket.Mask != nil {
 			size := net.IPv4len * 8
-			if len(ban.address) == net.IPv6len {
+			if len(ban.Address) == net.IPv6len {
 				size = net.IPv6len * 8
 			}
-			ban.mask = net.CIDRMask(int(*banPacket.Mask), size)
+			ban.Mask = net.CIDRMask(int(*banPacket.Mask), size)
 		}
 		if banPacket.Name != nil {
-			ban.name = *banPacket.Name
+			ban.Name = *banPacket.Name
 		}
 		if banPacket.Hash != nil {
-			ban.hash = *banPacket.Hash
+			ban.Hash = *banPacket.Hash
 		}
 		if banPacket.Reason != nil {
-			ban.reason = *banPacket.Reason
+			ban.Reason = *banPacket.Reason
 		}
 		if banPacket.Start != nil {
-			ban.start, _ = time.Parse(time.RFC3339, *banPacket.Start)
+			ban.Start, _ = time.Parse(time.RFC3339, *banPacket.Start)
 		}
 		if banPacket.Duration != nil {
-			ban.duration = time.Duration(*banPacket.Duration) * time.Second
+			ban.Duration = time.Duration(*banPacket.Duration) * time.Second
 		}
 		event.BanList = append(event.BanList, ban)
 	}
@@ -551,12 +551,12 @@ func handleTextMessage(c *Client, buffer []byte) error {
 		Client: c,
 	}
 	if packet.Actor != nil {
-		event.Sender = c.users[uint(*packet.Actor)]
+		event.Sender = c.Users[*packet.Actor]
 	}
 	if packet.Session != nil {
 		event.Users = make([]*User, 0, len(packet.Session))
 		for _, session := range packet.Session {
-			if user := c.users[uint(session)]; user != nil {
+			if user := c.Users[session]; user != nil {
 				event.Users = append(event.Users, user)
 			}
 		}
@@ -564,7 +564,7 @@ func handleTextMessage(c *Client, buffer []byte) error {
 	if packet.ChannelId != nil {
 		event.Channels = make([]*Channel, 0, len(packet.ChannelId))
 		for _, id := range packet.ChannelId {
-			if channel := c.channels[uint(id)]; channel != nil {
+			if channel := c.Channels[id]; channel != nil {
 				event.Channels = append(event.Channels, channel)
 			}
 		}
@@ -572,7 +572,7 @@ func handleTextMessage(c *Client, buffer []byte) error {
 	if packet.TreeId != nil {
 		event.Trees = make([]*Channel, 0, len(packet.TreeId))
 		for _, id := range packet.TreeId {
-			if channel := c.channels[uint(id)]; channel != nil {
+			if channel := c.Channels[id]; channel != nil {
 				event.Trees = append(event.Trees, channel)
 			}
 		}
@@ -606,13 +606,13 @@ func handlePermissionDenied(c *Client, buffer []byte) error {
 		event.String = *packet.Name
 	}
 	if packet.Session != nil {
-		event.User = c.users[uint(*packet.Session)]
+		event.User = c.Users[*packet.Session]
 		if event.User == nil {
 			return errInvalidProtobuf
 		}
 	}
 	if packet.ChannelId != nil {
-		event.Channel = c.channels[uint(*packet.ChannelId)]
+		event.Channel = c.Channels[*packet.ChannelId]
 		if event.Channel == nil {
 			return errInvalidProtobuf
 		}
@@ -632,30 +632,30 @@ func handleACL(c *Client, buffer []byte) error {
 	}
 
 	acl := &ACL{
-		inherits: packet.GetInheritAcls(),
+		Inherits: packet.GetInheritAcls(),
 	}
 	if packet.ChannelId == nil {
 		return errInvalidProtobuf
 	}
-	acl.channel = c.channels[uint(*packet.ChannelId)]
-	if acl.channel == nil {
+	acl.Channel = c.Channels[*packet.ChannelId]
+	if acl.Channel == nil {
 		return errInvalidProtobuf
 	}
 
 	if packet.Groups != nil {
-		acl.groups = make([]*ACLGroup, 0, len(packet.Groups))
+		acl.Groups = make([]*ACLGroup, 0, len(packet.Groups))
 		for _, group := range packet.Groups {
 			aclGroup := &ACLGroup{
-				name:         *group.Name,
-				inherited:    group.GetInherited(),
-				inheritUsers: group.GetInherit(),
-				inheritable:  group.GetInheritable(),
+				Name:         *group.Name,
+				Inherited:    group.GetInherited(),
+				InheritUsers: group.GetInherit(),
+				Inheritable:  group.GetInheritable(),
 			}
 			if group.Add != nil {
 				aclGroup.usersAdd = make(map[uint32]*ACLUser)
 				for _, userID := range group.Add {
 					aclGroup.usersAdd[userID] = &ACLUser{
-						userID: userID,
+						UserID: userID,
 					}
 				}
 			}
@@ -663,7 +663,7 @@ func handleACL(c *Client, buffer []byte) error {
 				aclGroup.usersRemove = make(map[uint32]*ACLUser)
 				for _, userID := range group.Remove {
 					aclGroup.usersRemove[userID] = &ACLUser{
-						userID: userID,
+						UserID: userID,
 					}
 				}
 			}
@@ -671,43 +671,43 @@ func handleACL(c *Client, buffer []byte) error {
 				aclGroup.usersInherited = make(map[uint32]*ACLUser)
 				for _, userID := range group.InheritedMembers {
 					aclGroup.usersInherited[userID] = &ACLUser{
-						userID: userID,
+						UserID: userID,
 					}
 				}
 			}
-			acl.groups = append(acl.groups, aclGroup)
+			acl.Groups = append(acl.Groups, aclGroup)
 		}
 	}
 	if packet.Acls != nil {
-		acl.rules = make([]*ACLRule, 0, len(packet.Acls))
+		acl.Rules = make([]*ACLRule, 0, len(packet.Acls))
 		for _, rule := range packet.Acls {
 			aclRule := &ACLRule{
-				appliesCurrent:  rule.GetApplyHere(),
-				appliesChildren: rule.GetApplySubs(),
-				inherited:       rule.GetInherited(),
-				granted:         Permission(rule.GetGrant()),
-				denied:          Permission(rule.GetDeny()),
+				AppliesCurrent:  rule.GetApplyHere(),
+				AppliesChildren: rule.GetApplySubs(),
+				Inherited:       rule.GetInherited(),
+				Granted:         Permission(rule.GetGrant()),
+				Denied:          Permission(rule.GetDeny()),
 			}
 			if rule.UserId != nil {
-				aclRule.user = &ACLUser{
-					userID: *rule.UserId,
+				aclRule.User = &ACLUser{
+					UserID: *rule.UserId,
 				}
 			} else if rule.Group != nil {
 				var group *ACLGroup
-				for _, g := range acl.groups {
-					if g.name == *rule.Group {
+				for _, g := range acl.Groups {
+					if g.Name == *rule.Group {
 						group = g
 						break
 					}
 				}
 				if group == nil {
 					group = &ACLGroup{
-						name: *rule.Group,
+						Name: *rule.Group,
 					}
 				}
-				aclRule.group = group
+				aclRule.Group = group
 			}
-			acl.rules = append(acl.rules, aclRule)
+			acl.Rules = append(acl.Rules, aclRule)
 		}
 	}
 	c.tmpACL = acl
@@ -731,20 +731,20 @@ func handleQueryUsers(c *Client, buffer []byte) error {
 		userMap[packet.Ids[i]] = packet.Names[i]
 	}
 
-	for _, group := range acl.groups {
+	for _, group := range acl.Groups {
 		for _, user := range group.usersAdd {
-			user.name = userMap[user.userID]
+			user.Name = userMap[user.UserID]
 		}
 		for _, user := range group.usersRemove {
-			user.name = userMap[user.userID]
+			user.Name = userMap[user.UserID]
 		}
 		for _, user := range group.usersInherited {
-			user.name = userMap[user.userID]
+			user.Name = userMap[user.UserID]
 		}
 	}
-	for _, rule := range acl.rules {
-		if rule.user != nil {
-			rule.user.name = userMap[rule.user.userID]
+	for _, rule := range acl.Rules {
+		if rule.User != nil {
+			rule.User.Name = userMap[rule.User.UserID]
 		}
 	}
 
@@ -776,25 +776,25 @@ func handleContextActionModify(c *Client, buffer []byte) error {
 
 	switch *packet.Operation {
 	case MumbleProto.ContextActionModify_Add:
-		if ca := c.contextActions[*packet.Action]; ca != nil {
+		if ca := c.ContextActions[*packet.Action]; ca != nil {
 			return nil
 		}
 		event.Type = ContextActionAdd
-		contextAction := c.contextActions.create(*packet.Action)
+		contextAction := c.ContextActions.create(*packet.Action)
 		if packet.Text != nil {
-			contextAction.label = *packet.Text
+			contextAction.Label = *packet.Text
 		}
 		if packet.Context != nil {
-			contextAction.contextType = ContextActionType(*packet.Context)
+			contextAction.Type = ContextActionType(*packet.Context)
 		}
 		event.ContextAction = contextAction
 	case MumbleProto.ContextActionModify_Remove:
-		contextAction := c.contextActions[*packet.Action]
+		contextAction := c.ContextActions[*packet.Action]
 		if contextAction == nil {
 			return nil
 		}
 		event.Type = ContextActionRemove
-		delete(c.contextActions, *packet.Action)
+		delete(c.ContextActions, *packet.Action)
 		event.ContextAction = contextAction
 	default:
 		return errInvalidProtobuf
@@ -821,10 +821,10 @@ func handleUserList(c *Client, buffer []byte) error {
 
 	for _, user := range packet.Users {
 		registeredUser := &RegisteredUser{
-			userID: *user.UserId,
+			UserID: *user.UserId,
 		}
 		if user.Name != nil {
-			registeredUser.name = *user.Name
+			registeredUser.Name = *user.Name
 		}
 		event.UserList = append(event.UserList, registeredUser)
 	}
@@ -845,9 +845,9 @@ func handlePermissionQuery(c *Client, buffer []byte) error {
 
 	if packet.Flush != nil && *packet.Flush {
 		oldPermissions := c.permissions
-		c.permissions = make(map[uint]*Permission)
+		c.permissions = make(map[uint32]*Permission)
 		for channelID := range oldPermissions {
-			channel := c.channels[channelID]
+			channel := c.Channels[channelID]
 			event := ChannelChangeEvent{
 				Client:  c,
 				Type:    ChannelChangePermission,
@@ -857,10 +857,10 @@ func handlePermissionQuery(c *Client, buffer []byte) error {
 		}
 	}
 	if packet.ChannelId != nil {
-		channel := c.channels[uint(*packet.ChannelId)]
+		channel := c.Channels[*packet.ChannelId]
 		if packet.Permissions != nil {
 			p := Permission(*packet.Permissions)
-			c.permissions[channel.ID()] = &p
+			c.permissions[channel.ID] = &p
 			event := ChannelChangeEvent{
 				Client:  c,
 				Type:    ChannelChangePermission,
@@ -885,46 +885,46 @@ func handleUserStats(c *Client, buffer []byte) error {
 	if packet.Session == nil {
 		return errIncompleteProtobuf
 	}
-	user := c.users[uint(*packet.Session)]
+	user := c.Users[*packet.Session]
 	if user == nil {
 		return errInvalidProtobuf
 	}
 
-	if user.stats == nil {
-		user.stats = &UserStats{}
+	if user.Stats == nil {
+		user.Stats = &UserStats{}
 	}
-	*user.stats = UserStats{
-		user: user,
+	*user.Stats = UserStats{
+		User: user,
 	}
-	stats := user.stats
+	stats := user.Stats
 
 	if packet.Version != nil {
-		stats.version = parseVersion(packet.Version)
+		stats.Version = parseVersion(packet.Version)
 	}
 	if packet.Onlinesecs != nil {
-		stats.connected = time.Now().Add(time.Duration(*packet.Onlinesecs) * -time.Second)
+		stats.Connected = time.Now().Add(time.Duration(*packet.Onlinesecs) * -time.Second)
 	}
 	if packet.Idlesecs != nil {
-		stats.idle = time.Duration(*packet.Idlesecs) * time.Second
+		stats.Idle = time.Duration(*packet.Idlesecs) * time.Second
 	}
 	if packet.Bandwidth != nil {
-		stats.bandwidth = int(*packet.Bandwidth)
+		stats.Bandwidth = int(*packet.Bandwidth)
 	}
 	if packet.Address != nil {
-		stats.ip = net.IP(packet.Address)
+		stats.IP = net.IP(packet.Address)
 	}
 	if packet.Certificates != nil {
-		stats.certificates = make([]*x509.Certificate, 0, len(packet.Certificates))
+		stats.Certificates = make([]*x509.Certificate, 0, len(packet.Certificates))
 		for _, data := range packet.Certificates {
 			if data != nil {
 				if cert, err := x509.ParseCertificate(data); err == nil {
-					stats.certificates = append(stats.certificates, cert)
+					stats.Certificates = append(stats.Certificates, cert)
 				}
 			}
 		}
 	}
 	if packet.Opus != nil {
-		stats.opus = *packet.Opus
+		stats.Opus = *packet.Opus
 	}
 
 	event := UserChangeEvent{

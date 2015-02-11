@@ -81,8 +81,8 @@ func (s *Stream) Stop() error {
 }
 
 func (s *Stream) sourceRoutine(callbacks []func()) {
-	interval := s.client.Config().GetAudioInterval()
-	frameSize := s.client.Config().GetAudioFrameSize()
+	interval := s.client.Config.GetAudioInterval()
+	frameSize := s.client.Config.GetAudioFrameSize()
 
 	ticker := time.NewTicker(interval)
 

@@ -1,12 +1,11 @@
 package gumble
 
 import (
-	"github.com/golang/protobuf/proto"
 	"github.com/layeh/gumble/gumble/MumbleProto"
 )
 
 var targetLoopback = VoiceTarget{
-	id: 31,
+	ID: 31,
 }
 
 // TargetLoopback is a special voice target which causes any audio sent to the
@@ -24,7 +23,8 @@ type voiceTargetChannel struct {
 // VoiceTarget represents a set of users and/or channels that the client can
 // whisper to.
 type VoiceTarget struct {
-	id       int
+	// The voice target ID. This value must be in the range [1, 30].
+	ID       uint32
 	users    []*User
 	channels []*voiceTargetChannel
 }
@@ -33,17 +33,6 @@ type VoiceTarget struct {
 func (vt *VoiceTarget) Clear() {
 	vt.users = nil
 	vt.channels = nil
-}
-
-// ID returns the voice target ID.
-func (vt *VoiceTarget) ID() int {
-	return vt.id
-}
-
-// SetID sets the ID of the voice target. This value must be in the range
-// [1, 30].
-func (vt *VoiceTarget) SetID(id int) {
-	vt.id = id
 }
 
 // AddUser adds a user to the voice target.
@@ -62,17 +51,17 @@ func (vt *VoiceTarget) AddChannel(channel *Channel, recursive, links bool) {
 
 func (vt *VoiceTarget) writeMessage(client *Client) error {
 	packet := MumbleProto.VoiceTarget{
-		Id:      proto.Uint32(uint32(vt.id)),
+		Id:      &vt.ID,
 		Targets: make([]*MumbleProto.VoiceTarget_Target, 0, len(vt.users)+len(vt.channels)),
 	}
 	for _, user := range vt.users {
 		packet.Targets = append(packet.Targets, &MumbleProto.VoiceTarget_Target{
-			Session: []uint32{user.session},
+			Session: []uint32{user.Session},
 		})
 	}
 	for _, vtChannel := range vt.channels {
 		packet.Targets = append(packet.Targets, &MumbleProto.VoiceTarget_Target{
-			ChannelId: &vtChannel.channel.id,
+			ChannelId: &vtChannel.channel.ID,
 			Links:     &vtChannel.links,
 			Children:  &vtChannel.recursive,
 		})

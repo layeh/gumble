@@ -79,7 +79,7 @@ func fetchYoutubeInfo(client *gumble.Client, id string) {
 	}
 	message := gumble.TextMessage{
 		Channels: []*gumble.Channel{
-			client.Self().Channel(),
+			client.Self.Channel,
 		},
 		Message: buffer.String(),
 	}
