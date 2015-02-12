@@ -31,7 +31,9 @@ type DisconnectType int
 
 // Client disconnect reasons.
 const (
-	DisconnectError DisconnectType = 0xFF - iota
+	DisconnectError DisconnectType = 0xFE - iota
+	DisconnectKicked
+	DisconnectBanned
 	DisconnectUser
 
 	DisconnectOther             DisconnectType = DisconnectType(MumbleProto.Reject_None)

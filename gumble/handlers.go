@@ -342,6 +342,13 @@ func handleUserRemove(c *Client, buffer []byte) error {
 	if packet.Ban != nil && *packet.Ban {
 		event.Type |= UserChangeBanned
 	}
+	if event.User == c.Self {
+		if packet.Ban != nil && *packet.Ban {
+			c.disconnectEvent.Type = DisconnectBanned
+		} else {
+			c.disconnectEvent.Type = DisconnectKicked
+		}
+	}
 
 	if c.State == StateSynced {
 		c.listeners.OnUserChange(&event)

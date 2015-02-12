@@ -167,6 +167,7 @@ func (c *Client) pingRoutine() {
 func (c *Client) readRoutine() {
 	c.disconnectEvent = DisconnectEvent{
 		Client: c,
+		Type:   DisconnectError,
 	}
 
 	for {
