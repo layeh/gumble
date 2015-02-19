@@ -99,6 +99,13 @@ func (c *Client) Connect() error {
 	if err != nil {
 		return err
 	}
+	if verify := c.Config.TLSVerify; verify != nil {
+		state := tlsConn.ConnectionState()
+		if err := verify(&state); err != nil {
+			tlsConn.Close()
+			return err
+		}
+	}
 	c.Conn = NewConn(tlsConn)
 
 	c.AudioEncoder = encoder

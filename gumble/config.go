@@ -27,6 +27,11 @@ type Config struct {
 	AudioDataBytes int
 
 	TLSConfig tls.Config
+	// If non-nil, this function will be called after the connection to the
+	// server has been made. If it returns nil, the connection will stay alive,
+	// otherwise, it will be closed and Client.Connect will return the returned
+	// error.
+	TLSVerify func(state *tls.ConnectionState) error
 	Dialer    net.Dialer
 }
 
