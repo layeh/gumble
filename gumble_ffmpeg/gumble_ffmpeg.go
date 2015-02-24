@@ -40,7 +40,37 @@ func New(client *gumble.Client) (*Stream, error) {
 	return stream, nil
 }
 
-func (s *Stream) Play(file string, callbacks... func()) error {
+func (s *Stream) PlayExec(name string, args []string, callbacks ...func()) error {
+	cmd := exec.Command(name, args...)
+	pipe, err := cmd.StdoutPipe()
+	if err != nil {
+		return err
+	}
+	if err = cmd.Start(); err != nil {
+		return err
+	}
+	cb := func() {
+		cmd.Process.Kill()
+		cmd.Wait()
+	}
+	callbacks = append(callbacks, cb)
+	err = s.play("-", pipe, callbacks...)
+	if err != nil {
+		cb()
+		return err
+	}
+	return nil
+}
+
+func (s *Stream) PlayReader(in io.Reader, callbacks ...func()) error {
+	return s.play("-", in, callbacks...)
+}
+
+func (s *Stream) Play(file string, callbacks ...func()) error {
+	return s.play(file, nil, callbacks...)
+}
+
+func (s *Stream) play(file string, in io.Reader, callbacks ...func()) error {
 	s.playLock.Lock()
 	defer s.playLock.Unlock()
 
@@ -52,6 +82,9 @@ func (s *Stream) Play(file string, callbacks... func()) error {
 		return err
 	} else {
 		s.pipe = pipe
+	}
+	if in != nil {
+		cmd.Stdin = in
 	}
 	if err := cmd.Start(); err != nil {
 		return err
