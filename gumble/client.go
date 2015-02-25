@@ -186,6 +186,7 @@ func (c *Client) readRoutine() {
 	c.end <- true
 	c.Conn = nil
 	c.State = StateDisconnected
+	c.tmpACL = nil
 	c.listeners.OnDisconnect(&c.disconnectEvent)
 }
 
