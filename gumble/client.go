@@ -45,10 +45,6 @@ type Client struct {
 	listeners      eventMultiplexer
 	audioListeners audioEventMultiplexer
 
-	server struct {
-		version Version
-	}
-
 	// The users currently connected to the server.
 	Users Users
 	// The connected server's channels.
@@ -78,6 +74,7 @@ func NewClient(config *Config) *Client {
 	}
 	client := &Client{
 		Config: config,
+		end:    make(chan bool),
 	}
 	return client
 }
@@ -116,7 +113,6 @@ func (c *Client) Connect() error {
 	c.State = StateConnected
 
 	// Channels and goroutines
-	c.end = make(chan bool)
 	go c.readRoutine()
 	go c.pingRoutine()
 
@@ -187,13 +183,10 @@ func (c *Client) readRoutine() {
 		}
 	}
 
-	close(c.end)
+	c.end <- true
+	c.Conn = nil
+	c.State = StateDisconnected
 	c.listeners.OnDisconnect(&c.disconnectEvent)
-	*c = Client{
-		Config:         c.Config,
-		listeners:      c.listeners,
-		audioListeners: c.audioListeners,
-	}
 }
 
 // Request requests that specific server information be sent to the client. The
@@ -215,7 +208,7 @@ func (c *Client) Request(request Request) {
 
 // Disconnect disconnects the client from the server.
 func (c *Client) Disconnect() error {
-	if c.Conn == nil {
+	if c.State == StateDisconnected {
 		return errors.New("client is already disconnected")
 	}
 	c.disconnectEvent.Type = DisconnectUser

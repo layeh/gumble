@@ -75,8 +75,6 @@ func handleVersion(c *Client, buffer []byte) error {
 	if err := proto.Unmarshal(buffer, &packet); err != nil {
 		return err
 	}
-
-	c.server.version = parseVersion(&packet)
 	return nil
 }
 
