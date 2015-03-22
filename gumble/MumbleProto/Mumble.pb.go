@@ -48,13 +48,23 @@ var _ = math.Inf
 type Reject_RejectType int32
 
 const (
-	Reject_None              Reject_RejectType = 0
-	Reject_WrongVersion      Reject_RejectType = 1
-	Reject_InvalidUsername   Reject_RejectType = 2
-	Reject_WrongUserPW       Reject_RejectType = 3
-	Reject_WrongServerPW     Reject_RejectType = 4
-	Reject_UsernameInUse     Reject_RejectType = 5
-	Reject_ServerFull        Reject_RejectType = 6
+	// TODO ??
+	Reject_None Reject_RejectType = 0
+	// The client attempted to connect with an incompatible version.
+	Reject_WrongVersion Reject_RejectType = 1
+	// The user name supplied by the client was invalid.
+	Reject_InvalidUsername Reject_RejectType = 2
+	// The client attempted to authenticate as a user with a password but it
+	// was wrong.
+	Reject_WrongUserPW Reject_RejectType = 3
+	// The client attempted to connect to a passworded server but the password
+	// was wrong.
+	Reject_WrongServerPW Reject_RejectType = 4
+	// Supplied username is already in use.
+	Reject_UsernameInUse Reject_RejectType = 5
+	// Server is currently full and cannot accept more users.
+	Reject_ServerFull Reject_RejectType = 6
+	// The user did not provide a certificate but one is required.
 	Reject_NoCertificate     Reject_RejectType = 7
 	Reject_AuthenticatorFail Reject_RejectType = 8
 )
@@ -102,17 +112,27 @@ func (x *Reject_RejectType) UnmarshalJSON(data []byte) error {
 type PermissionDenied_DenyType int32
 
 const (
-	PermissionDenied_Text               PermissionDenied_DenyType = 0
-	PermissionDenied_Permission         PermissionDenied_DenyType = 1
-	PermissionDenied_SuperUser          PermissionDenied_DenyType = 2
-	PermissionDenied_ChannelName        PermissionDenied_DenyType = 3
-	PermissionDenied_TextTooLong        PermissionDenied_DenyType = 4
-	PermissionDenied_H9K                PermissionDenied_DenyType = 5
-	PermissionDenied_TemporaryChannel   PermissionDenied_DenyType = 6
+	// Operation denied for other reason, see reason field.
+	PermissionDenied_Text PermissionDenied_DenyType = 0
+	// Permissions were denied.
+	PermissionDenied_Permission PermissionDenied_DenyType = 1
+	// Cannot modify SuperUser.
+	PermissionDenied_SuperUser PermissionDenied_DenyType = 2
+	// Invalid channel name.
+	PermissionDenied_ChannelName PermissionDenied_DenyType = 3
+	// Text message too long.
+	PermissionDenied_TextTooLong PermissionDenied_DenyType = 4
+	// The flux capacitor was spelled wrong.
+	PermissionDenied_H9K PermissionDenied_DenyType = 5
+	// Operation not permitted in temporary channel.
+	PermissionDenied_TemporaryChannel PermissionDenied_DenyType = 6
+	// Operation requires certificate.
 	PermissionDenied_MissingCertificate PermissionDenied_DenyType = 7
-	PermissionDenied_UserName           PermissionDenied_DenyType = 8
-	PermissionDenied_ChannelFull        PermissionDenied_DenyType = 9
-	PermissionDenied_NestingLimit       PermissionDenied_DenyType = 10
+	// Invalid username.
+	PermissionDenied_UserName PermissionDenied_DenyType = 8
+	// Channel is full.
+	PermissionDenied_ChannelFull  PermissionDenied_DenyType = 9
+	PermissionDenied_NestingLimit PermissionDenied_DenyType = 10
 )
 
 var PermissionDenied_DenyType_name = map[int32]string{
@@ -162,9 +182,12 @@ func (x *PermissionDenied_DenyType) UnmarshalJSON(data []byte) error {
 type ContextActionModify_Context int32
 
 const (
-	ContextActionModify_Server  ContextActionModify_Context = 1
+	// Action is applicable to the server.
+	ContextActionModify_Server ContextActionModify_Context = 1
+	// Action can target a Channel.
 	ContextActionModify_Channel ContextActionModify_Context = 2
-	ContextActionModify_User    ContextActionModify_Context = 4
+	// Action can target a User.
+	ContextActionModify_User ContextActionModify_Context = 4
 )
 
 var ContextActionModify_Context_name = map[int32]string{
@@ -229,9 +252,13 @@ func (x *ContextActionModify_Operation) UnmarshalJSON(data []byte) error {
 }
 
 type Version struct {
-	Version          *uint32 `protobuf:"varint,1,opt,name=version" json:"version,omitempty"`
-	Release          *string `protobuf:"bytes,2,opt,name=release" json:"release,omitempty"`
-	Os               *string `protobuf:"bytes,3,opt,name=os" json:"os,omitempty"`
+	// 2-byte Major, 1-byte Minor and 1-byte Patch version number.
+	Version *uint32 `protobuf:"varint,1,opt,name=version" json:"version,omitempty"`
+	// Client release name.
+	Release *string `protobuf:"bytes,2,opt,name=release" json:"release,omitempty"`
+	// Client OS name.
+	Os *string `protobuf:"bytes,3,opt,name=os" json:"os,omitempty"`
+	// Client OS version.
 	OsVersion        *string `protobuf:"bytes,4,opt,name=os_version" json:"os_version,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
@@ -268,7 +295,9 @@ func (m *Version) GetOsVersion() string {
 	return ""
 }
 
+// Not used. Not even for tunneling UDP through TCP.
 type UDPTunnel struct {
+	// Not used.
 	Packet           []byte `protobuf:"bytes,1,req,name=packet" json:"packet,omitempty"`
 	XXX_unrecognized []byte `json:"-"`
 }
@@ -284,13 +313,18 @@ func (m *UDPTunnel) GetPacket() []byte {
 	return nil
 }
 
+// Used by the client to send the authentication credentials to the server.
 type Authenticate struct {
-	Username         *string  `protobuf:"bytes,1,opt,name=username" json:"username,omitempty"`
-	Password         *string  `protobuf:"bytes,2,opt,name=password" json:"password,omitempty"`
-	Tokens           []string `protobuf:"bytes,3,rep,name=tokens" json:"tokens,omitempty"`
-	CeltVersions     []int32  `protobuf:"varint,4,rep,name=celt_versions" json:"celt_versions,omitempty"`
-	Opus             *bool    `protobuf:"varint,5,opt,name=opus,def=0" json:"opus,omitempty"`
-	XXX_unrecognized []byte   `json:"-"`
+	// UTF-8 encoded username.
+	Username *string `protobuf:"bytes,1,opt,name=username" json:"username,omitempty"`
+	// Server or user password.
+	Password *string `protobuf:"bytes,2,opt,name=password" json:"password,omitempty"`
+	// Additional access tokens for server ACL groups.
+	Tokens []string `protobuf:"bytes,3,rep,name=tokens" json:"tokens,omitempty"`
+	// A list of CELT bitstream version constants supported by the client.
+	CeltVersions     []int32 `protobuf:"varint,4,rep,name=celt_versions" json:"celt_versions,omitempty"`
+	Opus             *bool   `protobuf:"varint,5,opt,name=opus,def=0" json:"opus,omitempty"`
+	XXX_unrecognized []byte  `json:"-"`
 }
 
 func (m *Authenticate) Reset()         { *m = Authenticate{} }
@@ -334,17 +368,31 @@ func (m *Authenticate) GetOpus() bool {
 	return Default_Authenticate_Opus
 }
 
+// Sent by the client to notify the server that the client is still alive.
+// Server must reply to the packet with the same timestamp and its own
+// good/late/lost/resync numbers. None of the fields is strictly required.
 type Ping struct {
-	Timestamp        *uint64  `protobuf:"varint,1,opt,name=timestamp" json:"timestamp,omitempty"`
-	Good             *uint32  `protobuf:"varint,2,opt,name=good" json:"good,omitempty"`
-	Late             *uint32  `protobuf:"varint,3,opt,name=late" json:"late,omitempty"`
-	Lost             *uint32  `protobuf:"varint,4,opt,name=lost" json:"lost,omitempty"`
-	Resync           *uint32  `protobuf:"varint,5,opt,name=resync" json:"resync,omitempty"`
-	UdpPackets       *uint32  `protobuf:"varint,6,opt,name=udp_packets" json:"udp_packets,omitempty"`
-	TcpPackets       *uint32  `protobuf:"varint,7,opt,name=tcp_packets" json:"tcp_packets,omitempty"`
-	UdpPingAvg       *float32 `protobuf:"fixed32,8,opt,name=udp_ping_avg" json:"udp_ping_avg,omitempty"`
-	UdpPingVar       *float32 `protobuf:"fixed32,9,opt,name=udp_ping_var" json:"udp_ping_var,omitempty"`
-	TcpPingAvg       *float32 `protobuf:"fixed32,10,opt,name=tcp_ping_avg" json:"tcp_ping_avg,omitempty"`
+	// Client timestamp. Server should not attempt to decode.
+	Timestamp *uint64 `protobuf:"varint,1,opt,name=timestamp" json:"timestamp,omitempty"`
+	// The amount of good packets received.
+	Good *uint32 `protobuf:"varint,2,opt,name=good" json:"good,omitempty"`
+	// The amount of late packets received.
+	Late *uint32 `protobuf:"varint,3,opt,name=late" json:"late,omitempty"`
+	// The amount of packets never received.
+	Lost *uint32 `protobuf:"varint,4,opt,name=lost" json:"lost,omitempty"`
+	// The amount of nonce resyncs.
+	Resync *uint32 `protobuf:"varint,5,opt,name=resync" json:"resync,omitempty"`
+	// The total amount of UDP packets received.
+	UdpPackets *uint32 `protobuf:"varint,6,opt,name=udp_packets" json:"udp_packets,omitempty"`
+	// The total amount of TCP packets received.
+	TcpPackets *uint32 `protobuf:"varint,7,opt,name=tcp_packets" json:"tcp_packets,omitempty"`
+	// UDP ping average.
+	UdpPingAvg *float32 `protobuf:"fixed32,8,opt,name=udp_ping_avg" json:"udp_ping_avg,omitempty"`
+	// UDP ping variance.
+	UdpPingVar *float32 `protobuf:"fixed32,9,opt,name=udp_ping_var" json:"udp_ping_var,omitempty"`
+	// TCP ping average.
+	TcpPingAvg *float32 `protobuf:"fixed32,10,opt,name=tcp_ping_avg" json:"tcp_ping_avg,omitempty"`
+	// TCP ping variance.
 	TcpPingVar       *float32 `protobuf:"fixed32,11,opt,name=tcp_ping_var" json:"tcp_ping_var,omitempty"`
 	XXX_unrecognized []byte   `json:"-"`
 }
@@ -430,10 +478,13 @@ func (m *Ping) GetTcpPingVar() float32 {
 	return 0
 }
 
+// Sent by the server when it rejects the user connection.
 type Reject struct {
-	Type             *Reject_RejectType `protobuf:"varint,1,opt,name=type,enum=MumbleProto.Reject_RejectType" json:"type,omitempty"`
-	Reason           *string            `protobuf:"bytes,2,opt,name=reason" json:"reason,omitempty"`
-	XXX_unrecognized []byte             `json:"-"`
+	// Rejection type.
+	Type *Reject_RejectType `protobuf:"varint,1,opt,name=type,enum=MumbleProto.Reject_RejectType" json:"type,omitempty"`
+	// Human readable rejection reason.
+	Reason           *string `protobuf:"bytes,2,opt,name=reason" json:"reason,omitempty"`
+	XXX_unrecognized []byte  `json:"-"`
 }
 
 func (m *Reject) Reset()         { *m = Reject{} }
@@ -454,10 +505,16 @@ func (m *Reject) GetReason() string {
 	return ""
 }
 
+// ServerSync message is sent by the server when it has authenticated the user
+// and finished synchronizing the server state.
 type ServerSync struct {
-	Session          *uint32 `protobuf:"varint,1,opt,name=session" json:"session,omitempty"`
-	MaxBandwidth     *uint32 `protobuf:"varint,2,opt,name=max_bandwidth" json:"max_bandwidth,omitempty"`
-	WelcomeText      *string `protobuf:"bytes,3,opt,name=welcome_text" json:"welcome_text,omitempty"`
+	// The session of the current user.
+	Session *uint32 `protobuf:"varint,1,opt,name=session" json:"session,omitempty"`
+	// Maximum bandwidth that the user should use.
+	MaxBandwidth *uint32 `protobuf:"varint,2,opt,name=max_bandwidth" json:"max_bandwidth,omitempty"`
+	// Server welcome text.
+	WelcomeText *string `protobuf:"bytes,3,opt,name=welcome_text" json:"welcome_text,omitempty"`
+	// Current user permissions TODO: Confirm??
 	Permissions      *uint64 `protobuf:"varint,4,opt,name=permissions" json:"permissions,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
@@ -494,6 +551,8 @@ func (m *ServerSync) GetPermissions() uint64 {
 	return 0
 }
 
+// Sent by the client when it wants a channel removed. Sent by the server when
+// a channel has been removed and clients should be notified.
 type ChannelRemove struct {
 	ChannelId        *uint32 `protobuf:"varint,1,req,name=channel_id" json:"channel_id,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
@@ -510,18 +569,33 @@ func (m *ChannelRemove) GetChannelId() uint32 {
 	return 0
 }
 
+// Used to communicate channel properties between the client and the server.
+// Sent by the server during the login process or when channel properties are
+// updated. Client may use this message to update said channel properties.
 type ChannelState struct {
-	ChannelId        *uint32  `protobuf:"varint,1,opt,name=channel_id" json:"channel_id,omitempty"`
-	Parent           *uint32  `protobuf:"varint,2,opt,name=parent" json:"parent,omitempty"`
-	Name             *string  `protobuf:"bytes,3,opt,name=name" json:"name,omitempty"`
-	Links            []uint32 `protobuf:"varint,4,rep,name=links" json:"links,omitempty"`
-	Description      *string  `protobuf:"bytes,5,opt,name=description" json:"description,omitempty"`
-	LinksAdd         []uint32 `protobuf:"varint,6,rep,name=links_add" json:"links_add,omitempty"`
-	LinksRemove      []uint32 `protobuf:"varint,7,rep,name=links_remove" json:"links_remove,omitempty"`
-	Temporary        *bool    `protobuf:"varint,8,opt,name=temporary,def=0" json:"temporary,omitempty"`
-	Position         *int32   `protobuf:"varint,9,opt,name=position,def=0" json:"position,omitempty"`
-	DescriptionHash  []byte   `protobuf:"bytes,10,opt,name=description_hash" json:"description_hash,omitempty"`
-	XXX_unrecognized []byte   `json:"-"`
+	// Unique ID for the channel within the server.
+	ChannelId *uint32 `protobuf:"varint,1,opt,name=channel_id" json:"channel_id,omitempty"`
+	// channel_id of the parent channel.
+	Parent *uint32 `protobuf:"varint,2,opt,name=parent" json:"parent,omitempty"`
+	// UTF-8 encoded channel name.
+	Name *string `protobuf:"bytes,3,opt,name=name" json:"name,omitempty"`
+	// A collection of channel id values of the linked channels. Absent during
+	// the first channel listing.
+	Links []uint32 `protobuf:"varint,4,rep,name=links" json:"links,omitempty"`
+	// UTF-8 encoded channel description. Only if the description is less than
+	// 128 bytes
+	Description *string `protobuf:"bytes,5,opt,name=description" json:"description,omitempty"`
+	// A collection of channel_id values that should be added to links.
+	LinksAdd []uint32 `protobuf:"varint,6,rep,name=links_add" json:"links_add,omitempty"`
+	// A collection of channel_id values that should be removed from links.
+	LinksRemove []uint32 `protobuf:"varint,7,rep,name=links_remove" json:"links_remove,omitempty"`
+	// True if the channel is temporary.
+	Temporary *bool `protobuf:"varint,8,opt,name=temporary,def=0" json:"temporary,omitempty"`
+	// Position weight to tweak the channel position in the channel list.
+	Position *int32 `protobuf:"varint,9,opt,name=position,def=0" json:"position,omitempty"`
+	// SHA1 hash of the description if the description is 128 bytes or more.
+	DescriptionHash  []byte `protobuf:"bytes,10,opt,name=description_hash" json:"description_hash,omitempty"`
+	XXX_unrecognized []byte `json:"-"`
 }
 
 func (m *ChannelState) Reset()         { *m = ChannelState{} }
@@ -601,12 +675,21 @@ func (m *ChannelState) GetDescriptionHash() []byte {
 	return nil
 }
 
+// Used to communicate user leaving or being kicked. May be sent by the client
+// when it attempts to kick a user. Sent by the server when it informs the
+// clients that a user is not present anymore.
 type UserRemove struct {
-	Session          *uint32 `protobuf:"varint,1,req,name=session" json:"session,omitempty"`
-	Actor            *uint32 `protobuf:"varint,2,opt,name=actor" json:"actor,omitempty"`
-	Reason           *string `protobuf:"bytes,3,opt,name=reason" json:"reason,omitempty"`
-	Ban              *bool   `protobuf:"varint,4,opt,name=ban" json:"ban,omitempty"`
-	XXX_unrecognized []byte  `json:"-"`
+	// The user who is being kicked, identified by their session, not present
+	// when no one is being kicked.
+	Session *uint32 `protobuf:"varint,1,req,name=session" json:"session,omitempty"`
+	// The user who initiated the removal. Either the user who performs the kick
+	// or the user who is currently leaving.
+	Actor *uint32 `protobuf:"varint,2,opt,name=actor" json:"actor,omitempty"`
+	// Reason for the kick, stored as the ban reason if the user is banned.
+	Reason *string `protobuf:"bytes,3,opt,name=reason" json:"reason,omitempty"`
+	// True if the kick should result in a ban.
+	Ban              *bool  `protobuf:"varint,4,opt,name=ban" json:"ban,omitempty"`
+	XXX_unrecognized []byte `json:"-"`
 }
 
 func (m *UserRemove) Reset()         { *m = UserRemove{} }
@@ -641,27 +724,51 @@ func (m *UserRemove) GetBan() bool {
 	return false
 }
 
+// Sent by the server when it communicates new and changed users to client.
+// First seen during login procedure. May be sent by the client when it wishes
+// to alter its state.
 type UserState struct {
-	Session          *uint32 `protobuf:"varint,1,opt,name=session" json:"session,omitempty"`
-	Actor            *uint32 `protobuf:"varint,2,opt,name=actor" json:"actor,omitempty"`
-	Name             *string `protobuf:"bytes,3,opt,name=name" json:"name,omitempty"`
-	UserId           *uint32 `protobuf:"varint,4,opt,name=user_id" json:"user_id,omitempty"`
-	ChannelId        *uint32 `protobuf:"varint,5,opt,name=channel_id" json:"channel_id,omitempty"`
-	Mute             *bool   `protobuf:"varint,6,opt,name=mute" json:"mute,omitempty"`
-	Deaf             *bool   `protobuf:"varint,7,opt,name=deaf" json:"deaf,omitempty"`
-	Suppress         *bool   `protobuf:"varint,8,opt,name=suppress" json:"suppress,omitempty"`
-	SelfMute         *bool   `protobuf:"varint,9,opt,name=self_mute" json:"self_mute,omitempty"`
-	SelfDeaf         *bool   `protobuf:"varint,10,opt,name=self_deaf" json:"self_deaf,omitempty"`
-	Texture          []byte  `protobuf:"bytes,11,opt,name=texture" json:"texture,omitempty"`
-	PluginContext    []byte  `protobuf:"bytes,12,opt,name=plugin_context" json:"plugin_context,omitempty"`
-	PluginIdentity   *string `protobuf:"bytes,13,opt,name=plugin_identity" json:"plugin_identity,omitempty"`
-	Comment          *string `protobuf:"bytes,14,opt,name=comment" json:"comment,omitempty"`
-	Hash             *string `protobuf:"bytes,15,opt,name=hash" json:"hash,omitempty"`
-	CommentHash      []byte  `protobuf:"bytes,16,opt,name=comment_hash" json:"comment_hash,omitempty"`
-	TextureHash      []byte  `protobuf:"bytes,17,opt,name=texture_hash" json:"texture_hash,omitempty"`
-	PrioritySpeaker  *bool   `protobuf:"varint,18,opt,name=priority_speaker" json:"priority_speaker,omitempty"`
-	Recording        *bool   `protobuf:"varint,19,opt,name=recording" json:"recording,omitempty"`
-	XXX_unrecognized []byte  `json:"-"`
+	// Unique user session ID of the user whose state this is, may change on
+	// reconnect.
+	Session *uint32 `protobuf:"varint,1,opt,name=session" json:"session,omitempty"`
+	// The session of the user who is updating this user.
+	Actor *uint32 `protobuf:"varint,2,opt,name=actor" json:"actor,omitempty"`
+	// User name, UTF-8 encoded.
+	Name *string `protobuf:"bytes,3,opt,name=name" json:"name,omitempty"`
+	// Registered user ID if the user is registered.
+	UserId *uint32 `protobuf:"varint,4,opt,name=user_id" json:"user_id,omitempty"`
+	// Channel on which the user is.
+	ChannelId *uint32 `protobuf:"varint,5,opt,name=channel_id" json:"channel_id,omitempty"`
+	// True if the user is muted by admin.
+	Mute *bool `protobuf:"varint,6,opt,name=mute" json:"mute,omitempty"`
+	// True if the user is deafened by admin.
+	Deaf *bool `protobuf:"varint,7,opt,name=deaf" json:"deaf,omitempty"`
+	// True if the user has been suppressed from talking by a reason other than
+	// being muted.
+	Suppress *bool `protobuf:"varint,8,opt,name=suppress" json:"suppress,omitempty"`
+	// True if the user has muted self.
+	SelfMute *bool `protobuf:"varint,9,opt,name=self_mute" json:"self_mute,omitempty"`
+	// True if the user has deafened self.
+	SelfDeaf *bool `protobuf:"varint,10,opt,name=self_deaf" json:"self_deaf,omitempty"`
+	// User image if it is less than 128 bytes.
+	Texture []byte `protobuf:"bytes,11,opt,name=texture" json:"texture,omitempty"`
+	// TODO ??
+	PluginContext []byte `protobuf:"bytes,12,opt,name=plugin_context" json:"plugin_context,omitempty"`
+	// TODO ??
+	PluginIdentity *string `protobuf:"bytes,13,opt,name=plugin_identity" json:"plugin_identity,omitempty"`
+	// User comment if it is less than 128 bytes.
+	Comment *string `protobuf:"bytes,14,opt,name=comment" json:"comment,omitempty"`
+	// The hash of the user certificate.
+	Hash *string `protobuf:"bytes,15,opt,name=hash" json:"hash,omitempty"`
+	// SHA1 hash of the user comment if it 128 bytes or more.
+	CommentHash []byte `protobuf:"bytes,16,opt,name=comment_hash" json:"comment_hash,omitempty"`
+	// SHA1 hash of the user picture if it 128 bytes or more.
+	TextureHash []byte `protobuf:"bytes,17,opt,name=texture_hash" json:"texture_hash,omitempty"`
+	// True if the user is a priority speaker.
+	PrioritySpeaker *bool `protobuf:"varint,18,opt,name=priority_speaker" json:"priority_speaker,omitempty"`
+	// True if the user is currently recording.
+	Recording        *bool  `protobuf:"varint,19,opt,name=recording" json:"recording,omitempty"`
+	XXX_unrecognized []byte `json:"-"`
 }
 
 func (m *UserState) Reset()         { *m = UserState{} }
@@ -801,10 +908,16 @@ func (m *UserState) GetRecording() bool {
 	return false
 }
 
+// Relays information on the bans. The client may send the BanList message to
+// either modify the list of bans or query them from the server. The server
+// sends this list only after a client queries for it.
 type BanList struct {
-	Bans             []*BanList_BanEntry `protobuf:"bytes,1,rep,name=bans" json:"bans,omitempty"`
-	Query            *bool               `protobuf:"varint,2,opt,name=query,def=0" json:"query,omitempty"`
-	XXX_unrecognized []byte              `json:"-"`
+	// List of ban entries currently in place.
+	Bans []*BanList_BanEntry `protobuf:"bytes,1,rep,name=bans" json:"bans,omitempty"`
+	// True if the server should return the list, false if it should replace old
+	// ban list with the one provided.
+	Query            *bool  `protobuf:"varint,2,opt,name=query,def=0" json:"query,omitempty"`
+	XXX_unrecognized []byte `json:"-"`
 }
 
 func (m *BanList) Reset()         { *m = BanList{} }
@@ -828,12 +941,19 @@ func (m *BanList) GetQuery() bool {
 }
 
 type BanList_BanEntry struct {
-	Address          []byte  `protobuf:"bytes,1,req,name=address" json:"address,omitempty"`
-	Mask             *uint32 `protobuf:"varint,2,req,name=mask" json:"mask,omitempty"`
-	Name             *string `protobuf:"bytes,3,opt,name=name" json:"name,omitempty"`
-	Hash             *string `protobuf:"bytes,4,opt,name=hash" json:"hash,omitempty"`
-	Reason           *string `protobuf:"bytes,5,opt,name=reason" json:"reason,omitempty"`
-	Start            *string `protobuf:"bytes,6,opt,name=start" json:"start,omitempty"`
+	// Banned IP address.
+	Address []byte `protobuf:"bytes,1,req,name=address" json:"address,omitempty"`
+	// The length of the subnet mask for the ban.
+	Mask *uint32 `protobuf:"varint,2,req,name=mask" json:"mask,omitempty"`
+	// User name for identification purposes (does not affect the ban).
+	Name *string `protobuf:"bytes,3,opt,name=name" json:"name,omitempty"`
+	// TODO ??
+	Hash *string `protobuf:"bytes,4,opt,name=hash" json:"hash,omitempty"`
+	// Reason for the ban (does not affect the ban).
+	Reason *string `protobuf:"bytes,5,opt,name=reason" json:"reason,omitempty"`
+	// Ban start time.
+	Start *string `protobuf:"bytes,6,opt,name=start" json:"start,omitempty"`
+	// Ban duration in seconds.
 	Duration         *uint32 `protobuf:"varint,7,opt,name=duration" json:"duration,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
@@ -891,13 +1011,21 @@ func (m *BanList_BanEntry) GetDuration() uint32 {
 	return 0
 }
 
+// Used to send and broadcast text messages.
 type TextMessage struct {
-	Actor            *uint32  `protobuf:"varint,1,opt,name=actor" json:"actor,omitempty"`
-	Session          []uint32 `protobuf:"varint,2,rep,name=session" json:"session,omitempty"`
-	ChannelId        []uint32 `protobuf:"varint,3,rep,name=channel_id" json:"channel_id,omitempty"`
-	TreeId           []uint32 `protobuf:"varint,4,rep,name=tree_id" json:"tree_id,omitempty"`
-	Message          *string  `protobuf:"bytes,5,req,name=message" json:"message,omitempty"`
-	XXX_unrecognized []byte   `json:"-"`
+	// The message sender, identified by its session.
+	Actor *uint32 `protobuf:"varint,1,opt,name=actor" json:"actor,omitempty"`
+	// Target users for the message, identified by their session.
+	Session []uint32 `protobuf:"varint,2,rep,name=session" json:"session,omitempty"`
+	// The channels to which the message is sent, identified by their
+	// channel_ids.
+	ChannelId []uint32 `protobuf:"varint,3,rep,name=channel_id" json:"channel_id,omitempty"`
+	// The root channels when sending message recursively to several channels,
+	// identified by their channel_ids.
+	TreeId []uint32 `protobuf:"varint,4,rep,name=tree_id" json:"tree_id,omitempty"`
+	// The UTF-8 encoded message. May be HTML if the server allows.
+	Message          *string `protobuf:"bytes,5,req,name=message" json:"message,omitempty"`
+	XXX_unrecognized []byte  `json:"-"`
 }
 
 func (m *TextMessage) Reset()         { *m = TextMessage{} }
@@ -940,13 +1068,20 @@ func (m *TextMessage) GetMessage() string {
 }
 
 type PermissionDenied struct {
-	Permission       *uint32                    `protobuf:"varint,1,opt,name=permission" json:"permission,omitempty"`
-	ChannelId        *uint32                    `protobuf:"varint,2,opt,name=channel_id" json:"channel_id,omitempty"`
-	Session          *uint32                    `protobuf:"varint,3,opt,name=session" json:"session,omitempty"`
-	Reason           *string                    `protobuf:"bytes,4,opt,name=reason" json:"reason,omitempty"`
-	Type             *PermissionDenied_DenyType `protobuf:"varint,5,opt,name=type,enum=MumbleProto.PermissionDenied_DenyType" json:"type,omitempty"`
-	Name             *string                    `protobuf:"bytes,6,opt,name=name" json:"name,omitempty"`
-	XXX_unrecognized []byte                     `json:"-"`
+	// The denied permission when type is Permission.
+	Permission *uint32 `protobuf:"varint,1,opt,name=permission" json:"permission,omitempty"`
+	// channel_id for the channel where the permission was denied when type is
+	// Permission.
+	ChannelId *uint32 `protobuf:"varint,2,opt,name=channel_id" json:"channel_id,omitempty"`
+	// The user who was denied permissions, identified by session.
+	Session *uint32 `protobuf:"varint,3,opt,name=session" json:"session,omitempty"`
+	// Textual reason for the denial.
+	Reason *string `protobuf:"bytes,4,opt,name=reason" json:"reason,omitempty"`
+	// Type of the denial.
+	Type *PermissionDenied_DenyType `protobuf:"varint,5,opt,name=type,enum=MumbleProto.PermissionDenied_DenyType" json:"type,omitempty"`
+	// The name that is invalid when type is UserName.
+	Name             *string `protobuf:"bytes,6,opt,name=name" json:"name,omitempty"`
+	XXX_unrecognized []byte  `json:"-"`
 }
 
 func (m *PermissionDenied) Reset()         { *m = PermissionDenied{} }
@@ -996,12 +1131,17 @@ func (m *PermissionDenied) GetName() string {
 }
 
 type ACL struct {
-	ChannelId        *uint32          `protobuf:"varint,1,req,name=channel_id" json:"channel_id,omitempty"`
-	InheritAcls      *bool            `protobuf:"varint,2,opt,name=inherit_acls,def=1" json:"inherit_acls,omitempty"`
-	Groups           []*ACL_ChanGroup `protobuf:"bytes,3,rep,name=groups" json:"groups,omitempty"`
-	Acls             []*ACL_ChanACL   `protobuf:"bytes,4,rep,name=acls" json:"acls,omitempty"`
-	Query            *bool            `protobuf:"varint,5,opt,name=query,def=0" json:"query,omitempty"`
-	XXX_unrecognized []byte           `json:"-"`
+	// Channel ID of the channel this message affects.
+	ChannelId *uint32 `protobuf:"varint,1,req,name=channel_id" json:"channel_id,omitempty"`
+	// True if the channel inherits its parent's ACLs.
+	InheritAcls *bool `protobuf:"varint,2,opt,name=inherit_acls,def=1" json:"inherit_acls,omitempty"`
+	// User group specifications.
+	Groups []*ACL_ChanGroup `protobuf:"bytes,3,rep,name=groups" json:"groups,omitempty"`
+	// ACL specifications.
+	Acls []*ACL_ChanACL `protobuf:"bytes,4,rep,name=acls" json:"acls,omitempty"`
+	// True if the message is a query for ACLs instead of setting them.
+	Query            *bool  `protobuf:"varint,5,opt,name=query,def=0" json:"query,omitempty"`
+	XXX_unrecognized []byte `json:"-"`
 }
 
 func (m *ACL) Reset()         { *m = ACL{} }
@@ -1047,12 +1187,20 @@ func (m *ACL) GetQuery() bool {
 }
 
 type ACL_ChanGroup struct {
-	Name             *string  `protobuf:"bytes,1,req,name=name" json:"name,omitempty"`
-	Inherited        *bool    `protobuf:"varint,2,opt,name=inherited,def=1" json:"inherited,omitempty"`
-	Inherit          *bool    `protobuf:"varint,3,opt,name=inherit,def=1" json:"inherit,omitempty"`
-	Inheritable      *bool    `protobuf:"varint,4,opt,name=inheritable,def=1" json:"inheritable,omitempty"`
-	Add              []uint32 `protobuf:"varint,5,rep,name=add" json:"add,omitempty"`
-	Remove           []uint32 `protobuf:"varint,6,rep,name=remove" json:"remove,omitempty"`
+	// Name of the channel group, UTF-8 encoded.
+	Name *string `protobuf:"bytes,1,req,name=name" json:"name,omitempty"`
+	// True if the group has been inherited from the parent (Read only).
+	Inherited *bool `protobuf:"varint,2,opt,name=inherited,def=1" json:"inherited,omitempty"`
+	// True if the group members are inherited.
+	Inherit *bool `protobuf:"varint,3,opt,name=inherit,def=1" json:"inherit,omitempty"`
+	// True if the group can be inherited by sub channels.
+	Inheritable *bool `protobuf:"varint,4,opt,name=inheritable,def=1" json:"inheritable,omitempty"`
+	// Users explicitly included in this group, identified by user_id.
+	Add []uint32 `protobuf:"varint,5,rep,name=add" json:"add,omitempty"`
+	// Users explicitly removed from this group in this channel if the group
+	// has been inherited, identified by user_id.
+	Remove []uint32 `protobuf:"varint,6,rep,name=remove" json:"remove,omitempty"`
+	// Users inherited, identified by user_id.
 	InheritedMembers []uint32 `protobuf:"varint,7,rep,name=inherited_members" json:"inherited_members,omitempty"`
 	XXX_unrecognized []byte   `json:"-"`
 }
@@ -1115,12 +1263,19 @@ func (m *ACL_ChanGroup) GetInheritedMembers() []uint32 {
 }
 
 type ACL_ChanACL struct {
-	ApplyHere        *bool   `protobuf:"varint,1,opt,name=apply_here,def=1" json:"apply_here,omitempty"`
-	ApplySubs        *bool   `protobuf:"varint,2,opt,name=apply_subs,def=1" json:"apply_subs,omitempty"`
-	Inherited        *bool   `protobuf:"varint,3,opt,name=inherited,def=1" json:"inherited,omitempty"`
-	UserId           *uint32 `protobuf:"varint,4,opt,name=user_id" json:"user_id,omitempty"`
-	Group            *string `protobuf:"bytes,5,opt,name=group" json:"group,omitempty"`
-	Grant            *uint32 `protobuf:"varint,6,opt,name=grant" json:"grant,omitempty"`
+	// True if this ACL applies to the current channel.
+	ApplyHere *bool `protobuf:"varint,1,opt,name=apply_here,def=1" json:"apply_here,omitempty"`
+	// True if this ACL applies to the sub channels.
+	ApplySubs *bool `protobuf:"varint,2,opt,name=apply_subs,def=1" json:"apply_subs,omitempty"`
+	// True if the ACL has been inherited from the parent.
+	Inherited *bool `protobuf:"varint,3,opt,name=inherited,def=1" json:"inherited,omitempty"`
+	// ID of the user that is affected by this ACL.
+	UserId *uint32 `protobuf:"varint,4,opt,name=user_id" json:"user_id,omitempty"`
+	// ID of the group that is affected by this ACL.
+	Group *string `protobuf:"bytes,5,opt,name=group" json:"group,omitempty"`
+	// Bit flag field of the permissions granted by this ACL.
+	Grant *uint32 `protobuf:"varint,6,opt,name=grant" json:"grant,omitempty"`
+	// Bit flag field of the permissions denied by this ACL.
 	Deny             *uint32 `protobuf:"varint,7,opt,name=deny" json:"deny,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
@@ -1182,8 +1337,13 @@ func (m *ACL_ChanACL) GetDeny() uint32 {
 	return 0
 }
 
+// Client may use this message to refresh its registered user information. The
+// client should fill the IDs or Names of the users it wants to refresh. The
+// server fills the missing parts and sends the message back.
 type QueryUsers struct {
-	Ids              []uint32 `protobuf:"varint,1,rep,name=ids" json:"ids,omitempty"`
+	// user_ids.
+	Ids []uint32 `protobuf:"varint,1,rep,name=ids" json:"ids,omitempty"`
+	// User names in the same order as ids.
 	Names            []string `protobuf:"bytes,2,rep,name=names" json:"names,omitempty"`
 	XXX_unrecognized []byte   `json:"-"`
 }
@@ -1206,9 +1366,16 @@ func (m *QueryUsers) GetNames() []string {
 	return nil
 }
 
+// Used to initialize and resync the UDP encryption. Either side may request a
+// resync by sending the message without any values filled. The resync is
+// performed by sending the message with only the client or server nonce
+// filled.
 type CryptSetup struct {
-	Key              []byte `protobuf:"bytes,1,opt,name=key" json:"key,omitempty"`
-	ClientNonce      []byte `protobuf:"bytes,2,opt,name=client_nonce" json:"client_nonce,omitempty"`
+	// Encryption key.
+	Key []byte `protobuf:"bytes,1,opt,name=key" json:"key,omitempty"`
+	// Client nonce.
+	ClientNonce []byte `protobuf:"bytes,2,opt,name=client_nonce" json:"client_nonce,omitempty"`
+	// Server nonce.
 	ServerNonce      []byte `protobuf:"bytes,3,opt,name=server_nonce" json:"server_nonce,omitempty"`
 	XXX_unrecognized []byte `json:"-"`
 }
@@ -1239,8 +1406,11 @@ func (m *CryptSetup) GetServerNonce() []byte {
 }
 
 type ContextActionModify struct {
-	Action           *string                        `protobuf:"bytes,1,req,name=action" json:"action,omitempty"`
-	Text             *string                        `protobuf:"bytes,2,opt,name=text" json:"text,omitempty"`
+	// The action name.
+	Action *string `protobuf:"bytes,1,req,name=action" json:"action,omitempty"`
+	// The display name of the action.
+	Text *string `protobuf:"bytes,2,opt,name=text" json:"text,omitempty"`
+	// Context bit flags defining where the action should be displayed.
 	Context          *uint32                        `protobuf:"varint,3,opt,name=context" json:"context,omitempty"`
 	Operation        *ContextActionModify_Operation `protobuf:"varint,4,opt,name=operation,enum=MumbleProto.ContextActionModify_Operation" json:"operation,omitempty"`
 	XXX_unrecognized []byte                         `json:"-"`
@@ -1278,9 +1448,13 @@ func (m *ContextActionModify) GetOperation() ContextActionModify_Operation {
 	return ContextActionModify_Add
 }
 
+// Sent by the client when it wants to initiate a Context action.
 type ContextAction struct {
-	Session          *uint32 `protobuf:"varint,1,opt,name=session" json:"session,omitempty"`
-	ChannelId        *uint32 `protobuf:"varint,2,opt,name=channel_id" json:"channel_id,omitempty"`
+	// The target User for the action, identified by session.
+	Session *uint32 `protobuf:"varint,1,opt,name=session" json:"session,omitempty"`
+	// The target Channel for the action, identified by channel_id.
+	ChannelId *uint32 `protobuf:"varint,2,opt,name=channel_id" json:"channel_id,omitempty"`
+	// The action that should be executed.
 	Action           *string `protobuf:"bytes,3,req,name=action" json:"action,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
@@ -1310,7 +1484,9 @@ func (m *ContextAction) GetAction() string {
 	return ""
 }
 
+// Lists the registered users.
 type UserList struct {
+	// A list of registered users.
 	Users            []*UserList_User `protobuf:"bytes,1,rep,name=users" json:"users,omitempty"`
 	XXX_unrecognized []byte           `json:"-"`
 }
@@ -1327,7 +1503,9 @@ func (m *UserList) GetUsers() []*UserList_User {
 }
 
 type UserList_User struct {
-	UserId           *uint32 `protobuf:"varint,1,req,name=user_id" json:"user_id,omitempty"`
+	// Registered user ID.
+	UserId *uint32 `protobuf:"varint,1,req,name=user_id" json:"user_id,omitempty"`
+	// Registered user name.
 	Name             *string `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
 	LastSeen         *string `protobuf:"bytes,3,opt,name=last_seen" json:"last_seen,omitempty"`
 	LastChannel      *uint32 `protobuf:"varint,4,opt,name=last_channel" json:"last_channel,omitempty"`
@@ -1366,8 +1544,14 @@ func (m *UserList_User) GetLastChannel() uint32 {
 	return 0
 }
 
+// Sent by the client when it wants to register or clear whisper targets.
+//
+// Note: The first available target ID is 1 as 0 is reserved for normal
+// talking. Maximum target ID is 30.
 type VoiceTarget struct {
-	Id               *uint32               `protobuf:"varint,1,opt,name=id" json:"id,omitempty"`
+	// Voice target ID.
+	Id *uint32 `protobuf:"varint,1,opt,name=id" json:"id,omitempty"`
+	// The receivers that this voice target includes.
 	Targets          []*VoiceTarget_Target `protobuf:"bytes,2,rep,name=targets" json:"targets,omitempty"`
 	XXX_unrecognized []byte                `json:"-"`
 }
@@ -1391,12 +1575,18 @@ func (m *VoiceTarget) GetTargets() []*VoiceTarget_Target {
 }
 
 type VoiceTarget_Target struct {
-	Session          []uint32 `protobuf:"varint,1,rep,name=session" json:"session,omitempty"`
-	ChannelId        *uint32  `protobuf:"varint,2,opt,name=channel_id" json:"channel_id,omitempty"`
-	Group            *string  `protobuf:"bytes,3,opt,name=group" json:"group,omitempty"`
-	Links            *bool    `protobuf:"varint,4,opt,name=links,def=0" json:"links,omitempty"`
-	Children         *bool    `protobuf:"varint,5,opt,name=children,def=0" json:"children,omitempty"`
-	XXX_unrecognized []byte   `json:"-"`
+	// Users that are included as targets.
+	Session []uint32 `protobuf:"varint,1,rep,name=session" json:"session,omitempty"`
+	// Channels that are included as targets.
+	ChannelId *uint32 `protobuf:"varint,2,opt,name=channel_id" json:"channel_id,omitempty"`
+	// TODO ??
+	Group *string `protobuf:"bytes,3,opt,name=group" json:"group,omitempty"`
+	// True if the voice should follow links from the specified channel.
+	Links *bool `protobuf:"varint,4,opt,name=links,def=0" json:"links,omitempty"`
+	// True if the voice should also be sent to children of the specific
+	// channel.
+	Children         *bool  `protobuf:"varint,5,opt,name=children,def=0" json:"children,omitempty"`
+	XXX_unrecognized []byte `json:"-"`
 }
 
 func (m *VoiceTarget_Target) Reset()         { *m = VoiceTarget_Target{} }
@@ -1441,11 +1631,18 @@ func (m *VoiceTarget_Target) GetChildren() bool {
 	return Default_VoiceTarget_Target_Children
 }
 
+// Sent by the client when it wants permissions for a certain channel. Sent by
+// the server when it replies to the query or wants the user to resync all
+// channel permissions.
 type PermissionQuery struct {
-	ChannelId        *uint32 `protobuf:"varint,1,opt,name=channel_id" json:"channel_id,omitempty"`
-	Permissions      *uint32 `protobuf:"varint,2,opt,name=permissions" json:"permissions,omitempty"`
-	Flush            *bool   `protobuf:"varint,3,opt,name=flush,def=0" json:"flush,omitempty"`
-	XXX_unrecognized []byte  `json:"-"`
+	// channel_id of the channel for which the permissions are queried.
+	ChannelId *uint32 `protobuf:"varint,1,opt,name=channel_id" json:"channel_id,omitempty"`
+	// Channel permissions.
+	Permissions *uint32 `protobuf:"varint,2,opt,name=permissions" json:"permissions,omitempty"`
+	// True if the client should drop its current permission information for all
+	// channels.
+	Flush            *bool  `protobuf:"varint,3,opt,name=flush,def=0" json:"flush,omitempty"`
+	XXX_unrecognized []byte `json:"-"`
 }
 
 func (m *PermissionQuery) Reset()         { *m = PermissionQuery{} }
@@ -1475,9 +1672,14 @@ func (m *PermissionQuery) GetFlush() bool {
 	return Default_PermissionQuery_Flush
 }
 
+// Sent by the server to notify the users of the version of the CELT codec they
+// should use. This may change during the connection when new users join.
 type CodecVersion struct {
-	Alpha            *int32 `protobuf:"varint,1,req,name=alpha" json:"alpha,omitempty"`
-	Beta             *int32 `protobuf:"varint,2,req,name=beta" json:"beta,omitempty"`
+	// The version of the CELT Alpha codec.
+	Alpha *int32 `protobuf:"varint,1,req,name=alpha" json:"alpha,omitempty"`
+	// The version of the CELT Beta codec.
+	Beta *int32 `protobuf:"varint,2,req,name=beta" json:"beta,omitempty"`
+	// True if the user should prefer Alpha over Beta.
 	PreferAlpha      *bool  `protobuf:"varint,3,req,name=prefer_alpha,def=1" json:"prefer_alpha,omitempty"`
 	Opus             *bool  `protobuf:"varint,4,opt,name=opus,def=0" json:"opus,omitempty"`
 	XXX_unrecognized []byte `json:"-"`
@@ -1518,27 +1720,47 @@ func (m *CodecVersion) GetOpus() bool {
 	return Default_CodecVersion_Opus
 }
 
+// Used to communicate user stats between the server and clients.
 type UserStats struct {
-	Session           *uint32          `protobuf:"varint,1,opt,name=session" json:"session,omitempty"`
-	StatsOnly         *bool            `protobuf:"varint,2,opt,name=stats_only,def=0" json:"stats_only,omitempty"`
-	Certificates      [][]byte         `protobuf:"bytes,3,rep,name=certificates" json:"certificates,omitempty"`
-	FromClient        *UserStats_Stats `protobuf:"bytes,4,opt,name=from_client" json:"from_client,omitempty"`
-	FromServer        *UserStats_Stats `protobuf:"bytes,5,opt,name=from_server" json:"from_server,omitempty"`
-	UdpPackets        *uint32          `protobuf:"varint,6,opt,name=udp_packets" json:"udp_packets,omitempty"`
-	TcpPackets        *uint32          `protobuf:"varint,7,opt,name=tcp_packets" json:"tcp_packets,omitempty"`
-	UdpPingAvg        *float32         `protobuf:"fixed32,8,opt,name=udp_ping_avg" json:"udp_ping_avg,omitempty"`
-	UdpPingVar        *float32         `protobuf:"fixed32,9,opt,name=udp_ping_var" json:"udp_ping_var,omitempty"`
-	TcpPingAvg        *float32         `protobuf:"fixed32,10,opt,name=tcp_ping_avg" json:"tcp_ping_avg,omitempty"`
-	TcpPingVar        *float32         `protobuf:"fixed32,11,opt,name=tcp_ping_var" json:"tcp_ping_var,omitempty"`
-	Version           *Version         `protobuf:"bytes,12,opt,name=version" json:"version,omitempty"`
-	CeltVersions      []int32          `protobuf:"varint,13,rep,name=celt_versions" json:"celt_versions,omitempty"`
-	Address           []byte           `protobuf:"bytes,14,opt,name=address" json:"address,omitempty"`
-	Bandwidth         *uint32          `protobuf:"varint,15,opt,name=bandwidth" json:"bandwidth,omitempty"`
-	Onlinesecs        *uint32          `protobuf:"varint,16,opt,name=onlinesecs" json:"onlinesecs,omitempty"`
-	Idlesecs          *uint32          `protobuf:"varint,17,opt,name=idlesecs" json:"idlesecs,omitempty"`
-	StrongCertificate *bool            `protobuf:"varint,18,opt,name=strong_certificate,def=0" json:"strong_certificate,omitempty"`
-	Opus              *bool            `protobuf:"varint,19,opt,name=opus,def=0" json:"opus,omitempty"`
-	XXX_unrecognized  []byte           `json:"-"`
+	// User whose stats these are.
+	Session *uint32 `protobuf:"varint,1,opt,name=session" json:"session,omitempty"`
+	// True if the message contains only mutable stats (packets, ping).
+	StatsOnly *bool `protobuf:"varint,2,opt,name=stats_only,def=0" json:"stats_only,omitempty"`
+	// Full user certificate chain of the user certificate in DER format.
+	Certificates [][]byte `protobuf:"bytes,3,rep,name=certificates" json:"certificates,omitempty"`
+	// Packet statistics for packets received from the client.
+	FromClient *UserStats_Stats `protobuf:"bytes,4,opt,name=from_client" json:"from_client,omitempty"`
+	// Packet statistics for packets sent by the server.
+	FromServer *UserStats_Stats `protobuf:"bytes,5,opt,name=from_server" json:"from_server,omitempty"`
+	// Amount of UDP packets sent.
+	UdpPackets *uint32 `protobuf:"varint,6,opt,name=udp_packets" json:"udp_packets,omitempty"`
+	// Amount of TCP packets sent.
+	TcpPackets *uint32 `protobuf:"varint,7,opt,name=tcp_packets" json:"tcp_packets,omitempty"`
+	// UDP ping average.
+	UdpPingAvg *float32 `protobuf:"fixed32,8,opt,name=udp_ping_avg" json:"udp_ping_avg,omitempty"`
+	// UDP ping variance.
+	UdpPingVar *float32 `protobuf:"fixed32,9,opt,name=udp_ping_var" json:"udp_ping_var,omitempty"`
+	// TCP ping average.
+	TcpPingAvg *float32 `protobuf:"fixed32,10,opt,name=tcp_ping_avg" json:"tcp_ping_avg,omitempty"`
+	// TCP ping variance.
+	TcpPingVar *float32 `protobuf:"fixed32,11,opt,name=tcp_ping_var" json:"tcp_ping_var,omitempty"`
+	// Client version.
+	Version *Version `protobuf:"bytes,12,opt,name=version" json:"version,omitempty"`
+	// A list of CELT bitstream version constants supported by the client of this
+	// user.
+	CeltVersions []int32 `protobuf:"varint,13,rep,name=celt_versions" json:"celt_versions,omitempty"`
+	// Client IP address.
+	Address []byte `protobuf:"bytes,14,opt,name=address" json:"address,omitempty"`
+	// Bandwith used by this client.
+	Bandwidth *uint32 `protobuf:"varint,15,opt,name=bandwidth" json:"bandwidth,omitempty"`
+	// Connection duration.
+	Onlinesecs *uint32 `protobuf:"varint,16,opt,name=onlinesecs" json:"onlinesecs,omitempty"`
+	// Duration since last activity.
+	Idlesecs *uint32 `protobuf:"varint,17,opt,name=idlesecs" json:"idlesecs,omitempty"`
+	// True if the user has a strong certificate.
+	StrongCertificate *bool  `protobuf:"varint,18,opt,name=strong_certificate,def=0" json:"strong_certificate,omitempty"`
+	Opus              *bool  `protobuf:"varint,19,opt,name=opus,def=0" json:"opus,omitempty"`
+	XXX_unrecognized  []byte `json:"-"`
 }
 
 func (m *UserStats) Reset()         { *m = UserStats{} }
@@ -1683,9 +1905,13 @@ func (m *UserStats) GetOpus() bool {
 }
 
 type UserStats_Stats struct {
-	Good             *uint32 `protobuf:"varint,1,opt,name=good" json:"good,omitempty"`
-	Late             *uint32 `protobuf:"varint,2,opt,name=late" json:"late,omitempty"`
-	Lost             *uint32 `protobuf:"varint,3,opt,name=lost" json:"lost,omitempty"`
+	// The amount of good packets received.
+	Good *uint32 `protobuf:"varint,1,opt,name=good" json:"good,omitempty"`
+	// The amount of late packets received.
+	Late *uint32 `protobuf:"varint,2,opt,name=late" json:"late,omitempty"`
+	// The amount of packets never received.
+	Lost *uint32 `protobuf:"varint,3,opt,name=lost" json:"lost,omitempty"`
+	// The amount of nonce resyncs.
 	Resync           *uint32 `protobuf:"varint,4,opt,name=resync" json:"resync,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
@@ -1722,9 +1948,20 @@ func (m *UserStats_Stats) GetResync() uint32 {
 	return 0
 }
 
+// Used by the client to request binary data from the server. By default large
+// comments or textures are not sent within standard messages but instead the
+// hash is. If the client does not recognize the hash it may request the
+// resource when it needs it. The client does so by sending a RequestBlob
+// message with the correct fields filled with the user sessions or channel_ids
+// it wants to receive. The server replies to this by sending a new
+// UserState/ChannelState message with the resources filled even if they would
+// normally be transmitted as hashes.
 type RequestBlob struct {
-	SessionTexture     []uint32 `protobuf:"varint,1,rep,name=session_texture" json:"session_texture,omitempty"`
-	SessionComment     []uint32 `protobuf:"varint,2,rep,name=session_comment" json:"session_comment,omitempty"`
+	// sessions of the requested UserState textures.
+	SessionTexture []uint32 `protobuf:"varint,1,rep,name=session_texture" json:"session_texture,omitempty"`
+	// sessions of the requested UserState comments.
+	SessionComment []uint32 `protobuf:"varint,2,rep,name=session_comment" json:"session_comment,omitempty"`
+	// channel_ids of the requested ChannelState descriptions.
 	ChannelDescription []uint32 `protobuf:"varint,3,rep,name=channel_description" json:"channel_description,omitempty"`
 	XXX_unrecognized   []byte   `json:"-"`
 }
@@ -1754,11 +1991,18 @@ func (m *RequestBlob) GetChannelDescription() []uint32 {
 	return nil
 }
 
+// Sent by the server when it informs the clients on server configuration
+// details.
 type ServerConfig struct {
-	MaxBandwidth       *uint32 `protobuf:"varint,1,opt,name=max_bandwidth" json:"max_bandwidth,omitempty"`
-	WelcomeText        *string `protobuf:"bytes,2,opt,name=welcome_text" json:"welcome_text,omitempty"`
-	AllowHtml          *bool   `protobuf:"varint,3,opt,name=allow_html" json:"allow_html,omitempty"`
-	MessageLength      *uint32 `protobuf:"varint,4,opt,name=message_length" json:"message_length,omitempty"`
+	// The maximum bandwidth the clients should use.
+	MaxBandwidth *uint32 `protobuf:"varint,1,opt,name=max_bandwidth" json:"max_bandwidth,omitempty"`
+	// Server welcome text.
+	WelcomeText *string `protobuf:"bytes,2,opt,name=welcome_text" json:"welcome_text,omitempty"`
+	// True if the server allows HTML.
+	AllowHtml *bool `protobuf:"varint,3,opt,name=allow_html" json:"allow_html,omitempty"`
+	// Maximum text message length.
+	MessageLength *uint32 `protobuf:"varint,4,opt,name=message_length" json:"message_length,omitempty"`
+	// Maximum image message length.
 	ImageMessageLength *uint32 `protobuf:"varint,5,opt,name=image_message_length" json:"image_message_length,omitempty"`
 	XXX_unrecognized   []byte  `json:"-"`
 }
@@ -1802,11 +2046,17 @@ func (m *ServerConfig) GetImageMessageLength() uint32 {
 	return 0
 }
 
+// Sent by the server to inform the clients of suggested client configuration
+// specified by the server administrator.
 type SuggestConfig struct {
-	Version          *uint32 `protobuf:"varint,1,opt,name=version" json:"version,omitempty"`
-	Positional       *bool   `protobuf:"varint,2,opt,name=positional" json:"positional,omitempty"`
-	PushToTalk       *bool   `protobuf:"varint,3,opt,name=push_to_talk" json:"push_to_talk,omitempty"`
-	XXX_unrecognized []byte  `json:"-"`
+	// Suggested client version.
+	Version *uint32 `protobuf:"varint,1,opt,name=version" json:"version,omitempty"`
+	// True if the administrator suggests positional audio to be used on this
+	// server.
+	Positional *bool `protobuf:"varint,2,opt,name=positional" json:"positional,omitempty"`
+	// True if the administrator suggests push to talk to be used on this server.
+	PushToTalk       *bool  `protobuf:"varint,3,opt,name=push_to_talk" json:"push_to_talk,omitempty"`
+	XXX_unrecognized []byte `json:"-"`
 }
 
 func (m *SuggestConfig) Reset()         { *m = SuggestConfig{} }
