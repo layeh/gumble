@@ -137,7 +137,16 @@ func (u *User) Ban(reason string) {
 func (u *User) SetMuted(muted bool) {
 	packet := MumbleProto.UserState{
 		Session: &u.Session,
-		Mute:    proto.Bool(muted),
+		Mute:    &muted,
+	}
+	u.client.Send(protoMessage{&packet})
+}
+
+// SetSuppressed sets whether the user is suppressed by the server or not.
+func (u *User) SetSuppressed(supressed bool) {
+	packet := MumbleProto.UserState{
+		Session:  &u.Session,
+		Suppress: &supressed,
 	}
 	u.client.Send(protoMessage{&packet})
 }
@@ -146,7 +155,7 @@ func (u *User) SetMuted(muted bool) {
 func (u *User) SetDeafened(muted bool) {
 	packet := MumbleProto.UserState{
 		Session: &u.Session,
-		Deaf:    proto.Bool(muted),
+		Deaf:    &muted,
 	}
 	u.client.Send(protoMessage{&packet})
 }
@@ -157,7 +166,7 @@ func (u *User) SetDeafened(muted bool) {
 func (u *User) SetSelfMuted(muted bool) {
 	packet := MumbleProto.UserState{
 		Session:  &u.Session,
-		SelfMute: proto.Bool(muted),
+		SelfMute: &muted,
 	}
 	u.client.Send(protoMessage{&packet})
 }
@@ -168,7 +177,7 @@ func (u *User) SetSelfMuted(muted bool) {
 func (u *User) SetSelfDeafened(muted bool) {
 	packet := MumbleProto.UserState{
 		Session:  &u.Session,
-		SelfDeaf: proto.Bool(muted),
+		SelfDeaf: &muted,
 	}
 	u.client.Send(protoMessage{&packet})
 }

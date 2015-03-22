@@ -41,7 +41,7 @@ func (c *Channel) Add(name string, temporary bool) {
 	packet := MumbleProto.ChannelState{
 		Parent:    &c.ID,
 		Name:      &name,
-		Temporary: proto.Bool(temporary),
+		Temporary: &temporary,
 	}
 	c.client.Send(protoMessage{&packet})
 }
