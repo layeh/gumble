@@ -88,7 +88,7 @@ func (c *Channel) SetDescription(description string) {
 // To get the "Child 2.2.1" channel:
 //         root.Find("Child 2", "Child 2.2", "Child 2.2.1")
 func (c *Channel) Find(names ...string) *Channel {
-	if names == nil || len(names) == 0 {
+	if len(names) == 0 {
 		return c
 	}
 	for _, child := range c.Children {
