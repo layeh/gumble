@@ -15,6 +15,11 @@ func main() {
 	files := make(map[string]string)
 	var stream *gumble_ffmpeg.Stream
 
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage of %s: [flags] [audio files...]\n", os.Args[0])
+		flag.PrintDefaults()
+	}
+
 	gumbleutil.Main(func(client *gumble.Client) {
 		var err error
 		stream, err = gumble_ffmpeg.New(client)
