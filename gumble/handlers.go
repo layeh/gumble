@@ -158,7 +158,12 @@ func handleAuthenticate(c *Client, buffer []byte) error {
 }
 
 func handlePing(c *Client, buffer []byte) error {
-	return errUnimplementedHandler
+	var packet MumbleProto.Ping
+	if err := proto.Unmarshal(buffer, &packet); err != nil {
+		return err
+	}
+	c.pingStats.TCPPackets++
+	return nil
 }
 
 func handleReject(c *Client, buffer []byte) error {

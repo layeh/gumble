@@ -52,6 +52,8 @@ type Client struct {
 	permissions map[uint32]*Permission
 	tmpACL      *ACL
 
+	pingStats pingStats
+
 	// A collection containing the server's context actions.
 	ContextActions ContextActions
 
@@ -151,7 +153,8 @@ func (c *Client) pingRoutine() {
 	defer ticker.Stop()
 
 	pingPacket := MumbleProto.Ping{
-		Timestamp: proto.Uint64(0),
+		Timestamp:  proto.Uint64(0),
+		TcpPackets: &c.pingStats.TCPPackets,
 	}
 	pingProto := protoMessage{&pingPacket}
 
@@ -187,6 +190,7 @@ func (c *Client) readRoutine() {
 	c.Conn = nil
 	c.State = StateDisconnected
 	c.tmpACL = nil
+	c.pingStats = pingStats{}
 	c.listeners.OnDisconnect(&c.disconnectEvent)
 }
 
