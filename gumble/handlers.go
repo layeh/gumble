@@ -923,6 +923,7 @@ func handleUserStats(c *Client, buffer []byte) error {
 	if packet.Address != nil {
 		stats.IP = net.IP(packet.Address)
 	}
+	stats.StrongCertificate = packet.GetStrongCertificate()
 	if packet.Certificates != nil {
 		stats.Certificates = make([]*x509.Certificate, 0, len(packet.Certificates))
 		for _, data := range packet.Certificates {
