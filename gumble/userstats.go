@@ -24,6 +24,8 @@ type UserStats struct {
 	// Does the user have a strong certificate? A strong certificate is one that
 	// is not self signed, nor expired, etc.
 	StrongCertificate bool
+	// A list of CELT versions supported by the user's client.
+	CELTVersions []int32
 	// Does the user's client supports the Opus audio codec?
 	Opus bool
 
