@@ -11,10 +11,10 @@ import (
 
 func main() {
 	server := flag.String("server", "localhost:64738", "mumble server address")
-	timeout := flag.Int("timeout", 5, "ping timeout (seconds) until failure")
+	timeout := flag.Duration("timeout", time.Second*5, "ping timeout until failure")
 	flag.Parse()
 
-	resp, err := gumble.Ping(*server, time.Second*time.Duration(*timeout))
+	resp, err := gumble.Ping(*server, *timeout)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s: %s\n", os.Args[0], err)
 		os.Exit(1)
