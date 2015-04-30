@@ -25,32 +25,32 @@ var (
 )
 
 var handlers = map[uint16]handlerFunc{
-	0:  handleVersion,
-	1:  handleUdpTunnel,
-	2:  handleAuthenticate,
-	3:  handlePing,
-	4:  handleReject,
-	5:  handleServerSync,
-	6:  handleChannelRemove,
-	7:  handleChannelState,
-	8:  handleUserRemove,
-	9:  handleUserState,
-	10: handleBanList,
-	11: handleTextMessage,
-	12: handlePermissionDenied,
-	13: handleACL,
-	14: handleQueryUsers,
-	15: handleCryptSetup,
-	16: handleContextActionModify,
-	17: handleContextAction,
-	18: handleUserList,
-	19: handleVoiceTarget,
-	20: handlePermissionQuery,
-	21: handleCodecVersion,
-	22: handleUserStats,
-	23: handleRequestBlob,
-	24: handleServerConfig,
-	25: handleSuggestConfig,
+	0:  (*Client).handleVersion,
+	1:  (*Client).handleUdpTunnel,
+	2:  (*Client).handleAuthenticate,
+	3:  (*Client).handlePing,
+	4:  (*Client).handleReject,
+	5:  (*Client).handleServerSync,
+	6:  (*Client).handleChannelRemove,
+	7:  (*Client).handleChannelState,
+	8:  (*Client).handleUserRemove,
+	9:  (*Client).handleUserState,
+	10: (*Client).handleBanList,
+	11: (*Client).handleTextMessage,
+	12: (*Client).handlePermissionDenied,
+	13: (*Client).handleACL,
+	14: (*Client).handleQueryUsers,
+	15: (*Client).handleCryptSetup,
+	16: (*Client).handleContextActionModify,
+	17: (*Client).handleContextAction,
+	18: (*Client).handleUserList,
+	19: (*Client).handleVoiceTarget,
+	20: (*Client).handlePermissionQuery,
+	21: (*Client).handleCodecVersion,
+	22: (*Client).handleUserStats,
+	23: (*Client).handleRequestBlob,
+	24: (*Client).handleServerConfig,
+	25: (*Client).handleSuggestConfig,
 }
 
 func parseVersion(packet *MumbleProto.Version) Version {
@@ -70,7 +70,7 @@ func parseVersion(packet *MumbleProto.Version) Version {
 	return version
 }
 
-func handleVersion(c *Client, buffer []byte) error {
+func (c *Client) handleVersion(buffer []byte) error {
 	var packet MumbleProto.Version
 	if err := proto.Unmarshal(buffer, &packet); err != nil {
 		return err
@@ -78,7 +78,7 @@ func handleVersion(c *Client, buffer []byte) error {
 	return nil
 }
 
-func handleUdpTunnel(c *Client, buffer []byte) error {
+func (c *Client) handleUdpTunnel(buffer []byte) error {
 	reader := bytes.NewReader(buffer)
 	var bytesRead int64
 
@@ -153,11 +153,11 @@ func handleUdpTunnel(c *Client, buffer []byte) error {
 	return nil
 }
 
-func handleAuthenticate(c *Client, buffer []byte) error {
+func (c *Client) handleAuthenticate(buffer []byte) error {
 	return errUnimplementedHandler
 }
 
-func handlePing(c *Client, buffer []byte) error {
+func (c *Client) handlePing(buffer []byte) error {
 	var packet MumbleProto.Ping
 	if err := proto.Unmarshal(buffer, &packet); err != nil {
 		return err
@@ -166,7 +166,7 @@ func handlePing(c *Client, buffer []byte) error {
 	return nil
 }
 
-func handleReject(c *Client, buffer []byte) error {
+func (c *Client) handleReject(buffer []byte) error {
 	var packet MumbleProto.Reject
 	if err := proto.Unmarshal(buffer, &packet); err != nil {
 		return err
@@ -182,7 +182,7 @@ func handleReject(c *Client, buffer []byte) error {
 	return nil
 }
 
-func handleServerSync(c *Client, buffer []byte) error {
+func (c *Client) handleServerSync(buffer []byte) error {
 	var packet MumbleProto.ServerSync
 	if err := proto.Unmarshal(buffer, &packet); err != nil {
 		return err
@@ -206,7 +206,7 @@ func handleServerSync(c *Client, buffer []byte) error {
 	return nil
 }
 
-func handleChannelRemove(c *Client, buffer []byte) error {
+func (c *Client) handleChannelRemove(buffer []byte) error {
 	var packet MumbleProto.ChannelRemove
 	if err := proto.Unmarshal(buffer, &packet); err != nil {
 		return err
@@ -240,7 +240,7 @@ func handleChannelRemove(c *Client, buffer []byte) error {
 	return nil
 }
 
-func handleChannelState(c *Client, buffer []byte) error {
+func (c *Client) handleChannelState(buffer []byte) error {
 	var packet MumbleProto.ChannelState
 	if err := proto.Unmarshal(buffer, &packet); err != nil {
 		return err
@@ -308,7 +308,7 @@ func handleChannelState(c *Client, buffer []byte) error {
 	return nil
 }
 
-func handleUserRemove(c *Client, buffer []byte) error {
+func (c *Client) handleUserRemove(buffer []byte) error {
 	var packet MumbleProto.UserRemove
 	if err := proto.Unmarshal(buffer, &packet); err != nil {
 		return err
@@ -359,7 +359,7 @@ func handleUserRemove(c *Client, buffer []byte) error {
 	return nil
 }
 
-func handleUserState(c *Client, buffer []byte) error {
+func (c *Client) handleUserState(buffer []byte) error {
 	var packet MumbleProto.UserState
 	if err := proto.Unmarshal(buffer, &packet); err != nil {
 		return err
@@ -507,7 +507,7 @@ func handleUserState(c *Client, buffer []byte) error {
 	return nil
 }
 
-func handleBanList(c *Client, buffer []byte) error {
+func (c *Client) handleBanList(buffer []byte) error {
 	var packet MumbleProto.BanList
 	if err := proto.Unmarshal(buffer, &packet); err != nil {
 		return err
@@ -551,7 +551,7 @@ func handleBanList(c *Client, buffer []byte) error {
 	return nil
 }
 
-func handleTextMessage(c *Client, buffer []byte) error {
+func (c *Client) handleTextMessage(buffer []byte) error {
 	var packet MumbleProto.TextMessage
 	if err := proto.Unmarshal(buffer, &packet); err != nil {
 		return err
@@ -595,7 +595,7 @@ func handleTextMessage(c *Client, buffer []byte) error {
 	return nil
 }
 
-func handlePermissionDenied(c *Client, buffer []byte) error {
+func (c *Client) handlePermissionDenied(buffer []byte) error {
 	var packet MumbleProto.PermissionDenied
 	if err := proto.Unmarshal(buffer, &packet); err != nil {
 		return err
@@ -635,7 +635,7 @@ func handlePermissionDenied(c *Client, buffer []byte) error {
 	return nil
 }
 
-func handleACL(c *Client, buffer []byte) error {
+func (c *Client) handleACL(buffer []byte) error {
 	var packet MumbleProto.ACL
 	if err := proto.Unmarshal(buffer, &packet); err != nil {
 		return err
@@ -724,7 +724,7 @@ func handleACL(c *Client, buffer []byte) error {
 	return nil
 }
 
-func handleQueryUsers(c *Client, buffer []byte) error {
+func (c *Client) handleQueryUsers(buffer []byte) error {
 	var packet MumbleProto.QueryUsers
 	if err := proto.Unmarshal(buffer, &packet); err != nil {
 		return err
@@ -766,11 +766,11 @@ func handleQueryUsers(c *Client, buffer []byte) error {
 	return nil
 }
 
-func handleCryptSetup(c *Client, buffer []byte) error {
+func (c *Client) handleCryptSetup(buffer []byte) error {
 	return errUnimplementedHandler
 }
 
-func handleContextActionModify(c *Client, buffer []byte) error {
+func (c *Client) handleContextActionModify(buffer []byte) error {
 	var packet MumbleProto.ContextActionModify
 	if err := proto.Unmarshal(buffer, &packet); err != nil {
 		return err
@@ -814,11 +814,11 @@ func handleContextActionModify(c *Client, buffer []byte) error {
 	return nil
 }
 
-func handleContextAction(c *Client, buffer []byte) error {
+func (c *Client) handleContextAction(buffer []byte) error {
 	return errUnimplementedHandler
 }
 
-func handleUserList(c *Client, buffer []byte) error {
+func (c *Client) handleUserList(buffer []byte) error {
 	var packet MumbleProto.UserList
 	if err := proto.Unmarshal(buffer, &packet); err != nil {
 		return err
@@ -843,11 +843,11 @@ func handleUserList(c *Client, buffer []byte) error {
 	return nil
 }
 
-func handleVoiceTarget(c *Client, buffer []byte) error {
+func (c *Client) handleVoiceTarget(buffer []byte) error {
 	return errUnimplementedHandler
 }
 
-func handlePermissionQuery(c *Client, buffer []byte) error {
+func (c *Client) handlePermissionQuery(buffer []byte) error {
 	var packet MumbleProto.PermissionQuery
 	if err := proto.Unmarshal(buffer, &packet); err != nil {
 		return err
@@ -882,11 +882,11 @@ func handlePermissionQuery(c *Client, buffer []byte) error {
 	return nil
 }
 
-func handleCodecVersion(c *Client, buffer []byte) error {
+func (c *Client) handleCodecVersion(buffer []byte) error {
 	return errUnimplementedHandler
 }
 
-func handleUserStats(c *Client, buffer []byte) error {
+func (c *Client) handleUserStats(buffer []byte) error {
 	var packet MumbleProto.UserStats
 	if err := proto.Unmarshal(buffer, &packet); err != nil {
 		return err
@@ -949,14 +949,14 @@ func handleUserStats(c *Client, buffer []byte) error {
 	return nil
 }
 
-func handleRequestBlob(c *Client, buffer []byte) error {
+func (c *Client) handleRequestBlob(buffer []byte) error {
 	return errUnimplementedHandler
 }
 
-func handleServerConfig(c *Client, buffer []byte) error {
+func (c *Client) handleServerConfig(buffer []byte) error {
 	return errUnimplementedHandler
 }
 
-func handleSuggestConfig(c *Client, buffer []byte) error {
+func (c *Client) handleSuggestConfig(buffer []byte) error {
 	return errUnimplementedHandler
 }
