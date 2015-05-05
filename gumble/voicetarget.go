@@ -20,6 +20,7 @@ func init() {
 type voiceTargetChannel struct {
 	channel          *Channel
 	links, recursive bool
+	group            string
 }
 
 // VoiceTarget represents a set of users and/or channels that the client can
@@ -42,12 +43,14 @@ func (vt *VoiceTarget) AddUser(user *User) {
 	vt.users = append(vt.users, user)
 }
 
-// AddChannel adds a user to the voice target.
-func (vt *VoiceTarget) AddChannel(channel *Channel, recursive, links bool) {
+// AddChannel adds a user to the voice target. If group is non-empty, only
+// users belonging to that ACL group will be targeted.
+func (vt *VoiceTarget) AddChannel(channel *Channel, recursive, links bool, group string) {
 	vt.channels = append(vt.channels, &voiceTargetChannel{
 		channel:   channel,
 		links:     links,
 		recursive: recursive,
+		group:     group,
 	})
 }
 
@@ -62,11 +65,15 @@ func (vt *VoiceTarget) writeMessage(client *Client) error {
 		})
 	}
 	for _, vtChannel := range vt.channels {
-		packet.Targets = append(packet.Targets, &MumbleProto.VoiceTarget_Target{
+		target := &MumbleProto.VoiceTarget_Target{
 			ChannelId: &vtChannel.channel.ID,
 			Links:     &vtChannel.links,
 			Children:  &vtChannel.recursive,
-		})
+		}
+		if vtChannel.group != "" {
+			target.Group = &vtChannel.group
+		}
+		packet.Targets = append(packet.Targets, target)
 	}
 
 	proto := protoMessage{&packet}
