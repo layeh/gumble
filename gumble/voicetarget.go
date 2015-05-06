@@ -4,15 +4,15 @@ import (
 	"github.com/layeh/gumble/gumble/MumbleProto"
 )
 
-// TargetLoopback is a special voice target which causes any audio sent to the
-// server to be returned to the client.
+// VoiceTargetLoopback is a special voice target which causes any audio sent to
+// the server to be returned to the client.
 //
 // Its ID should not be modified, and it does not have to to be sent to the
 // server before use.
-var TargetLoopback *VoiceTarget
+var VoiceTargetLoopback *VoiceTarget
 
 func init() {
-	TargetLoopback = &VoiceTarget{
+	VoiceTargetLoopback = &VoiceTarget{
 		ID: 31,
 	}
 }
