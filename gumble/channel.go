@@ -7,8 +7,6 @@ import (
 
 // Channel represents a channel in the server's channel tree.
 type Channel struct {
-	client *Client
-
 	// The channel's unique ID.
 	ID uint32
 	// The channel's name.
@@ -29,6 +27,8 @@ type Channel struct {
 	Position int32
 	// Is the channel temporary?
 	Temporary bool
+
+	client *Client
 }
 
 // IsRoot returns true if the channel is the server's root channel.

@@ -8,9 +8,6 @@ import (
 
 // User represents a user that is currently connected to the server.
 type User struct {
-	client  *Client
-	decoder *gopus.Decoder
-
 	// The user's unique session ID.
 	Session uint32
 	// The user's ID. Contains an invalid value if the user is not registered.
@@ -50,6 +47,9 @@ type User struct {
 
 	// The user's stats. Containts nil if the stats have not yet been requested.
 	Stats *UserStats
+
+	client  *Client
+	decoder *gopus.Decoder
 }
 
 // SetTexture sets the user's texture.
