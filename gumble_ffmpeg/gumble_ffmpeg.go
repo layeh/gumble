@@ -24,6 +24,8 @@ type Stream struct {
 	// Audio source. This value should not be closed until the stream is done
 	// playing.
 	Source Source
+	// Starting offset.
+	Offset time.Duration
 
 	client *gumble.Client
 	cmd    *exec.Cmd
@@ -54,6 +56,9 @@ func (s *Stream) Play() error {
 		return errors.New("nil source")
 	}
 	args := s.Source.arguments()
+	if secs := int(s.Offset.Seconds()); secs > 0 {
+		args = append([]string{"-ss", strconv.Itoa(secs)}, args...)
+	}
 	args = append(args, []string{"-ac", "1", "-ar", strconv.Itoa(gumble.AudioSampleRate), "-f", "s16le", "-"}...)
 	cmd := exec.Command(s.Command, args...)
 	if pipe, err := cmd.StdoutPipe(); err != nil {
