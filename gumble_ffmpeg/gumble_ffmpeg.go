@@ -17,10 +17,13 @@ const (
 )
 
 type Stream struct {
+	// Command to execute to play the file. Defaults to "ffmpeg".
 	Command string
-	Volume  float32
-
-	playLock sync.Mutex
+	// Playback volume. This value can be changed while the source is playing.
+	Volume float32
+	// Audio source. This value should not be closed until the stream is done
+	// playing.
+	Source Source
 
 	client *gumble.Client
 	cmd    *exec.Cmd
@@ -30,79 +33,56 @@ type Stream struct {
 	stopWaitGroup sync.WaitGroup
 }
 
-func New(client *gumble.Client) (*Stream, error) {
+// New creates a new stream on the given gumble client.
+func New(client *gumble.Client) *Stream {
 	stream := &Stream{
 		client:  client,
 		Volume:  1.0,
 		Command: DefaultCommand,
 		stop:    make(chan bool),
 	}
-	return stream, nil
+	return stream
 }
 
-func (s *Stream) PlayExec(name string, args []string, callbacks ...func()) error {
-	cmd := exec.Command(name, args...)
-	pipe, err := cmd.StdoutPipe()
-	if err != nil {
-		return err
-	}
-	if err = cmd.Start(); err != nil {
-		return err
-	}
-	cb := func() {
-		cmd.Process.Kill()
-		cmd.Wait()
-	}
-	callbacks = append(callbacks, cb)
-	err = s.play("-", pipe, callbacks...)
-	if err != nil {
-		cb()
-		return err
-	}
-	return nil
-}
-
-func (s *Stream) PlayReader(in io.Reader, callbacks ...func()) error {
-	return s.play("-", in, callbacks...)
-}
-
-func (s *Stream) Play(file string, callbacks ...func()) error {
-	return s.play(file, nil, callbacks...)
-}
-
-func (s *Stream) play(file string, in io.Reader, callbacks ...func()) error {
-	s.playLock.Lock()
-	defer s.playLock.Unlock()
-
+// Play starts playing the stream to the gumble client. Returns non-nil if the
+// stream could not be started.
+func (s *Stream) Play() error {
 	if s.IsPlaying() {
 		return errors.New("already playing")
 	}
-	cmd := exec.Command(s.Command, "-i", file, "-ac", "1", "-ar", strconv.Itoa(gumble.AudioSampleRate), "-f", "s16le", "-")
+	if s.Source == nil {
+		return errors.New("nil source")
+	}
+	args := s.Source.arguments()
+	args = append(args, []string{"-ac", "1", "-ar", strconv.Itoa(gumble.AudioSampleRate), "-f", "s16le", "-"}...)
+	cmd := exec.Command(s.Command, args...)
 	if pipe, err := cmd.StdoutPipe(); err != nil {
 		return err
 	} else {
 		s.pipe = pipe
 	}
-	if in != nil {
-		cmd.Stdin = in
-	}
+	s.Source.start(cmd)
 	if err := cmd.Start(); err != nil {
+		s.Source.done()
 		return err
 	}
 	s.stopWaitGroup.Add(1)
 	s.cmd = cmd
-	go s.sourceRoutine(callbacks)
+	go s.sourceRoutine()
 	return nil
 }
 
+// IsPlaying returns if a stream is playing.
 func (s *Stream) IsPlaying() bool {
 	return s.cmd != nil
 }
 
+// Wait returns once the stream has finished playing.
 func (s *Stream) Wait() {
 	s.stopWaitGroup.Wait()
 }
 
+// Stop stops the currently playing stream.
 func (s *Stream) Stop() error {
 	if !s.IsPlaying() {
 		return errors.New("nothing playing")
@@ -113,7 +93,7 @@ func (s *Stream) Stop() error {
 	return nil
 }
 
-func (s *Stream) sourceRoutine(callbacks []func()) {
+func (s *Stream) sourceRoutine() {
 	interval := s.client.Config.GetAudioInterval()
 	frameSize := s.client.Config.GetAudioFrameSize()
 
@@ -124,10 +104,8 @@ func (s *Stream) sourceRoutine(callbacks []func()) {
 		s.cmd.Process.Kill()
 		s.cmd.Wait()
 		s.cmd = nil
+		s.Source.done()
 		s.stopWaitGroup.Done()
-		for _, callback := range callbacks {
-			callback()
-		}
 	}()
 
 	int16Buffer := make([]int16, frameSize)
