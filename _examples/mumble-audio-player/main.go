@@ -21,12 +21,7 @@ func main() {
 	}
 
 	gumbleutil.Main(func(client *gumble.Client) {
-		var err error
-		stream, err = gumble_ffmpeg.New(client)
-		if err != nil {
-			fmt.Printf("%s\n", err)
-			os.Exit(1)
-		}
+		stream = gumble_ffmpeg.New(client)
 
 		client.Attach(gumbleutil.AutoBitrate)
 
@@ -49,7 +44,8 @@ func main() {
 			if !ok {
 				return
 			}
-			if err := stream.Play(file); err != nil {
+			stream.Source = gumble_ffmpeg.SourceFile(file)
+			if err := stream.Play(); err != nil {
 				fmt.Printf("%s\n", err)
 			} else {
 				fmt.Printf("Playing %s\n", file)
