@@ -21,7 +21,7 @@ type Stream struct {
 	Command string
 	// Playback volume. This value can be changed while the source is playing.
 	Volume float32
-	// Audio source. This value should not be closed until the stream is done
+	// Audio source. This value should not be changed until the stream is done
 	// playing.
 	Source Source
 	// Starting offset.
