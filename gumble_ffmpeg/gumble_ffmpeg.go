@@ -26,6 +26,10 @@ type Stream struct {
 	Source Source
 	// Starting offset.
 	Offset time.Duration
+	// Elapsed time since starting playback.
+	ElapsedTime time.Duration
+
+	startTime time.Time
 
 	client *gumble.Client
 	cmd    *exec.Cmd
@@ -61,6 +65,12 @@ func (s *Stream) Play() error {
 	}
 	args = append(args, "-ac", "1", "-ar", strconv.Itoa(gumble.AudioSampleRate), "-f", "s16le", "-")
 	cmd := exec.Command(s.Command, args...)
+	
+	// with an offset we move the start time back so the elapsed
+	// duration is from the start of the file
+	s.startTime = time.Now().Add(-s.Offset)
+	s.ElapsedTime = 0
+
 	if pipe, err := cmd.StdoutPipe(); err != nil {
 		return err
 	} else {
@@ -117,6 +127,7 @@ func (s *Stream) sourceRoutine() {
 	byteBuffer := make([]byte, frameSize*2)
 
 	for {
+		s.ElapsedTime = time.Since(s.startTime)
 		select {
 		case <-s.stop:
 			return
