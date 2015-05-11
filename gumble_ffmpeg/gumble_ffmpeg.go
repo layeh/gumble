@@ -118,9 +118,8 @@ func (s *Stream) Stop() error {
 		s.stateChange.Unlock()
 		return errors.New("stream is not active")
 	}
-	s.stop <- true
-	s.stateChange.Unlock()
-	s.stopWaitGroup.Wait()
+	s.cleanup()
+	s.Wait()
 	return nil
 }
 
@@ -138,8 +137,12 @@ func (s *Stream) Pause() error {
 	return nil
 }
 
+// s.stateChange must be acquired before calling.
 func (s *Stream) cleanup() {
-	s.stateChange.Lock()
+	defer s.stateChange.Unlock()
+	if s.cmd == nil {
+		return
+	}
 	s.cmd.Process.Kill()
 	s.cmd.Wait()
 	s.cmd = nil
@@ -149,7 +152,6 @@ func (s *Stream) cleanup() {
 		<-s.stop
 	}
 	s.stopWaitGroup.Done()
-	s.stateChange.Unlock()
 }
 
 func (s *Stream) sourceRoutine() {
@@ -175,6 +177,7 @@ func (s *Stream) sourceRoutine() {
 			return
 		case <-ticker.C:
 			if _, err := io.ReadFull(s.pipe, byteBuffer); err != nil {
+				s.stateChange.Lock()
 				s.cleanup()
 				return
 			}
