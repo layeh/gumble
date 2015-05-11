@@ -31,6 +31,9 @@ type Stream struct {
 	cmd    *exec.Cmd
 	pipe   io.ReadCloser
 
+	paused      bool
+	stateChange sync.Mutex
+
 	stop          chan bool
 	stopWaitGroup sync.WaitGroup
 }
@@ -46,11 +49,17 @@ func New(client *gumble.Client) *Stream {
 	return stream
 }
 
-// Play starts playing the stream to the gumble client. Returns non-nil if the
-// stream could not be started.
+// Play starts playing a stream to the gumble client. If the stream is paused,
+// it will be resumed. Returns non-nil if the stream could not be started.
 func (s *Stream) Play() error {
-	if s.IsPlaying() {
-		return errors.New("already playing")
+	s.stateChange.Lock()
+	defer s.stateChange.Unlock()
+	if s.IsPaused() {
+		go s.sourceRoutine()
+		return nil
+	}
+	if s.IsActive() {
+		return errors.New("stream is already active")
 	}
 	if s.Source == nil {
 		return errors.New("nil source")
@@ -77,25 +86,66 @@ func (s *Stream) Play() error {
 	return nil
 }
 
-// IsPlaying returns if a stream is playing.
-func (s *Stream) IsPlaying() bool {
+// IsActive returns if a stream is playing or paused.
+func (s *Stream) IsActive() bool {
 	return s.cmd != nil
 }
 
-// Wait returns once the stream has finished playing.
+// IsPlaying returns if a stream is playing.
+func (s *Stream) IsPlaying() bool {
+	return s.cmd != nil && !s.paused
+}
+
+// IsPaused returns if a stream is paused.
+func (s *Stream) IsPaused() bool {
+	return s.cmd != nil && s.paused
+}
+
+// Wait returns once the stream has finished playing (pausing will not cause
+// this function to return).
 func (s *Stream) Wait() {
 	s.stopWaitGroup.Wait()
 }
 
 // Stop stops the currently playing stream.
 func (s *Stream) Stop() error {
-	if !s.IsPlaying() {
-		return errors.New("nothing playing")
+	s.stateChange.Lock()
+	if !s.IsActive() {
+		s.stateChange.Unlock()
+		return errors.New("stream is not active")
 	}
-
 	s.stop <- true
+	s.stateChange.Unlock()
 	s.stopWaitGroup.Wait()
 	return nil
+}
+
+// Pause pauses the currently playing stream.
+func (s *Stream) Pause() error {
+	s.stateChange.Lock()
+	defer s.stateChange.Unlock()
+	if !s.IsActive() {
+		return errors.New("stream is not active")
+	}
+	if s.IsPaused() {
+		return errors.New("stream is already paused")
+	}
+	s.stop <- false
+	return nil
+}
+
+func (s *Stream) cleanup() {
+	s.stateChange.Lock()
+	s.cmd.Process.Kill()
+	s.cmd.Wait()
+	s.cmd = nil
+	s.Source.done()
+	s.paused = false
+	for len(s.stop) > 0 {
+		<-s.stop
+	}
+	s.stopWaitGroup.Done()
+	s.stateChange.Unlock()
 }
 
 func (s *Stream) sourceRoutine() {
@@ -103,25 +153,25 @@ func (s *Stream) sourceRoutine() {
 	frameSize := s.client.Config.GetAudioFrameSize()
 
 	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
 
-	defer func() {
-		ticker.Stop()
-		s.cmd.Process.Kill()
-		s.cmd.Wait()
-		s.cmd = nil
-		s.Source.done()
-		s.stopWaitGroup.Done()
-	}()
+	s.paused = false
 
 	int16Buffer := make([]int16, frameSize)
 	byteBuffer := make([]byte, frameSize*2)
 
 	for {
 		select {
-		case <-s.stop:
+		case kill := <-s.stop:
+			if kill {
+				s.cleanup()
+			} else {
+				s.paused = true
+			}
 			return
 		case <-ticker.C:
 			if _, err := io.ReadFull(s.pipe, byteBuffer); err != nil {
+				s.cleanup()
 				return
 			}
 			for i := range int16Buffer {
