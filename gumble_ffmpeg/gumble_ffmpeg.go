@@ -34,10 +34,10 @@ type Stream struct {
 	cmd    *exec.Cmd
 	pipe   io.ReadCloser
 
+	pause       chan struct{}
 	paused      bool
 	stateChange sync.Mutex
 
-	stop          chan bool
 	stopWaitGroup sync.WaitGroup
 }
 
@@ -47,7 +47,7 @@ func New(client *gumble.Client) *Stream {
 		client:  client,
 		Volume:  1.0,
 		Command: DefaultCommand,
-		stop:    make(chan bool),
+		pause:   make(chan struct{}),
 	}
 	return stream
 }
@@ -133,7 +133,7 @@ func (s *Stream) Pause() error {
 	if s.IsPaused() {
 		return errors.New("stream is already paused")
 	}
-	s.stop <- false
+	s.pause <- struct{}{}
 	return nil
 }
 
@@ -148,8 +148,8 @@ func (s *Stream) cleanup() {
 	s.cmd = nil
 	s.Source.done()
 	s.paused = false
-	for len(s.stop) > 0 {
-		<-s.stop
+	for len(s.pause) > 0 {
+		<-s.pause
 	}
 	s.stopWaitGroup.Done()
 }
@@ -168,12 +168,8 @@ func (s *Stream) sourceRoutine() {
 
 	for {
 		select {
-		case kill := <-s.stop:
-			if kill {
-				s.cleanup()
-			} else {
-				s.paused = true
-			}
+		case <-s.pause:
+			s.paused = true
 			return
 		case <-ticker.C:
 			if _, err := io.ReadFull(s.pipe, byteBuffer); err != nil {
