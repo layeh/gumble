@@ -35,6 +35,14 @@ type ACLGroup struct {
 	usersAdd, usersRemove, usersInherited map[uint32]*ACLUser
 }
 
+// ACL group names that are built-in.
+const (
+	ACLGroupEveryone       = "all"
+	ACLGroupAuthenticated  = "auth"
+	ACLGroupInsideChannel  = "in"
+	ACLGroupOutsideChannel = "out"
+)
+
 // ACLRule is a set of granted and denied permissions given to an ACLUser or
 // ACLGroup.
 type ACLRule struct {
