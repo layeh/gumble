@@ -26,6 +26,9 @@ type Stream struct {
 	Source Source
 	// Starting offset.
 	Offset time.Duration
+	// The amount of audio that has been played by the stream (resets when a
+	// source starts from the beginning).
+	Elapsed time.Duration
 
 	client *gumble.Client
 	cmd    *exec.Cmd
@@ -82,6 +85,7 @@ func (s *Stream) Play() error {
 	}
 	s.stopWaitGroup.Add(1)
 	s.cmd = cmd
+	s.Elapsed = 0
 	go s.sourceRoutine()
 	return nil
 }
@@ -178,6 +182,7 @@ func (s *Stream) sourceRoutine() {
 				float := float32(int16(binary.LittleEndian.Uint16(byteBuffer[i*2 : (i+1)*2])))
 				int16Buffer[i] = int16(s.Volume * float)
 			}
+			s.Elapsed += interval
 			s.client.Send(gumble.AudioBuffer(int16Buffer))
 		}
 	}
