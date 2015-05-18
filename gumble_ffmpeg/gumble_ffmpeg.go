@@ -78,7 +78,9 @@ func (s *Stream) Play() error {
 	} else {
 		s.pipe = pipe
 	}
-	s.Source.start(cmd)
+	if err := s.Source.start(cmd); err != nil {
+		return err
+	}
 	if err := cmd.Start(); err != nil {
 		s.Source.done()
 		return err
