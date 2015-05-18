@@ -68,7 +68,7 @@ type sourceExec struct {
 func SourceExec(name string, arg ...string) Source {
 	return &sourceExec{
 		name: name,
-		arg: arg,
+		arg:  arg,
 	}
 }
 
