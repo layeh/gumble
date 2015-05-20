@@ -971,5 +971,16 @@ func (c *Client) handleServerConfig(buffer []byte) error {
 }
 
 func (c *Client) handleSuggestConfig(buffer []byte) error {
+	var packet MumbleProto.SuggestConfig
+	if err := proto.Unmarshal(buffer, &packet); err != nil {
+		return err
+	}
+	event := ServerConfigEvent{
+		Client:            c,
+		SuggestVersion:    Version{Version: packet.GetVersion()},
+		SuggestPositional: packet.GetPositional(),
+		SuggestPushToTalk: packet.GetPushToTalk(),
+	}
+	c.listeners.OnServerConfig(&event)
 	return errUnimplementedHandler
 }

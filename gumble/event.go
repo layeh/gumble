@@ -212,4 +212,8 @@ type ServerConfigEvent struct {
 	AllowHTML                 bool
 	MaximumMessageLength      int
 	MaximumImageMessageLength int
+
+	SuggestVersion    Version
+	SuggestPositional bool
+	SuggestPushToTalk bool
 }
