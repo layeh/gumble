@@ -23,8 +23,8 @@ type EventListener interface {
 // ConnectEvent is the event that is passed to EventListener.OnConnect.
 type ConnectEvent struct {
 	Client         *Client
-	WelcomeMessage string
-	MaximumBitrate int
+	WelcomeMessage *string
+	MaximumBitrate *int
 }
 
 // DisconnectType specifies why a Client disconnected from a server.
@@ -207,13 +207,13 @@ type ContextActionChangeEvent struct {
 type ServerConfigEvent struct {
 	Client *Client
 
-	MaximumBitrate            int
-	WelcomeMessage            string
-	AllowHTML                 bool
-	MaximumMessageLength      int
-	MaximumImageMessageLength int
+	MaximumBitrate            *int
+	WelcomeMessage            *string
+	AllowHTML                 *bool
+	MaximumMessageLength      *int
+	MaximumImageMessageLength *int
 
-	SuggestVersion    Version
-	SuggestPositional bool
-	SuggestPushToTalk bool
+	SuggestVersion    *Version
+	SuggestPositional *bool
+	SuggestPushToTalk *bool
 }

@@ -195,10 +195,11 @@ func (c *Client) handleServerSync(buffer []byte) error {
 		c.Self = c.Users[*packet.Session]
 	}
 	if packet.WelcomeText != nil {
-		event.WelcomeMessage = *packet.WelcomeText
+		event.WelcomeMessage = packet.WelcomeText
 	}
 	if packet.MaxBandwidth != nil {
-		event.MaximumBitrate = int(*packet.MaxBandwidth)
+		val := int(*packet.MaxBandwidth)
+		event.MaximumBitrate = &val
 	}
 	c.State = StateSynced
 
@@ -959,12 +960,25 @@ func (c *Client) handleServerConfig(buffer []byte) error {
 		return err
 	}
 	event := ServerConfigEvent{
-		Client:                    c,
-		MaximumBitrate:            int(packet.GetMaxBandwidth()),
-		WelcomeMessage:            packet.GetWelcomeText(),
-		AllowHTML:                 packet.GetAllowHtml(),
-		MaximumMessageLength:      int(packet.GetMessageLength()),
-		MaximumImageMessageLength: int(packet.GetImageMessageLength()),
+		Client: c,
+	}
+	if packet.MaxBandwidth != nil {
+		val := int(*packet.MaxBandwidth)
+		event.MaximumBitrate = &val
+	}
+	if packet.WelcomeText != nil {
+		event.WelcomeMessage = packet.WelcomeText
+	}
+	if packet.AllowHtml != nil {
+		event.AllowHTML = packet.AllowHtml
+	}
+	if packet.MessageLength != nil {
+		val := int(*packet.MessageLength)
+		event.MaximumMessageLength = &val
+	}
+	if packet.ImageMessageLength != nil {
+		val := int(*packet.ImageMessageLength)
+		event.MaximumImageMessageLength = &val
 	}
 	c.listeners.OnServerConfig(&event)
 	return errUnimplementedHandler
@@ -976,10 +990,18 @@ func (c *Client) handleSuggestConfig(buffer []byte) error {
 		return err
 	}
 	event := ServerConfigEvent{
-		Client:            c,
-		SuggestVersion:    Version{Version: packet.GetVersion()},
-		SuggestPositional: packet.GetPositional(),
-		SuggestPushToTalk: packet.GetPushToTalk(),
+		Client: c,
+	}
+	if packet.Version != nil {
+		event.SuggestVersion = &Version{
+			Version: packet.GetVersion(),
+		}
+	}
+	if packet.Positional != nil {
+		event.SuggestPositional = packet.Positional
+	}
+	if packet.PushToTalk != nil {
+		event.SuggestPushToTalk = packet.PushToTalk
 	}
 	c.listeners.OnServerConfig(&event)
 	return errUnimplementedHandler
