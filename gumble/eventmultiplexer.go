@@ -104,3 +104,9 @@ func (em eventMultiplexer) OnContextActionChange(event *ContextActionChangeEvent
 		item.listener.OnContextActionChange(event)
 	}
 }
+
+func (em eventMultiplexer) OnServerConfig(event *ServerConfigEvent) {
+	for item := em.head; item != nil; item = item.next {
+		item.listener.OnServerConfig(event)
+	}
+}

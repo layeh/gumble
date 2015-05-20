@@ -17,6 +17,7 @@ type Listener struct {
 	ACL                 func(e *gumble.ACLEvent)
 	BanList             func(e *gumble.BanListEvent)
 	ContextActionChange func(e *gumble.ContextActionChangeEvent)
+	ServerConfig        func(e *gumble.ServerConfigEvent)
 }
 
 // OnConnect implements gumble.EventListener.OnConnect.
@@ -86,5 +87,12 @@ func (l Listener) OnBanList(e *gumble.BanListEvent) {
 func (l Listener) OnContextActionChange(e *gumble.ContextActionChangeEvent) {
 	if l.ContextActionChange != nil {
 		l.ContextActionChange(e)
+	}
+}
+
+// OnServerConfig implements gumble.EventListener.OnServerConfig.
+func (l Listener) OnServerConfig(e *gumble.ServerConfigEvent) {
+	if l.ServerConfig != nil {
+		l.ServerConfig(e)
 	}
 }

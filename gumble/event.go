@@ -17,6 +17,7 @@ type EventListener interface {
 	OnACL(e *ACLEvent)
 	OnBanList(e *BanListEvent)
 	OnContextActionChange(e *ContextActionChangeEvent)
+	OnServerConfig(e *ServerConfigEvent)
 }
 
 // ConnectEvent is the event that is passed to EventListener.OnConnect.
@@ -199,4 +200,16 @@ type ContextActionChangeEvent struct {
 	Client        *Client
 	Type          ContextActionChangeType
 	ContextAction *ContextAction
+}
+
+// ServerConfigEvent is the event that is passed to
+// EventListener.OnServerConfig.
+type ServerConfigEvent struct {
+	Client *Client
+
+	MaximumBitrate            int
+	WelcomeMessage            string
+	AllowHTML                 bool
+	MaximumMessageLength      int
+	MaximumImageMessageLength int
 }

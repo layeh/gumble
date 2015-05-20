@@ -71,3 +71,8 @@ func (lf ListenerFunc) OnBanList(e *gumble.BanListEvent) {
 func (lf ListenerFunc) OnContextActionChange(e *gumble.ContextActionChangeEvent) {
 	lf(e)
 }
+
+// OnServerConfig implements gumble.EventListener.OnServerConfig.
+func (lf ListenerFunc) OnServerConfig(e *gumble.ServerConfigEvent) {
+	lf(e)
+}

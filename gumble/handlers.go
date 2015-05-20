@@ -954,6 +954,19 @@ func (c *Client) handleRequestBlob(buffer []byte) error {
 }
 
 func (c *Client) handleServerConfig(buffer []byte) error {
+	var packet MumbleProto.ServerConfig
+	if err := proto.Unmarshal(buffer, &packet); err != nil {
+		return err
+	}
+	event := ServerConfigEvent{
+		Client:                    c,
+		MaximumBitrate:            int(packet.GetMaxBandwidth()),
+		WelcomeMessage:            packet.GetWelcomeText(),
+		AllowHTML:                 packet.GetAllowHtml(),
+		MaximumMessageLength:      int(packet.GetMessageLength()),
+		MaximumImageMessageLength: int(packet.GetImageMessageLength()),
+	}
+	c.listeners.OnServerConfig(&event)
 	return errUnimplementedHandler
 }
 
