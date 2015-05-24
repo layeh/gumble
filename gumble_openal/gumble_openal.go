@@ -113,7 +113,7 @@ func (s *Stream) OnAudioPacket(e *gumble.AudioPacketEvent) {
 }
 
 func (s *Stream) sourceRoutine() {
-	interval := s.client.Config.GetAudioInterval()
+	interval := s.client.Config.AudioInterval
 	frameSize := s.client.Config.GetAudioFrameSize()
 
 	if frameSize != s.sourceFrameSize {

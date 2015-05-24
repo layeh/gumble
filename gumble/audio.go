@@ -66,7 +66,7 @@ func (ab AudioBuffer) writeMessage(client *Client) error {
 }
 
 func writeAudioTo(client *Client, ab AudioBuffer, pab *PositionalAudioBuffer) error {
-	dataBytes := client.Config.GetAudioDataBytes()
+	dataBytes := client.Config.AudioDataBytes
 	opus, err := client.AudioEncoder.Encode(ab, len(ab), dataBytes)
 	if err != nil {
 		return err

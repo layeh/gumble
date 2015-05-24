@@ -157,7 +157,7 @@ func (s *Stream) cleanup() {
 }
 
 func (s *Stream) sourceRoutine() {
-	interval := s.client.Config.GetAudioInterval()
+	interval := s.client.Config.AudioInterval
 	frameSize := s.client.Config.GetAudioFrameSize()
 
 	ticker := time.NewTicker(interval)

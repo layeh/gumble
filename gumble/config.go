@@ -35,28 +35,18 @@ type Config struct {
 	Dialer    net.Dialer
 }
 
-// GetAudioInterval returns c.AudioInterval if it is valid, else returns
-// AudioDefaultInterval.
-func (c *Config) GetAudioInterval() time.Duration {
-	if c.AudioInterval <= 0 {
-		return AudioDefaultInterval
+// NewConfig returns a new Config struct with default values set.
+func NewConfig() *Config {
+	return &Config{
+		AudioInterval:  AudioDefaultInterval,
+		AudioDataBytes: AudioDefaultDataBytes,
 	}
-	return c.AudioInterval
-}
-
-// GetAudioDataBytes returns c.AudioDataBytes if it is valid, else returns
-// AudioDefaultDataBytes.
-func (c *Config) GetAudioDataBytes() int {
-	if c.AudioDataBytes <= 0 {
-		return AudioDefaultDataBytes
-	}
-	return c.AudioDataBytes
 }
 
 // GetAudioFrameSize returns the appropriate audio frame size, based off of the
 // audio interval.
 func (c *Config) GetAudioFrameSize() int {
-	return int(c.GetAudioInterval()/AudioDefaultInterval) * AudioDefaultFrameSize
+	return int(c.AudioInterval/AudioDefaultInterval) * AudioDefaultFrameSize
 }
 
 // AccessTokens are additional passwords that can be provided to the server to
