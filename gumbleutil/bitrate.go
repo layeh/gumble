@@ -20,4 +20,8 @@ var autoBitrate = &Listener{
 
 // AutoBitrate is a gumble.EventListener that automatically sets the client's
 // AudioDataBytes to suitable value, based on the server's bitrate.
-var AutoBitrate gumble.EventListener = autoBitrate
+var AutoBitrate gumble.EventListener
+
+func init() {
+	AutoBitrate = autoBitrate
+}
