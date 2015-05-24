@@ -40,6 +40,9 @@ func NewConfig() *Config {
 	return &Config{
 		AudioInterval:  AudioDefaultInterval,
 		AudioDataBytes: AudioDefaultDataBytes,
+		Dialer: net.Dialer{
+			Timeout: time.Second * 20,
+		},
 	}
 }
 
