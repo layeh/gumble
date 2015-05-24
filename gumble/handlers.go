@@ -981,7 +981,7 @@ func (c *Client) handleServerConfig(buffer []byte) error {
 		event.MaximumImageMessageLength = &val
 	}
 	c.listeners.OnServerConfig(&event)
-	return errUnimplementedHandler
+	return nil
 }
 
 func (c *Client) handleSuggestConfig(buffer []byte) error {
@@ -1004,5 +1004,5 @@ func (c *Client) handleSuggestConfig(buffer []byte) error {
 		event.SuggestPushToTalk = packet.PushToTalk
 	}
 	c.listeners.OnServerConfig(&event)
-	return errUnimplementedHandler
+	return nil
 }
