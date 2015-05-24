@@ -4,14 +4,13 @@
 //
 //1. Create a new Config to hold your connection settings:
 //
-//        config := gumble.Config{
-//          Username: "gumble-test",
-//          Address:  "example.com:64738",
-//        }
+//        config := gumble.NewConfig()
+//        config.Username = "gumble-test"
+//        config.Address = "example.com:64738"
 //
 //2. Create a new Client:
 //
-//        client := gumble.NewClient(&config)
+//        client := gumble.NewClient(config)
 //
 //3. Implement EventListener (or use gumbleutil.Listener) and attach it to the client:
 //
