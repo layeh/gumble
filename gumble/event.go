@@ -213,6 +213,11 @@ type ServerConfigEvent struct {
 	MaximumMessageLength      *int
 	MaximumImageMessageLength *int
 
+	CodecAlpha       *int32
+	CodecBeta        *int32
+	CodecPreferAlpha *bool
+	CodecOpus        *bool
+
 	SuggestVersion    *Version
 	SuggestPositional *bool
 	SuggestPushToTalk *bool

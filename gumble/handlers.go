@@ -884,7 +884,25 @@ func (c *Client) handlePermissionQuery(buffer []byte) error {
 }
 
 func (c *Client) handleCodecVersion(buffer []byte) error {
-	return errUnimplementedHandler
+	var packet MumbleProto.CodecVersion
+	if err := proto.Unmarshal(buffer, &packet); err != nil {
+		return err
+	}
+	event := ServerConfigEvent{
+		Client: c,
+	}
+	event.CodecAlpha = packet.Alpha
+	event.CodecBeta = packet.Beta
+	{
+		val := packet.GetPreferAlpha()
+		event.CodecPreferAlpha = &val
+	}
+	{
+		val := packet.GetOpus()
+		event.CodecOpus = &val
+	}
+	c.listeners.OnServerConfig(&event)
+	return nil
 }
 
 func (c *Client) handleUserStats(buffer []byte) error {
