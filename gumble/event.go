@@ -112,6 +112,7 @@ const (
 	ChannelChangeRemoved
 	ChannelChangeMoved
 	ChannelChangeName
+	ChannelChangeLinks
 	ChannelChangeDescription
 	ChannelChangePosition
 	ChannelChangePermission

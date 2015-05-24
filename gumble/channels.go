@@ -13,6 +13,7 @@ type Channels map[uint32]*Channel
 func (c Channels) create(id uint32) *Channel {
 	channel := &Channel{
 		ID:       id,
+		Links:    make(map[uint32]*Channel),
 		Children: Channels{},
 		Users:    Users{},
 	}

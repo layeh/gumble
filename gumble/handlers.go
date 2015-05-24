@@ -220,18 +220,18 @@ func (c *Client) handleChannelRemove(buffer []byte) error {
 	if packet.ChannelId == nil {
 		return errIncompleteProtobuf
 	}
-	var channel *Channel
-	{
-		channelID := *packet.ChannelId
-		channel = c.Channels[channelID]
-		if channel == nil {
-			return errInvalidProtobuf
-		}
-		delete(c.Channels, channelID)
-		delete(c.permissions, channelID)
-		if parent := channel.Parent; parent != nil {
-			delete(parent.Children, channel.ID)
-		}
+	channelID := *packet.ChannelId
+	channel := c.Channels[channelID]
+	if channel == nil {
+		return errInvalidProtobuf
+	}
+	delete(c.Channels, channelID)
+	delete(c.permissions, channelID)
+	if parent := channel.Parent; parent != nil {
+		delete(parent.Children, channel.ID)
+	}
+	for _, link := range channel.Links {
+		delete(link.Links, channelID)
 	}
 
 	if c.State == StateSynced {
@@ -284,6 +284,29 @@ func (c *Client) handleChannelState(buffer []byte) error {
 			event.Type |= ChannelChangeName
 		}
 		channel.Name = *packet.Name
+	}
+	if packet.Links != nil {
+		channel.Links = make(map[uint32]*Channel)
+		event.Type |= ChannelChangeLinks
+		for _, channelID := range packet.Links {
+			if c := c.Channels[channelID]; c != nil {
+				channel.Links[channelID] = c
+			}
+		}
+	}
+	for _, channelID := range packet.LinksAdd {
+		if c := c.Channels[channelID]; c != nil {
+			event.Type |= ChannelChangeLinks
+			channel.Links[channelID] = c
+			c.Links[channel.ID] = channel
+		}
+	}
+	for _, channelID := range packet.LinksRemove {
+		if c := c.Channels[channelID]; c != nil {
+			event.Type |= ChannelChangeLinks
+			delete(channel.Links, channelID)
+			delete(c.Links, channel.ID)
+		}
 	}
 	if packet.Description != nil {
 		if *packet.Description != channel.Description {

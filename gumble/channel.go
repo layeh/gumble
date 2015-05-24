@@ -15,6 +15,8 @@ type Channel struct {
 	Parent *Channel
 	// The channels directly underneath the channel.
 	Children Channels
+	// The channels that are linked to the channel.
+	Links map[uint32]*Channel
 	// The users currently in the channel.
 	Users Users
 	// The channel's description. Contains the empty string if the channel does
@@ -144,4 +146,38 @@ func (c *Channel) Send(message string, recursive bool) {
 // the permissions are unknown.
 func (c *Channel) Permission() *Permission {
 	return c.client.permissions[c.ID]
+}
+
+// Link links the given channels to the channel.
+func (c *Channel) Link(channel ...*Channel) {
+	packet := MumbleProto.ChannelState{
+		ChannelId: &c.ID,
+		LinksAdd:  make([]uint32, len(channel)),
+	}
+	for i, ch := range channel {
+		packet.LinksAdd[i] = ch.ID
+	}
+	c.client.Send(protoMessage{&packet})
+}
+
+// Unlink unlinks the given channels from the channel. If no arguments are
+// passed, all linked channels are unlinked.
+func (c *Channel) Unlink(channel ...*Channel) {
+	packet := MumbleProto.ChannelState{
+		ChannelId: &c.ID,
+	}
+	if len(channel) == 0 {
+		packet.LinksRemove = make([]uint32, len(c.Links))
+		i := 0
+		for channelID := range c.Links {
+			packet.LinksRemove[i] = channelID
+			i++
+		}
+	} else {
+		packet.LinksRemove = make([]uint32, len(channel))
+		for i, ch := range channel {
+			packet.LinksRemove[i] = ch.ID
+		}
+	}
+	c.client.Send(protoMessage{&packet})
 }
