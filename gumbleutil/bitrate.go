@@ -3,7 +3,6 @@ package gumbleutil
 import (
 	"time"
 
-	"github.com/layeh/gopus"
 	"github.com/layeh/gumble/gumble"
 )
 
@@ -15,7 +14,6 @@ var autoBitrate = &Listener{
 			dataBytes := (*e.MaximumBitrate / (8 * (int(time.Second/interval) + safety))) - 32 - 10
 
 			e.Client.Config.AudioDataBytes = dataBytes
-			e.Client.AudioEncoder.SetBitrate(gopus.BitrateMaximum)
 		}
 	},
 }

@@ -29,7 +29,11 @@
 // Audio codecs
 //
 // Currently, only the Opus codec (https://www.opus-codec.org/) is supported
-// for transmitting and receiving audio.
+// for transmitting and receiving audio. It can be enabled by importing the
+// following package for its side effect:
+//  import (
+//    _ "github.com/layeh/gumble/opus"
+//  )
 //
 // To ensure that gumble clients can always transmit and receive audio to and
 // from your server, add the following line to your murmur configuration file:

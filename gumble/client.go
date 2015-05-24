@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/layeh/gopus"
 	"github.com/layeh/gumble/gumble/MumbleProto"
 )
 
@@ -58,8 +57,9 @@ type Client struct {
 	ContextActions ContextActions
 
 	// The audio encoder used when sending audio to the server.
-	AudioEncoder  *gopus.Encoder
+	AudioEncoder  AudioEncoder
 	audioSequence int
+	audioCodec    AudioCodec
 	// To whom transmitted audio will be sent. The VoiceTarget must have already
 	// been sent to the server for targeting to work correctly. Setting to nil
 	// will disable voice targeting (i.e. switch back to regular speaking).
@@ -86,13 +86,6 @@ func (c *Client) Connect() error {
 	if c.State != StateDisconnected {
 		return errors.New("client is already connected")
 	}
-	encoder, err := gopus.NewEncoder(AudioSampleRate, 1, gopus.Voip)
-	if err != nil {
-		return err
-	}
-	encoder.SetBitrate(gopus.BitrateMaximum)
-	c.audioSequence = 0
-	c.VoiceTarget = nil
 
 	tlsConn, err := tls.DialWithDialer(&c.Config.Dialer, "tcp", c.Config.Address, &c.Config.TLSConfig)
 	if err != nil {
@@ -107,7 +100,6 @@ func (c *Client) Connect() error {
 	}
 	c.Conn = NewConn(tlsConn)
 
-	c.AudioEncoder = encoder
 	c.Users = Users{}
 	c.Channels = Channels{}
 	c.permissions = make(map[uint32]*Permission)
@@ -190,6 +182,9 @@ func (c *Client) readRoutine() {
 	c.Conn = nil
 	c.State = StateDisconnected
 	c.tmpACL = nil
+	c.audioCodec = nil
+	c.AudioEncoder = nil
+	c.audioSequence = 0
 	c.pingStats = pingStats{}
 	c.listeners.OnDisconnect(&c.disconnectEvent)
 }

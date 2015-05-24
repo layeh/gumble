@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/layeh/gopus"
 	"github.com/layeh/gumble/gumble/MumbleProto"
 	"github.com/layeh/gumble/gumble/varint"
 )
@@ -95,7 +94,8 @@ func (c *Client) handleUdpTunnel(buffer []byte) error {
 	audioType = (typeTarget >> 5) & 0x7
 	audioTarget = typeTarget & 0x1F
 	// Opus only
-	if audioType != 4 {
+	// TODO: add handling for other packet types
+	if audioType != audioCodecIDOpus {
 		return errUnsupportedAudio
 	}
 	bytesRead++
@@ -110,6 +110,10 @@ func (c *Client) handleUdpTunnel(buffer []byte) error {
 		return errInvalidProtobuf
 	}
 	bytesRead += n
+	decoder := user.decoder
+	if decoder == nil {
+		return nil
+	}
 
 	// Sequence
 	sequence, n, err := varint.ReadFrom(reader)
@@ -131,8 +135,8 @@ func (c *Client) handleUdpTunnel(buffer []byte) error {
 	audioLength64 := int64(audioLength)
 	bytesRead += n
 
-	opus := buffer[bytesRead : bytesRead+audioLength64]
-	pcm, err := user.decoder.Decode(opus, AudioMaximumFrameSize, false)
+	raw := buffer[bytesRead : bytesRead+audioLength64]
+	pcm, err := decoder.Decode(raw, AudioMaximumFrameSize)
 	if err != nil {
 		return err
 	}
@@ -383,8 +387,9 @@ func (c *Client) handleUserState(buffer []byte) error {
 
 			event.Type |= UserChangeConnected
 
-			decoder, _ := gopus.NewDecoder(AudioSampleRate, 1)
-			user.decoder = decoder
+			if codec := c.audioCodec; codec != nil {
+				user.decoder = codec.NewDecoder()
+			}
 
 			if user.Channel == nil {
 				return errInvalidProtobuf
@@ -901,6 +906,20 @@ func (c *Client) handleCodecVersion(buffer []byte) error {
 		val := packet.GetOpus()
 		event.CodecOpus = &val
 	}
+
+	var codec AudioCodec
+	switch {
+	case *event.CodecOpus:
+		codec = audioCodecs[audioCodecIDOpus]
+	}
+	if codec != nil {
+		c.audioCodec = codec
+		c.AudioEncoder = codec.NewEncoder()
+		for _, user := range c.Users {
+			user.decoder = codec.NewDecoder()
+		}
+	}
+
 	c.listeners.OnServerConfig(&event)
 	return nil
 }

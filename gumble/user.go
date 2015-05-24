@@ -2,7 +2,6 @@ package gumble
 
 import (
 	"github.com/golang/protobuf/proto"
-	"github.com/layeh/gopus"
 	"github.com/layeh/gumble/gumble/MumbleProto"
 )
 
@@ -49,7 +48,7 @@ type User struct {
 	Stats *UserStats
 
 	client  *Client
-	decoder *gopus.Decoder
+	decoder AudioDecoder
 }
 
 // SetTexture sets the user's texture.
