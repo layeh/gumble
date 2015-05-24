@@ -25,6 +25,10 @@ const (
 	// AudioDefaultDataBytes is the default number of bytes that an audio frame
 	// can use.
 	AudioDefaultDataBytes = 40
+
+	// AudioChannels is the number of audio channels that are contained in an
+	// audio stream.
+	AudioChannels = 1
 )
 
 // AudioListener is the interface that must be implemented by types wishing to

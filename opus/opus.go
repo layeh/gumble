@@ -22,7 +22,7 @@ func (*generator) ID() int {
 }
 
 func (*generator) NewEncoder() gumble.AudioEncoder {
-	e, _ := gopus.NewEncoder(gumble.AudioSampleRate, 1, gopus.Voip)
+	e, _ := gopus.NewEncoder(gumble.AudioSampleRate, gumble.AudioChannels, gopus.Voip)
 	e.SetBitrate(gopus.BitrateMaximum)
 	return &Encoder{
 		e,
@@ -30,7 +30,7 @@ func (*generator) NewEncoder() gumble.AudioEncoder {
 }
 
 func (*generator) NewDecoder() gumble.AudioDecoder {
-	d, _ := gopus.NewDecoder(gumble.AudioSampleRate, 1)
+	d, _ := gopus.NewDecoder(gumble.AudioSampleRate, gumble.AudioChannels)
 	return &Decoder{
 		d,
 	}
