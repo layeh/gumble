@@ -68,7 +68,9 @@ func CertificateLockFile(client *gumble.Client, filename string) {
 		}
 		for _, cert := range state.PeerCertificates {
 			block.Bytes = cert.Raw
-			pem.Encode(file, &block)
+			if err := pem.Encode(file, &block); err != nil {
+				return err
+			}
 		}
 		return nil
 	}
