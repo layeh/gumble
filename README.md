@@ -2,7 +2,7 @@
 
 ## Sub-projects
 
-- gumble
+- gumble [![GoDoc](https://godoc.org/github.com/layeh/gumble/gumble?status.svg)](https://godoc.org/github.com/layeh/gumble/gumble)
     - Client library
 - gumble_openal
     - [OpenAL](http://kcat.strangesoft.net/openal.html) audio system for gumble
