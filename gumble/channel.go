@@ -16,7 +16,7 @@ type Channel struct {
 	// The channels directly underneath the channel.
 	Children Channels
 	// The channels that are linked to the channel.
-	Links map[uint32]*Channel
+	Links Channels
 	// The users currently in the channel.
 	Users Users
 	// The channel's description. Contains the empty string if the channel does

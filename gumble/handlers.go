@@ -286,7 +286,7 @@ func (c *Client) handleChannelState(buffer []byte) error {
 		channel.Name = *packet.Name
 	}
 	if packet.Links != nil {
-		channel.Links = make(map[uint32]*Channel)
+		channel.Links = make(Channels)
 		event.Type |= ChannelChangeLinks
 		for _, channelID := range packet.Links {
 			if c := c.Channels[channelID]; c != nil {
