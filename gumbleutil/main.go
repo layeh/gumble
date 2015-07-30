@@ -29,12 +29,11 @@ func Main(init func(client *gumble.Client), listener gumble.EventListener) {
 	keepAlive := make(chan bool)
 
 	// client
-	config := gumble.Config{
-		Username: *username,
-		Password: *password,
-		Address:  *server,
-	}
-	client := gumble.NewClient(&config)
+	config := gumble.NewConfig()
+	config.Username = *username
+	config.Password = *password
+	config.Address = *server
+	client := gumble.NewClient(config)
 	if *insecure {
 		config.TLSConfig.InsecureSkipVerify = true
 	}
