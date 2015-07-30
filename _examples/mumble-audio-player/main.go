@@ -9,6 +9,7 @@ import (
 	"github.com/layeh/gumble/gumble"
 	"github.com/layeh/gumble/gumble_ffmpeg"
 	"github.com/layeh/gumble/gumbleutil"
+	_ "github.com/layeh/gumble/opus"
 )
 
 func main() {
