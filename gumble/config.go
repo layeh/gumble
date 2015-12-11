@@ -46,9 +46,9 @@ func NewConfig() *Config {
 	}
 }
 
-// GetAudioFrameSize returns the appropriate audio frame size, based off of the
+// AudioFrameSize returns the appropriate audio frame size, based off of the
 // audio interval.
-func (c *Config) GetAudioFrameSize() int {
+func (c *Config) AudioFrameSize() int {
 	return int(c.AudioInterval/AudioDefaultInterval) * AudioDefaultFrameSize
 }
 

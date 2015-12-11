@@ -158,7 +158,7 @@ func (s *Stream) cleanup() {
 
 func (s *Stream) sourceRoutine() {
 	interval := s.client.Config.AudioInterval
-	frameSize := s.client.Config.GetAudioFrameSize()
+	frameSize := s.client.Config.AudioFrameSize()
 
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
@@ -177,6 +177,9 @@ func (s *Stream) sourceRoutine() {
 			s.paused = true
 			return
 		case <-ticker.C:
+			// TODO: read an extra frame ahead so we know when to send terminating
+			// bit.  This does not always work. we may need to just send a "flush"
+			// packet.
 			if _, err := io.ReadFull(s.pipe, byteBuffer); err != nil {
 				s.stateChange.Lock()
 				s.cleanup()
