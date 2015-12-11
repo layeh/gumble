@@ -12,10 +12,6 @@ import (
 	"github.com/layeh/gumble/gumble"
 )
 
-const (
-	DefaultCommand = "ffmpeg"
-)
-
 type Stream struct {
 	// Command to execute to play the file. Defaults to "ffmpeg".
 	Command string
@@ -46,7 +42,7 @@ func New(client *gumble.Client) *Stream {
 	stream := &Stream{
 		client:  client,
 		Volume:  1.0,
-		Command: DefaultCommand,
+		Command: "ffmpeg",
 		pause:   make(chan struct{}),
 	}
 	return stream
