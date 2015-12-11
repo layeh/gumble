@@ -1,7 +1,6 @@
 package gumble
 
 import (
-	"math"
 	"time"
 )
 
@@ -37,6 +36,10 @@ type AudioListener interface {
 	OnAudioPacket(e *AudioPacketEvent)
 }
 
+type Audio interface {
+	writeAudio(client *Client, seq int64) error
+}
+
 // AudioPacketEvent is event that is passed to AudioListener.OnAudioPacket.
 type AudioPacketEvent struct {
 	Client      *Client
@@ -46,6 +49,10 @@ type AudioPacketEvent struct {
 // AudioBuffer is a slice of PCM samples.
 type AudioBuffer []int16
 
+func (ab AudioBuffer) writeAudio(client *Client, seq int64) error {
+	return writeAudioTo(client, seq, ab, nil)
+}
+
 // PositionalAudioBuffer is an AudioBuffer that has a position in 3D space
 // associated with it.
 type PositionalAudioBuffer struct {
@@ -53,8 +60,8 @@ type PositionalAudioBuffer struct {
 	AudioBuffer
 }
 
-func (pab PositionalAudioBuffer) writeMessage(client *Client) error {
-	return writeAudioTo(client, pab.AudioBuffer, &pab)
+func (pab PositionalAudioBuffer) writeAudio(client *Client, seq int64) error {
+	return writeAudioTo(client, seq, pab.AudioBuffer, &pab)
 }
 
 // AudioPacket contains incoming audio data and information.
@@ -65,11 +72,7 @@ type AudioPacket struct {
 	PositionalAudioBuffer
 }
 
-func (ab AudioBuffer) writeMessage(client *Client) error {
-	return writeAudioTo(client, ab, nil)
-}
-
-func writeAudioTo(client *Client, ab AudioBuffer, pab *PositionalAudioBuffer) error {
+func writeAudioTo(client *Client, seq int64, ab AudioBuffer, pab *PositionalAudioBuffer) error {
 	encoder := client.AudioEncoder
 	if encoder == nil {
 		return nil
@@ -84,8 +87,6 @@ func writeAudioTo(client *Client, ab AudioBuffer, pab *PositionalAudioBuffer) er
 	if target := client.VoiceTarget; target != nil {
 		targetID = byte(target.ID)
 	}
-	seq := client.audioSequence
-	client.audioSequence = (client.audioSequence + 1) % math.MaxInt32
 	if pab == nil {
 		return client.Conn.WriteAudio(byte(4), targetID, seq, raw, nil, nil, nil)
 	}

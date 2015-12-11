@@ -3,6 +3,7 @@ package gumble
 import (
 	"crypto/tls"
 	"errors"
+	"math"
 	"runtime"
 	"time"
 
@@ -57,9 +58,8 @@ type Client struct {
 	ContextActions ContextActions
 
 	// The audio encoder used when sending audio to the server.
-	AudioEncoder  AudioEncoder
-	audioSequence int64
-	audioCodec    AudioCodec
+	AudioEncoder AudioEncoder
+	audioCodec   AudioCodec
 	// To whom transmitted audio will be sent. The VoiceTarget must have already
 	// been sent to the server for targeting to work correctly. Setting to nil
 	// will disable voice targeting (i.e. switch back to regular speaking).
@@ -139,6 +139,18 @@ func (c *Client) AttachAudio(listener AudioListener) Detacher {
 	return c.audioListeners.Attach(listener)
 }
 
+func (c *Client) AudioOutgoing() chan<- Audio {
+	ch := make(chan Audio)
+	go func() {
+		var seq int64
+		for p := range ch {
+			p.writeAudio(c, seq)
+			seq = (seq + 1) % math.MaxInt32
+		}
+	}()
+	return ch
+}
+
 // pingRoutine sends ping packets to the server at regular intervals.
 func (c *Client) pingRoutine() {
 	ticker := time.NewTicker(time.Second * 10)
@@ -184,7 +196,6 @@ func (c *Client) readRoutine() {
 	c.tmpACL = nil
 	c.audioCodec = nil
 	c.AudioEncoder = nil
-	c.audioSequence = 0
 	c.pingStats = pingStats{}
 	c.listeners.OnDisconnect(&c.disconnectEvent)
 }

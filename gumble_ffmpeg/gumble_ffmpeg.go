@@ -168,6 +168,9 @@ func (s *Stream) sourceRoutine() {
 	int16Buffer := make([]int16, frameSize)
 	byteBuffer := make([]byte, frameSize*2)
 
+	outgoing := s.client.AudioOutgoing()
+	defer close(outgoing)
+
 	for {
 		select {
 		case <-s.pause:
@@ -184,7 +187,7 @@ func (s *Stream) sourceRoutine() {
 				int16Buffer[i] = int16(s.Volume * float)
 			}
 			s.Elapsed += interval
-			s.client.Send(gumble.AudioBuffer(int16Buffer))
+			outgoing <- gumble.AudioBuffer(int16Buffer)
 		}
 	}
 }

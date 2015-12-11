@@ -939,6 +939,7 @@ func (c *Client) handleCodecVersion(buffer []byte) error {
 		c.audioCodec = codec
 		c.AudioEncoder = codec.NewEncoder()
 		for _, user := range c.Users {
+			// TODO: have users use a shared pool of decoders
 			user.decoder = codec.NewDecoder()
 		}
 	}
