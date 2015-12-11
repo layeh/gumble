@@ -1,10 +1,11 @@
-package gumble_ffmpeg
+package gumbleffmpeg
 
 import (
 	"io"
 	"os/exec"
 )
 
+// Source is a Stream source.
 type Source interface {
 	// must include the -i <filename>
 	arguments() []string
@@ -65,6 +66,8 @@ type sourceExec struct {
 	cmd *exec.Cmd
 }
 
+// SourceExec uses the output of the given command and arguments as source
+// data.
 func SourceExec(name string, arg ...string) Source {
 	return &sourceExec{
 		name: name,
