@@ -139,6 +139,9 @@ func (c *Client) AttachAudio(listener AudioListener) Detacher {
 	return c.audioListeners.Attach(listener)
 }
 
+// AudioOutgoing creates a new channel that outgoing audio data can be written
+// to. After audio transmission has stopped, the channel should be closed. Only
+// a single channel should be open at any given time.
 func (c *Client) AudioOutgoing() chan<- Audio {
 	ch := make(chan Audio)
 	go func() {

@@ -36,6 +36,9 @@ type AudioListener interface {
 	OnAudioPacket(e *AudioPacketEvent)
 }
 
+// Audio represents audio data. The following types implement this interface:
+//  AudioBuffer,
+//  PositionalAudioBuffer
 type Audio interface {
 	writeAudio(client *Client, seq int64) error
 }
