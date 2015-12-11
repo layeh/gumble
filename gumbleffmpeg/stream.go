@@ -102,6 +102,7 @@ func (s *Stream) Play() error {
 	}
 	s.wg.Add(1)
 	s.cmd = cmd
+	s.state = StatePlaying
 	go s.process()
 	return nil
 }
