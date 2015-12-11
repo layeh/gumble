@@ -5,5 +5,5 @@ import (
 )
 
 var (
-	ErrOutOfRange = errors.New("out of range")
+	ErrOutOfRange = errors.New("varint: out of range")
 )

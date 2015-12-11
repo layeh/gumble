@@ -58,7 +58,7 @@ type Client struct {
 
 	// The audio encoder used when sending audio to the server.
 	AudioEncoder  AudioEncoder
-	audioSequence int
+	audioSequence int64
 	audioCodec    AudioCodec
 	// To whom transmitted audio will be sent. The VoiceTarget must have already
 	// been sent to the server for targeting to work correctly. Setting to nil

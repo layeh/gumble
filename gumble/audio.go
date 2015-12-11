@@ -80,14 +80,14 @@ func writeAudioTo(client *Client, ab AudioBuffer, pab *PositionalAudioBuffer) er
 		return err
 	}
 
-	var targetID int
+	var targetID byte
 	if target := client.VoiceTarget; target != nil {
-		targetID = int(target.ID)
+		targetID = byte(target.ID)
 	}
 	seq := client.audioSequence
 	client.audioSequence = (client.audioSequence + 1) % math.MaxInt32
 	if pab == nil {
-		return client.Conn.WriteAudio(4, targetID, seq, raw, nil, nil, nil)
+		return client.Conn.WriteAudio(byte(4), targetID, seq, raw, nil, nil, nil)
 	}
-	return client.Conn.WriteAudio(4, targetID, seq, raw, &pab.X, &pab.Y, &pab.Z)
+	return client.Conn.WriteAudio(byte(4), targetID, seq, raw, &pab.X, &pab.Y, &pab.Z)
 }

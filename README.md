@@ -39,7 +39,7 @@
 
 ## License
 
-MIT
+MPL 2.0
 
 ## Author
 

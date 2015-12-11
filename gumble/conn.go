@@ -63,13 +63,13 @@ func (c *Conn) ReadPacket() (uint16, []byte, error) {
 }
 
 // WriteAudio writes an audio packet to the connection.
-func (c *Conn) WriteAudio(format, target, sequence int, data []byte, X, Y, Z *float32) error {
+func (c *Conn) WriteAudio(format, target byte, sequence int64, data []byte, X, Y, Z *float32) error {
 	var header bytes.Buffer
-	formatTarget := byte(format)<<5 | byte(target)
+	formatTarget := (format<<5) | target
 	if err := header.WriteByte(formatTarget); err != nil {
 		return err
 	}
-	if _, err := varint.WriteTo(&header, int64(sequence)); err != nil {
+	if _, err := varint.WriteTo(&header, sequence); err != nil {
 		return err
 	}
 	if _, err := varint.WriteTo(&header, int64(len(data))); err != nil {
