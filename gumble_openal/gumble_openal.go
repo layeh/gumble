@@ -31,7 +31,7 @@ func New(client *gumble.Client) (*Stream, error) {
 	s := &Stream{
 		client:          client,
 		userStreams:     make(map[uint32]openal.Source),
-		sourceFrameSize: client.Config.GetAudioFrameSize(),
+		sourceFrameSize: client.Config.AudioFrameSize(),
 	}
 
 	s.deviceSource = openal.CaptureOpenDevice("", gumble.AudioSampleRate, openal.FormatMono16, uint32(s.sourceFrameSize))
@@ -101,7 +101,7 @@ func (s *Stream) OnAudioPacket(e *gumble.AudioPacketEvent) {
 
 	var buffer openal.Buffer
 	for source.BuffersProcessed() > 0 {
-		openal.DeleteBuffer(source.UnqueueBuffer())
+		source.UnqueueBuffer().Delete()
 	}
 	buffer = openal.NewBuffer()
 	buffer.SetData(openal.FormatMono16, s.buffer[0:samples*2], gumble.AudioSampleRate)
@@ -114,7 +114,7 @@ func (s *Stream) OnAudioPacket(e *gumble.AudioPacketEvent) {
 
 func (s *Stream) sourceRoutine() {
 	interval := s.client.Config.AudioInterval
-	frameSize := s.client.Config.GetAudioFrameSize()
+	frameSize := s.client.Config.AudioFrameSize()
 
 	if frameSize != s.sourceFrameSize {
 		s.deviceSource.CaptureCloseDevice()
@@ -128,6 +128,9 @@ func (s *Stream) sourceRoutine() {
 	stop := s.sourceStop
 	int16Buffer := make([]int16, frameSize)
 
+	outgoing := s.client.AudioOutgoing()
+	defer close(outgoing)
+
 	for {
 		select {
 		case <-stop:
@@ -140,7 +143,7 @@ func (s *Stream) sourceRoutine() {
 			for i := range int16Buffer {
 				int16Buffer[i] = int16(binary.LittleEndian.Uint16(buff[i*2 : (i+1)*2]))
 			}
-			s.client.Send(gumble.AudioBuffer(int16Buffer))
+			outgoing <- gumble.AudioBuffer(int16Buffer)
 		}
 	}
 }
