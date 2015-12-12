@@ -4,9 +4,9 @@
 
 - gumble [![GoDoc](https://godoc.org/github.com/layeh/gumble/gumble?status.svg)](https://godoc.org/github.com/layeh/gumble/gumble)
     - Client library
-- gumble_openal
+- gumbleopenal
     - [OpenAL](http://kcat.strangesoft.net/openal.html) audio system for gumble
-- gumble_ffmpeg
+- gumbleffmpeg
     - [ffmpeg](https://www.ffmpeg.org/) audio source for gumble
 - gumbleutil
     - Extras that can make working with gumble easier

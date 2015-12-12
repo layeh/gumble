@@ -1,4 +1,4 @@
-package gumble_openal
+package gumbleopenal
 
 import (
 	"encoding/binary"
