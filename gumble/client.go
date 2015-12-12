@@ -146,7 +146,7 @@ func (c *Client) AudioOutgoing() chan<- Audio {
 	ch := make(chan Audio)
 	go func() {
 		var seq int64
-		previous := <- ch
+		previous := <-ch
 		for p := range ch {
 			previous.writeAudio(c, seq, false)
 			previous = p

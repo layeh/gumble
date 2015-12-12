@@ -72,7 +72,7 @@ func (c *Conn) WriteAudio(format, target byte, sequence int64, final bool, data 
 	if _, err := varint.WriteTo(&header, sequence); err != nil {
 		return err
 	}
-	l :=  int64(len(data))
+	l := int64(len(data))
 	if final {
 		l |= 0x2000
 	}
