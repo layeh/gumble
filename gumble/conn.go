@@ -51,7 +51,7 @@ func (c *Conn) ReadPacket() (uint16, []byte, error) {
 	}
 	pLengthInt := int(pLength)
 	if pLengthInt > c.MaximumPacketBytes {
-		return 0, nil, errors.New("packet larger than maximum allowed size")
+		return 0, nil, errors.New("gumble: packet larger than maximum allowed size")
 	}
 	if pLengthInt > cap(c.buffer) {
 		c.buffer = make([]byte, pLengthInt)
@@ -191,7 +191,7 @@ func (c *Conn) WriteProto(message proto.Message) error {
 	case *MumbleProto.SuggestConfig:
 		protoType = 25
 	default:
-		return errors.New("unknown message type")
+		return errors.New("gumble: unknown message type")
 	}
 	data, err := proto.Marshal(message)
 	if err != nil {

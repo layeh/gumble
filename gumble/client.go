@@ -84,7 +84,7 @@ func NewClient(config *Config) *Client {
 // Connect connects to the server.
 func (c *Client) Connect() error {
 	if c.State != StateDisconnected {
-		return errors.New("client is already connected")
+		return errors.New("gumble: client is already connected")
 	}
 
 	tlsConn, err := tls.DialWithDialer(&c.Config.Dialer, "tcp", c.Config.Address, &c.Config.TLSConfig)
@@ -228,7 +228,7 @@ func (c *Client) Request(request Request) {
 // Disconnect disconnects the client from the server.
 func (c *Client) Disconnect() error {
 	if c.State == StateDisconnected {
-		return errors.New("client is already disconnected")
+		return errors.New("gumble: client is already disconnected")
 	}
 	c.disconnectEvent.Type = DisconnectUser
 	c.Conn.Close()

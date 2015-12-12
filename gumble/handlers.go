@@ -17,10 +17,10 @@ import (
 type handlerFunc func(*Client, []byte) error
 
 var (
-	errUnimplementedHandler = errors.New("the handler has not been implemented")
-	errIncompleteProtobuf   = errors.New("protobuf message is missing a required field")
-	errInvalidProtobuf      = errors.New("protobuf message has an invalid field")
-	errUnsupportedAudio     = errors.New("unsupported audio codec")
+	errUnimplementedHandler = errors.New("gumble: the handler has not been implemented")
+	errIncompleteProtobuf   = errors.New("gumble: protobuf message is missing a required field")
+	errInvalidProtobuf      = errors.New("gumble: protobuf message has an invalid field")
+	errUnsupportedAudio     = errors.New("gumble: unsupported audio codec")
 )
 
 var handlers = map[uint16]handlerFunc{
