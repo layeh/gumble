@@ -7,14 +7,14 @@ import (
 	"path/filepath"
 
 	"github.com/layeh/gumble/gumble"
-	"github.com/layeh/gumble/gumble_ffmpeg"
+	"github.com/layeh/gumble/gumbleffmpeg"
 	"github.com/layeh/gumble/gumbleutil"
 	_ "github.com/layeh/gumble/opus"
 )
 
 func main() {
 	files := make(map[string]string)
-	var stream *gumble_ffmpeg.Stream
+	var stream *gumbleffmpeg.Stream
 
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage of %s: [flags] [audio files...]\n", os.Args[0])
@@ -22,8 +22,6 @@ func main() {
 	}
 
 	gumbleutil.Main(func(client *gumble.Client) {
-		stream = gumble_ffmpeg.New(client)
-
 		client.Attach(gumbleutil.AutoBitrate)
 
 		for _, file := range flag.Args() {
@@ -45,7 +43,10 @@ func main() {
 			if !ok {
 				return
 			}
-			stream.Source = gumble_ffmpeg.SourceFile(file)
+			if stream != nil && stream.State() == gumbleffmpeg.StatePlaying {
+				return
+			}
+			stream = gumbleffmpeg.New(e.Client, gumbleffmpeg.SourceFile(file))
 			if err := stream.Play(); err != nil {
 				fmt.Printf("%s\n", err)
 			} else {
