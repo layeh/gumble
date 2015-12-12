@@ -17,7 +17,10 @@ type Config struct {
 	Password string
 	// Server address, including port (e.g. localhost:64738).
 	Address string
-	Tokens  AccessTokens
+	// The initial access tokens to the send to the server. Access tokens can be
+	// resent to the server using:
+	//  client.Send(config.Tokens)
+	Tokens AccessTokens
 
 	// AudioInterval is the interval at which audio packets are sent. Valid
 	// values are 10ms, 20ms, 40ms, and 60ms.
