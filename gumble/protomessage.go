@@ -9,8 +9,5 @@ type protoMessage struct {
 }
 
 func (pm protoMessage) writeMessage(client *Client) error {
-	if err := client.Conn.WriteProto(pm.Message); err != nil {
-		return err
-	}
-	return nil
+	return client.Conn.WriteProto(pm.Message)
 }

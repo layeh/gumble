@@ -23,7 +23,7 @@ type Config struct {
 	Tokens AccessTokens
 
 	// AudioInterval is the interval at which audio packets are sent. Valid
-	// values are 10ms, 20ms, 40ms, and 60ms.
+	// values are: 10ms, 20ms, 40ms, and 60ms.
 	AudioInterval time.Duration
 
 	// AudioDataBytes is the number of bytes that an audio frame can use.
