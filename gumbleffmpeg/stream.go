@@ -169,9 +169,6 @@ func (s *Stream) process() {
 		case <-s.pause:
 			return
 		case <-ticker.C:
-			// TODO: read an extra frame ahead so we know when to send terminating
-			// bit.  This does not always work. we may need to just send a "flush"
-			// packet.
 			if _, err := io.ReadFull(s.pipe, byteBuffer); err != nil {
 				s.l.Lock()
 				s.cleanup()
