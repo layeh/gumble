@@ -37,7 +37,7 @@ type AudioListener interface {
 }
 
 // Audio represents audio data. The following types implement this interface:
-//  AudioBuffer,
+//  AudioBuffer
 //  PositionalAudioBuffer
 type Audio interface {
 	writeAudio(client *Client, seq int64, final bool) error
