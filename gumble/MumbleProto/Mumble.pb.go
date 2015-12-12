@@ -39,10 +39,12 @@ It has these top-level messages:
 package MumbleProto
 
 import proto "github.com/golang/protobuf/proto"
+import fmt "fmt"
 import math "math"
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
+var _ = fmt.Errorf
 var _ = math.Inf
 
 type Reject_RejectType int32
@@ -594,8 +596,12 @@ type ChannelState struct {
 	// Position weight to tweak the channel position in the channel list.
 	Position *int32 `protobuf:"varint,9,opt,name=position,def=0" json:"position,omitempty"`
 	// SHA1 hash of the description if the description is 128 bytes or more.
-	DescriptionHash  []byte `protobuf:"bytes,10,opt,name=description_hash" json:"description_hash,omitempty"`
-	XXX_unrecognized []byte `json:"-"`
+	DescriptionHash []byte `protobuf:"bytes,10,opt,name=description_hash" json:"description_hash,omitempty"`
+	// Maximum number of users allowed in the channel. If this value is zero,
+	// the maximum number of users allowed in the channel is given by the
+	// server's "usersperchannel" setting.
+	MaxUsers         *uint32 `protobuf:"varint,11,opt,name=max_users" json:"max_users,omitempty"`
+	XXX_unrecognized []byte  `json:"-"`
 }
 
 func (m *ChannelState) Reset()         { *m = ChannelState{} }
@@ -673,6 +679,13 @@ func (m *ChannelState) GetDescriptionHash() []byte {
 		return m.DescriptionHash
 	}
 	return nil
+}
+
+func (m *ChannelState) GetMaxUsers() uint32 {
+	if m != nil && m.MaxUsers != nil {
+		return *m.MaxUsers
+	}
+	return 0
 }
 
 // Used to communicate user leaving or being kicked. May be sent by the client
@@ -2004,7 +2017,9 @@ type ServerConfig struct {
 	MessageLength *uint32 `protobuf:"varint,4,opt,name=message_length" json:"message_length,omitempty"`
 	// Maximum image message length.
 	ImageMessageLength *uint32 `protobuf:"varint,5,opt,name=image_message_length" json:"image_message_length,omitempty"`
-	XXX_unrecognized   []byte  `json:"-"`
+	// The maximum number of users allowed on the server.
+	MaxUsers         *uint32 `protobuf:"varint,6,opt,name=max_users" json:"max_users,omitempty"`
+	XXX_unrecognized []byte  `json:"-"`
 }
 
 func (m *ServerConfig) Reset()         { *m = ServerConfig{} }
@@ -2042,6 +2057,13 @@ func (m *ServerConfig) GetMessageLength() uint32 {
 func (m *ServerConfig) GetImageMessageLength() uint32 {
 	if m != nil && m.ImageMessageLength != nil {
 		return *m.ImageMessageLength
+	}
+	return 0
+}
+
+func (m *ServerConfig) GetMaxUsers() uint32 {
+	if m != nil && m.MaxUsers != nil {
+		return *m.MaxUsers
 	}
 	return 0
 }
