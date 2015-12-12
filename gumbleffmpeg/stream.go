@@ -156,7 +156,6 @@ func (s *Stream) process() {
 	interval := s.client.Config.AudioInterval
 	frameSize := s.client.Config.AudioFrameSize()
 
-	int16Buffer := make([]int16, frameSize)
 	byteBuffer := make([]byte, frameSize*2)
 
 	outgoing := s.client.AudioOutgoing()
@@ -178,6 +177,7 @@ func (s *Stream) process() {
 				s.cleanup()
 				return
 			}
+			int16Buffer := make([]int16, frameSize)
 			for i := range int16Buffer {
 				float := float32(int16(binary.LittleEndian.Uint16(byteBuffer[i*2 : (i+1)*2])))
 				int16Buffer[i] = int16(s.Volume * float)

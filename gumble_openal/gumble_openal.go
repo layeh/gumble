@@ -126,7 +126,6 @@ func (s *Stream) sourceRoutine() {
 	defer ticker.Stop()
 
 	stop := s.sourceStop
-	int16Buffer := make([]int16, frameSize)
 
 	outgoing := s.client.AudioOutgoing()
 	defer close(outgoing)
@@ -140,6 +139,7 @@ func (s *Stream) sourceRoutine() {
 			if len(buff) != frameSize*2 {
 				continue
 			}
+			int16Buffer := make([]int16, frameSize)
 			for i := range int16Buffer {
 				int16Buffer[i] = int16(binary.LittleEndian.Uint16(buff[i*2 : (i+1)*2]))
 			}

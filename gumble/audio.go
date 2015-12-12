@@ -40,7 +40,7 @@ type AudioListener interface {
 //  AudioBuffer,
 //  PositionalAudioBuffer
 type Audio interface {
-	writeAudio(client *Client, seq int64) error
+	writeAudio(client *Client, seq int64, final bool) error
 }
 
 // AudioPacketEvent is event that is passed to AudioListener.OnAudioPacket.
@@ -52,8 +52,8 @@ type AudioPacketEvent struct {
 // AudioBuffer is a slice of PCM samples.
 type AudioBuffer []int16
 
-func (ab AudioBuffer) writeAudio(client *Client, seq int64) error {
-	return writeAudioTo(client, seq, ab, nil)
+func (ab AudioBuffer) writeAudio(client *Client, seq int64, final bool) error {
+	return writeAudioTo(client, seq, final, ab, nil)
 }
 
 // PositionalAudioBuffer is an AudioBuffer that has a position in 3D space
@@ -63,8 +63,8 @@ type PositionalAudioBuffer struct {
 	AudioBuffer
 }
 
-func (pab PositionalAudioBuffer) writeAudio(client *Client, seq int64) error {
-	return writeAudioTo(client, seq, pab.AudioBuffer, &pab)
+func (pab PositionalAudioBuffer) writeAudio(client *Client, seq int64, final bool) error {
+	return writeAudioTo(client, seq, final, pab.AudioBuffer, &pab)
 }
 
 // AudioPacket contains incoming audio data and information.
@@ -75,7 +75,7 @@ type AudioPacket struct {
 	PositionalAudioBuffer
 }
 
-func writeAudioTo(client *Client, seq int64, ab AudioBuffer, pab *PositionalAudioBuffer) error {
+func writeAudioTo(client *Client, seq int64, final bool, ab AudioBuffer, pab *PositionalAudioBuffer) error {
 	encoder := client.AudioEncoder
 	if encoder == nil {
 		return nil
@@ -91,7 +91,7 @@ func writeAudioTo(client *Client, seq int64, ab AudioBuffer, pab *PositionalAudi
 		targetID = byte(target.ID)
 	}
 	if pab == nil {
-		return client.Conn.WriteAudio(byte(4), targetID, seq, raw, nil, nil, nil)
+		return client.Conn.WriteAudio(byte(4), targetID, seq, final, raw, nil, nil, nil)
 	}
-	return client.Conn.WriteAudio(byte(4), targetID, seq, raw, &pab.X, &pab.Y, &pab.Z)
+	return client.Conn.WriteAudio(byte(4), targetID, seq, final, raw, &pab.X, &pab.Y, &pab.Z)
 }
