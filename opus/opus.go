@@ -50,6 +50,10 @@ func (e *Encoder) Encode(pcm []int16, mframeSize, maxDataBytes int) ([]byte, err
 	return e.Encoder.Encode(pcm, mframeSize, maxDataBytes)
 }
 
+func (e *Encoder) Reset() {
+	e.Encoder.ResetState()
+}
+
 // decoder
 
 type Decoder struct {
@@ -62,4 +66,8 @@ func (*Decoder) ID() int {
 
 func (d *Decoder) Decode(data []byte, frameSize int) ([]int16, error) {
 	return d.Decoder.Decode(data, frameSize, false)
+}
+
+func (d *Decoder) Reset() {
+	d.Decoder.ResetState()
 }

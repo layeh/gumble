@@ -28,10 +28,12 @@ type AudioCodec interface {
 type AudioEncoder interface {
 	ID() int
 	Encode(pcm []int16, mframeSize, maxDataBytes int) ([]byte, error)
+	Reset()
 }
 
 // AudioDecoder decodes an encoded byte slice to a chunk of PCM audio samples.
 type AudioDecoder interface {
 	ID() int
 	Decode(data []byte, frameSize int) ([]int16, error)
+	Reset()
 }

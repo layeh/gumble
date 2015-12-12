@@ -82,6 +82,9 @@ func writeAudioTo(client *Client, seq int64, final bool, ab AudioBuffer, pab *Po
 	}
 	dataBytes := client.Config.AudioDataBytes
 	raw, err := encoder.Encode(ab, len(ab), dataBytes)
+	if final {
+		defer encoder.Reset()
+	}
 	if err != nil {
 		return err
 	}
