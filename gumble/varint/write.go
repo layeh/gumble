@@ -17,35 +17,35 @@ func WriteTo(w io.Writer, value int64) (int64, error) {
 	if value < 0 {
 		return 0, ErrOutOfRange
 	}
-	if value <= 0x7F {
+	switch {
+	case value <= 0x7F:
 		buff[0] = byte(value)
 		length = 1
-	} else if value <= 0x3FFF {
+	case value <= 0x3FFF:
 		buff[0] = byte(((value >> 8) & 0x3F) | 0x80)
 		buff[1] = byte(value & 0xFF)
 		length = 2
-	} else if value <= 0x1FFFFF {
+	case value <= 0x1FFFFF:
 		buff[0] = byte((value>>16)&0x1F | 0xC0)
 		buff[1] = byte((value >> 8) & 0xFF)
 		buff[2] = byte(value & 0xFF)
 		length = 3
-	} else if value <= 0xFFFFFFF {
+	case value <= 0xFFFFFFF:
 		buff[0] = byte((value>>24)&0xF | 0xE0)
 		buff[1] = byte((value >> 16) & 0xFF)
 		buff[2] = byte((value >> 8) & 0xFF)
 		buff[3] = byte(value & 0xFF)
 		length = 4
-	} else if value <= math.MaxInt32 {
+	case value <= math.MaxInt32:
 		buff[0] = 0xF0
 		binary.BigEndian.PutUint32(buff[1:], uint32(value))
 		length = 5
+	default:
+		return 0, ErrOutOfRange
 	}
-	if length > 0 {
-		if n, err := w.Write(buff[:length]); err != nil {
-			return int64(n), err
-		} else {
-			return int64(n), nil
-		}
+	n, err := w.Write(buff[:length])
+	if err != nil {
+		return int64(n), err
 	}
-	return 0, ErrOutOfRange
+	return int64(n), nil
 }
