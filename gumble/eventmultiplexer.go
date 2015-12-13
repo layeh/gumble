@@ -2,6 +2,9 @@ package gumble
 
 // Detacher is an interface that event listeners implement. After the Detach
 // method is called, the listener will no longer receive events.
+//
+// Currently, Detach should only be called when a Client is not connected to a
+// server.
 type Detacher interface {
 	Detach()
 }
