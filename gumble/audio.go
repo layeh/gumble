@@ -33,7 +33,9 @@ const (
 // AudioListener is the interface that must be implemented by types wishing to
 // receive incoming audio data from the server.
 //
-// OnAudioStream is called when an audio stream for a user starts.
+// OnAudioStream is called when an audio stream for a user starts. It is the
+// implementer's responsibility to continuously process AudioStreamEvent.C
+// until it is closed.
 type AudioListener interface {
 	OnAudioStream(e *AudioStreamEvent)
 }
