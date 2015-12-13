@@ -20,6 +20,7 @@ var (
 	errIncompleteProtobuf   = errors.New("gumble: protobuf message is missing a required field")
 	errInvalidProtobuf      = errors.New("gumble: protobuf message has an invalid field")
 	errUnsupportedAudio     = errors.New("gumble: unsupported audio codec")
+	errNoCodec     = errors.New("gumble: no audio codec")
 )
 
 var handlers = map[uint16]handlerFunc{
@@ -99,10 +100,16 @@ func (c *Client) handleUdpTunnel(buffer []byte) error {
 	if user == nil {
 		return errInvalidProtobuf
 	}
-	// TODO: decoder pool
 	decoder := user.decoder
 	if decoder == nil {
-		return nil
+		// TODO: decoder pool
+		// TODO: de-reference after stream is done
+		codec := c.audioCodec
+		if codec == nil {
+			return errNoCodec
+		}
+		decoder = codec.NewDecoder()
+		user.decoder = decoder
 	}
 
 	// Sequence
@@ -419,10 +426,6 @@ func (c *Client) handleUserState(buffer []byte) error {
 			user.client = c
 
 			event.Type |= UserChangeConnected
-
-			if codec := c.audioCodec; codec != nil {
-				user.decoder = codec.NewDecoder()
-			}
 
 			if user.Channel == nil {
 				return errInvalidProtobuf
@@ -948,10 +951,6 @@ func (c *Client) handleCodecVersion(buffer []byte) error {
 	if codec != nil {
 		c.audioCodec = codec
 		c.AudioEncoder = codec.NewEncoder()
-		for _, user := range c.Users {
-			// TODO: have users use a shared pool of decoders
-			user.decoder = codec.NewDecoder()
-		}
 	}
 
 	c.listeners.OnServerConfig(&event)
