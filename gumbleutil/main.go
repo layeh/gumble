@@ -48,6 +48,7 @@ func Main(init func(client *gumble.Client), listener gumble.EventListener) {
 			config.TLSConfig.Certificates = append(config.TLSConfig.Certificates, certificate)
 		}
 	}
+	client.Attach(AutoBitrate)
 	client.Attach(listener)
 	client.Attach(Listener{
 		Disconnect: func(e *gumble.DisconnectEvent) {
