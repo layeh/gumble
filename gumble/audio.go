@@ -19,7 +19,7 @@ const (
 
 	// AudioMaximumFrameSize is the maximum audio frame size from another user
 	// that will be processed.
-	AudioMaximumFrameSize = AudioDefaultFrameSize * 10
+	AudioMaximumFrameSize = AudioSampleRate / 1000 * 60
 
 	// AudioDefaultDataBytes is the default number of bytes that an audio frame
 	// can use.
