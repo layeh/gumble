@@ -48,67 +48,67 @@ func (em *eventMultiplexer) Attach(listener EventListener) Detacher {
 	return item
 }
 
-func (em eventMultiplexer) OnConnect(event *ConnectEvent) {
+func (em *eventMultiplexer) OnConnect(event *ConnectEvent) {
 	for item := em.head; item != nil; item = item.next {
 		item.listener.OnConnect(event)
 	}
 }
 
-func (em eventMultiplexer) OnDisconnect(event *DisconnectEvent) {
+func (em *eventMultiplexer) OnDisconnect(event *DisconnectEvent) {
 	for item := em.head; item != nil; item = item.next {
 		item.listener.OnDisconnect(event)
 	}
 }
 
-func (em eventMultiplexer) OnTextMessage(event *TextMessageEvent) {
+func (em *eventMultiplexer) OnTextMessage(event *TextMessageEvent) {
 	for item := em.head; item != nil; item = item.next {
 		item.listener.OnTextMessage(event)
 	}
 }
 
-func (em eventMultiplexer) OnUserChange(event *UserChangeEvent) {
+func (em *eventMultiplexer) OnUserChange(event *UserChangeEvent) {
 	for item := em.head; item != nil; item = item.next {
 		item.listener.OnUserChange(event)
 	}
 }
 
-func (em eventMultiplexer) OnChannelChange(event *ChannelChangeEvent) {
+func (em *eventMultiplexer) OnChannelChange(event *ChannelChangeEvent) {
 	for item := em.head; item != nil; item = item.next {
 		item.listener.OnChannelChange(event)
 	}
 }
 
-func (em eventMultiplexer) OnPermissionDenied(event *PermissionDeniedEvent) {
+func (em *eventMultiplexer) OnPermissionDenied(event *PermissionDeniedEvent) {
 	for item := em.head; item != nil; item = item.next {
 		item.listener.OnPermissionDenied(event)
 	}
 }
 
-func (em eventMultiplexer) OnUserList(event *UserListEvent) {
+func (em *eventMultiplexer) OnUserList(event *UserListEvent) {
 	for item := em.head; item != nil; item = item.next {
 		item.listener.OnUserList(event)
 	}
 }
 
-func (em eventMultiplexer) OnACL(event *ACLEvent) {
+func (em *eventMultiplexer) OnACL(event *ACLEvent) {
 	for item := em.head; item != nil; item = item.next {
 		item.listener.OnACL(event)
 	}
 }
 
-func (em eventMultiplexer) OnBanList(event *BanListEvent) {
+func (em *eventMultiplexer) OnBanList(event *BanListEvent) {
 	for item := em.head; item != nil; item = item.next {
 		item.listener.OnBanList(event)
 	}
 }
 
-func (em eventMultiplexer) OnContextActionChange(event *ContextActionChangeEvent) {
+func (em *eventMultiplexer) OnContextActionChange(event *ContextActionChangeEvent) {
 	for item := em.head; item != nil; item = item.next {
 		item.listener.OnContextActionChange(event)
 	}
 }
 
-func (em eventMultiplexer) OnServerConfig(event *ServerConfigEvent) {
+func (em *eventMultiplexer) OnServerConfig(event *ServerConfigEvent) {
 	for item := em.head; item != nil; item = item.next {
 		item.listener.OnServerConfig(event)
 	}
