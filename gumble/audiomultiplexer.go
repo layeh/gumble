@@ -4,6 +4,7 @@ type audioEventMultiplexerItem struct {
 	mux        *audioEventMultiplexer
 	prev, next *audioEventMultiplexerItem
 	listener   AudioListener
+	streams    map[*User]chan *AudioPacket
 }
 
 func (emi *audioEventMultiplexerItem) Detach() {
@@ -28,6 +29,7 @@ func (aem *audioEventMultiplexer) Attach(listener AudioListener) Detacher {
 		mux:      aem,
 		prev:     aem.tail,
 		listener: listener,
+		streams:  make(map[*User]chan *AudioPacket),
 	}
 	if aem.head == nil {
 		aem.head = item
@@ -38,10 +40,4 @@ func (aem *audioEventMultiplexer) Attach(listener AudioListener) Detacher {
 		aem.tail.next = item
 	}
 	return item
-}
-
-func (aem audioEventMultiplexer) OnAudioPacket(event *AudioPacketEvent) {
-	for item := aem.head; item != nil; item = item.next {
-		item.listener.OnAudioPacket(event)
-	}
 }

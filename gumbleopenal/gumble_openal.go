@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	ErrState = errors.New("invalid state")
+	ErrState = errors.New("gumbleopenal: invalid state")
 )
 
 type Stream struct {
@@ -23,14 +23,11 @@ type Stream struct {
 
 	deviceSink  *openal.Device
 	contextSink *openal.Context
-	userStreams map[uint32]openal.Source
-	buffer      []byte
 }
 
 func New(client *gumble.Client) (*Stream, error) {
 	s := &Stream{
 		client:          client,
-		userStreams:     make(map[uint32]openal.Source),
 		sourceFrameSize: client.Config.AudioFrameSize(),
 	}
 
@@ -39,7 +36,6 @@ func New(client *gumble.Client) (*Stream, error) {
 	s.deviceSink = openal.OpenDevice("")
 	s.contextSink = s.deviceSink.CreateContext()
 	s.contextSink.Activate()
-	s.buffer = make([]byte, gumble.AudioMaximumFrameSize)
 
 	s.link = client.AttachAudio(s)
 
@@ -81,35 +77,33 @@ func (s *Stream) StopSource() error {
 	return nil
 }
 
-func (s *Stream) OnAudioPacket(e *gumble.AudioPacketEvent) {
-	packet := e.AudioPacket
-	samples := len(packet.PositionalAudioBuffer.AudioBuffer)
-	if samples*2 > cap(s.buffer) {
-		return
-	}
-	var source openal.Source
-	if userSource, ok := s.userStreams[packet.Sender.Session]; !ok {
-		source = openal.NewSource()
-		s.userStreams[packet.Sender.Session] = source
-	} else {
-		source = userSource
-	}
-
-	for i, value := range packet.PositionalAudioBuffer.AudioBuffer {
-		binary.LittleEndian.PutUint16(s.buffer[i*2:], uint16(value))
-	}
-
-	var buffer openal.Buffer
-	for source.BuffersProcessed() > 0 {
-		source.UnqueueBuffer().Delete()
-	}
-	buffer = openal.NewBuffer()
-	buffer.SetData(openal.FormatMono16, s.buffer[0:samples*2], gumble.AudioSampleRate)
-	source.QueueBuffer(buffer)
-
-	if source.State() != openal.Playing {
-		source.Play()
-	}
+func (s *Stream) OnAudioStream(e *gumble.AudioStreamEvent) {
+	go func() {
+		source := openal.NewSource()
+		var raw [gumble.AudioMaximumFrameSize * 2]byte
+		for packet := range e.C {
+			samples := len(packet.AudioBuffer)
+			if samples > cap(raw) {
+				continue
+			}
+			for i, value := range packet.AudioBuffer {
+				binary.LittleEndian.PutUint16(raw[i*2:], uint16(value))
+			}
+			for source.BuffersProcessed() > 0 {
+				source.UnqueueBuffer().Delete()
+			}
+			buffer := openal.NewBuffer()
+			buffer.SetData(openal.FormatMono16, raw[:samples*2], gumble.AudioSampleRate)
+			source.QueueBuffer(buffer)
+			if source.State() != openal.Playing {
+				source.Play()
+			}
+		}
+		for source.BuffersProcessed() > 0 {
+			source.UnqueueBuffer().Delete()
+		}
+		openal.DeleteSource(source)
+	}()
 }
 
 func (s *Stream) sourceRoutine() {

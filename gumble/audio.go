@@ -32,50 +32,23 @@ const (
 
 // AudioListener is the interface that must be implemented by types wishing to
 // receive incoming audio data from the server.
+//
+// OnAudioStream is called when an audio stream for a user starts.
 type AudioListener interface {
-	OnAudioPacket(e *AudioPacketEvent)
+	OnAudioStream(e *AudioStreamEvent)
 }
 
-// Audio represents audio data. The following types implement this interface:
-//  AudioBuffer
-//  PositionalAudioBuffer
-type Audio interface {
-	writeAudio(client *Client, seq int64, final bool) error
+// AudioPacketEvent is event that is passed to AudioListener.OnAudioStream.
+type AudioStreamEvent struct {
+	Client *Client
+	User   *User
+	C      <-chan *AudioPacket
 }
 
-// AudioPacketEvent is event that is passed to AudioListener.OnAudioPacket.
-type AudioPacketEvent struct {
-	Client      *Client
-	AudioPacket AudioPacket
-}
-
-// AudioBuffer is a slice of PCM samples.
+// AudioBuffer is a slice of PCM audio samples.
 type AudioBuffer []int16
 
 func (ab AudioBuffer) writeAudio(client *Client, seq int64, final bool) error {
-	return writeAudioTo(client, seq, final, ab, nil)
-}
-
-// PositionalAudioBuffer is an AudioBuffer that has a position in 3D space
-// associated with it.
-type PositionalAudioBuffer struct {
-	X, Y, Z float32
-	AudioBuffer
-}
-
-func (pab PositionalAudioBuffer) writeAudio(client *Client, seq int64, final bool) error {
-	return writeAudioTo(client, seq, final, pab.AudioBuffer, &pab)
-}
-
-// AudioPacket contains incoming audio data and information.
-type AudioPacket struct {
-	Sender   *User
-	Target   int
-	Sequence int
-	PositionalAudioBuffer
-}
-
-func writeAudioTo(client *Client, seq int64, final bool, ab AudioBuffer, pab *PositionalAudioBuffer) error {
 	encoder := client.AudioEncoder
 	if encoder == nil {
 		return nil
@@ -93,8 +66,18 @@ func writeAudioTo(client *Client, seq int64, final bool, ab AudioBuffer, pab *Po
 	if target := client.VoiceTarget; target != nil {
 		targetID = byte(target.ID)
 	}
-	if pab == nil {
-		return client.Conn.WriteAudio(byte(4), targetID, seq, final, raw, nil, nil, nil)
-	}
-	return client.Conn.WriteAudio(byte(4), targetID, seq, final, raw, &pab.X, &pab.Y, &pab.Z)
+	// TODO: re-enable positional audio
+	return client.Conn.WriteAudio(byte(4), targetID, seq, final, raw, nil, nil, nil)
+}
+
+// AudioPacket contains incoming audio samples and information.
+type AudioPacket struct {
+	Client *Client
+	Sender *User
+	Target *VoiceTarget
+
+	AudioBuffer
+
+	HasPosition bool
+	X, Y, Z     float32
 }

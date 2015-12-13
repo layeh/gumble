@@ -143,8 +143,8 @@ func (c *Client) AttachAudio(listener AudioListener) Detacher {
 // to. The channel must be closed after the audio stream is completed. Only
 // a single channel should be open at any given time (i.e. close the channel
 // before opening another).
-func (c *Client) AudioOutgoing() chan<- Audio {
-	ch := make(chan Audio)
+func (c *Client) AudioOutgoing() chan<- AudioBuffer {
+	ch := make(chan AudioBuffer)
 	go func() {
 		var seq int64
 		previous := <-ch

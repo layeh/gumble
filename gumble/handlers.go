@@ -78,6 +78,7 @@ func (c *Client) handleVersion(buffer []byte) error {
 }
 
 func (c *Client) handleUdpTunnel(buffer []byte) error {
+	// TODO: remove Reader; just use buffer?
 	reader := bytes.NewReader(buffer)
 	var bytesRead int64
 
@@ -116,7 +117,8 @@ func (c *Client) handleUdpTunnel(buffer []byte) error {
 	}
 
 	// Sequence
-	sequence, n, err := varint.ReadFrom(reader)
+	// TODO: use in jitter buffer
+	_, n, err = varint.ReadFrom(reader)
 	if err != nil {
 		return err
 	}
@@ -140,20 +142,39 @@ func (c *Client) handleUdpTunnel(buffer []byte) error {
 	if err != nil {
 		return err
 	}
-	event := AudioPacketEvent{
+
+	event := AudioPacket{
 		Client: c,
+		Sender: user,
+		Target: &VoiceTarget{
+			ID: uint32(audioTarget),
+		},
+		AudioBuffer: AudioBuffer(pcm),
 	}
-	event.AudioPacket.Sender = user
-	event.AudioPacket.Target = int(audioTarget)
-	event.AudioPacket.Sequence = int(sequence)
-	event.AudioPacket.PositionalAudioBuffer.AudioBuffer = pcm
 
 	reader.Seek(audioLength64, 1)
-	binary.Read(reader, binary.LittleEndian, &event.AudioPacket.PositionalAudioBuffer.X)
-	binary.Read(reader, binary.LittleEndian, &event.AudioPacket.PositionalAudioBuffer.Y)
-	binary.Read(reader, binary.LittleEndian, &event.AudioPacket.PositionalAudioBuffer.Z)
+	err = binary.Read(reader, binary.LittleEndian, &event.X)
+	err = binary.Read(reader, binary.LittleEndian, &event.Y)
+	err = binary.Read(reader, binary.LittleEndian, &event.Z)
+	if err == nil {
+		event.HasPosition = true
+	}
 
-	c.audioListeners.OnAudioPacket(&event)
+	for item := c.audioListeners.head; item != nil; item = item.next {
+		ch := item.streams[user]
+		if ch == nil {
+			ch = make(chan *AudioPacket)
+			item.streams[user] = ch
+			event := AudioStreamEvent{
+				Client: c,
+				User:   user,
+				C:      ch,
+			}
+			item.listener.OnAudioStream(&event)
+		}
+		ch <- &event
+	}
+
 	return nil
 }
 
