@@ -6,6 +6,11 @@ import (
 
 // EventListener is the interface that must be implemented by a type if it
 // wishes to be notified of Client events.
+//
+// Listener methods are executed synchronously as event happen. They also block
+// network reads from happening until all handlers for an event are called.
+// Therefore, it is not recommended to do any long processing from inside of
+// these methods.
 type EventListener interface {
 	OnConnect(e *ConnectEvent)
 	OnDisconnect(e *DisconnectEvent)
