@@ -1,7 +1,6 @@
 package gumble
 
 import (
-	"bytes"
 	"crypto/x509"
 	"encoding/binary"
 	"errors"
@@ -78,39 +77,29 @@ func (c *Client) handleVersion(buffer []byte) error {
 }
 
 func (c *Client) handleUdpTunnel(buffer []byte) error {
-	// TODO: remove Reader; just use buffer?
-	reader := bytes.NewReader(buffer)
-	var bytesRead int64
-
-	var audioType byte
-	var audioTarget byte
-	var user *User
-	var audioLength int
-
-	// Header byte
-	typeTarget, err := varint.ReadByte(reader)
-	if err != nil {
-		return err
+	if len(buffer) < 1 {
+		return errInvalidProtobuf
 	}
-	audioType = (typeTarget >> 5) & 0x7
-	audioTarget = typeTarget & 0x1F
+	audioType := (buffer[0] >> 5) & 0x7
+	audioTarget := buffer[0] & 0x1F
+
 	// Opus only
 	// TODO: add handling for other packet types
 	if audioType != audioCodecIDOpus {
 		return errUnsupportedAudio
 	}
-	bytesRead++
 
 	// Session
-	session, n, err := varint.ReadFrom(reader)
-	if err != nil {
-		return err
+	session, n := varint.Decode(buffer)
+	if n <= 0 {
+		return errInvalidProtobuf
 	}
-	user = c.Users[uint32(session)]
+	buff := buffer[n:]
+	user := c.Users[uint32(session)]
 	if user == nil {
 		return errInvalidProtobuf
 	}
-	bytesRead += n
+	// TODO: decoder pool
 	decoder := user.decoder
 	if decoder == nil {
 		return nil
@@ -118,27 +107,25 @@ func (c *Client) handleUdpTunnel(buffer []byte) error {
 
 	// Sequence
 	// TODO: use in jitter buffer
-	_, n, err = varint.ReadFrom(reader)
-	if err != nil {
-		return err
-	}
-	bytesRead += n
-
-	// Length
-	length, n, err := varint.ReadFrom(reader)
-	if err != nil {
-		return err
-	}
-	// Opus audio packets set the 13th bit in the size field as the terminator.
-	audioLength = int(length) &^ 0x2000
-	if audioLength > reader.Len() {
+	_, n = varint.Decode(buff)
+	if n <= 0 {
 		return errInvalidProtobuf
 	}
-	audioLength64 := int64(audioLength)
-	bytesRead += n
+	buff = buff[n:]
 
-	raw := buffer[bytesRead : bytesRead+audioLength64]
-	pcm, err := decoder.Decode(raw, AudioMaximumFrameSize)
+	// Length
+	length, n := varint.Decode(buff)
+	if n <= 0 {
+		return errInvalidProtobuf
+	}
+	buff = buff[n:]
+	// Opus audio packets set the 13th bit in the size field as the terminator.
+	audioLength := int(length) &^ 0x2000
+	if audioLength > len(buff) {
+		return errInvalidProtobuf
+	}
+
+	pcm, err := decoder.Decode(buff[:audioLength], AudioMaximumFrameSize)
 	if err != nil {
 		return err
 	}
@@ -152,11 +139,13 @@ func (c *Client) handleUdpTunnel(buffer []byte) error {
 		AudioBuffer: AudioBuffer(pcm),
 	}
 
-	reader.Seek(audioLength64, 1)
-	err = binary.Read(reader, binary.LittleEndian, &event.X)
-	err = binary.Read(reader, binary.LittleEndian, &event.Y)
-	err = binary.Read(reader, binary.LittleEndian, &event.Z)
-	if err == nil {
+	if len(buff)-audioLength == 3*4 {
+		// the packet has positional audio data; 3x float32
+		buff = buff[audioLength:]
+
+		event.X = math.Float32frombits(binary.LittleEndian.Uint32(buff))
+		event.Y = math.Float32frombits(binary.LittleEndian.Uint32(buff[4:]))
+		event.Z = math.Float32frombits(binary.LittleEndian.Uint32(buff[8:]))
 		event.HasPosition = true
 	}
 
