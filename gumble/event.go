@@ -218,6 +218,7 @@ type ServerConfigEvent struct {
 	AllowHTML                 *bool
 	MaximumMessageLength      *int
 	MaximumImageMessageLength *int
+	MaximumUsers              *int
 
 	CodecAlpha       *int32
 	CodecBeta        *int32

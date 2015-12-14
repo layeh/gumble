@@ -1050,6 +1050,10 @@ func (c *Client) handleServerConfig(buffer []byte) error {
 		val := int(*packet.ImageMessageLength)
 		event.MaximumImageMessageLength = &val
 	}
+	if packet.MaxUsers != nil {
+		val := int(*packet.MaxUsers)
+		event.MaximumUsers = &val
+	}
 	c.listeners.OnServerConfig(&event)
 	return nil
 }
