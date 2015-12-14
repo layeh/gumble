@@ -238,8 +238,5 @@ func (c *Client) Disconnect() error {
 
 // Send will send a message to the server.
 func (c *Client) Send(message Message) error {
-	if err := message.writeMessage(c); err != nil {
-		return err
-	}
-	return nil
+	return message.writeMessage(c)
 }
