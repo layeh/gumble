@@ -878,6 +878,14 @@ func (c *Client) handleUserList(buffer []byte) error {
 		if user.Name != nil {
 			registeredUser.Name = *user.Name
 		}
+		if user.LastSeen != nil {
+			registeredUser.LastSeen, _ = time.ParseInLocation(time.RFC3339, *user.LastSeen, nil)
+		}
+		if user.LastChannel != nil {
+			if lastChannel := c.Channels[*user.LastChannel]; lastChannel != nil {
+				registeredUser.LastChannel = lastChannel
+			}
+		}
 		event.UserList = append(event.UserList, registeredUser)
 	}
 

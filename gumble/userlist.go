@@ -1,6 +1,8 @@
 package gumble
 
 import (
+	"time"
+
 	"github.com/layeh/gumble/gumble/MumbleProto"
 )
 
@@ -10,6 +12,10 @@ type RegisteredUser struct {
 	UserID uint32
 	// The registered user's name.
 	Name string
+	// The last time the user was seen by the server.
+	LastSeen time.Time
+	// The last channel the user was seen in.
+	LastChannel *Channel
 
 	changed    bool
 	deregister bool
