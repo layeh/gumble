@@ -16,9 +16,9 @@ type Version struct {
 }
 
 // SemanticVersion returns the version's semantic version components.
-func (v *Version) SemanticVersion() (major, minor, patch uint) {
-	major = uint(v.Version>>16) & 0xFFFF
-	minor = uint(v.Version>>8) & 0xFF
-	patch = uint(v.Version) & 0xFF
+func (v *Version) SemanticVersion() (major uint16, minor, patch uint8) {
+	major = uint16(v.Version>>16) & 0xFFFF
+	minor = uint8(v.Version>>8) & 0xFF
+	patch = uint8(v.Version) & 0xFF
 	return
 }

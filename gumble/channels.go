@@ -22,8 +22,8 @@ func (c Channels) create(id uint32) *Channel {
 }
 
 // Find returns a channel whose path (by channel name) from the server root
-// channel is equal to the arguments passed. If the root channel does not
-// exist, nil is returned.
+// channel is equal to the arguments passed. nil is returned if c does not
+// containt the root channel.
 func (c Channels) Find(names ...string) *Channel {
 	root := c[0]
 	if names == nil || root == nil {

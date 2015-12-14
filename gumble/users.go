@@ -18,7 +18,7 @@ func (u Users) create(session uint32) *User {
 	return user
 }
 
-// Find returns the user with the given name. Nil is returned if no user exists
+// Find returns the user with the given name. nil is returned if no user exists
 // with the given name.
 func (u Users) Find(name string) *User {
 	for _, user := range u {
