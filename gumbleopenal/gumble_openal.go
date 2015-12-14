@@ -102,7 +102,7 @@ func (s *Stream) OnAudioStream(e *gumble.AudioStreamEvent) {
 		for source.BuffersProcessed() > 0 {
 			source.UnqueueBuffer().Delete()
 		}
-		openal.DeleteSource(source)
+		source.Delete()
 	}()
 }
 
