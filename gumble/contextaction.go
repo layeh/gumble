@@ -18,14 +18,14 @@ const (
 // ContextAction is an triggerable item that has been added by a server-side
 // plugin.
 type ContextAction struct {
-	client *Client
-
 	// The context action type.
 	Type ContextActionType
 	// The name of the context action.
 	Name string
 	// The user-friendly description of the context action.
 	Label string
+
+	client *Client
 }
 
 // Trigger will trigger the context action in the context of the server.

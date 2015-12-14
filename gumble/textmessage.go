@@ -9,16 +9,12 @@ import (
 type TextMessage struct {
 	// User who sent the message (can be nil).
 	Sender *User
-
 	// Users that receive the message.
 	Users []*User
-
 	// Channels that receive the message.
 	Channels []*Channel
-
 	// Channels that receive the message and send it recursively to sub-channels.
 	Trees []*Channel
-
 	// Chat message.
 	Message string
 }
