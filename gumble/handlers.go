@@ -6,6 +6,7 @@ import (
 	"errors"
 	"math"
 	"net"
+	"sync/atomic"
 	"time"
 
 	"github.com/golang/protobuf/proto"
@@ -183,7 +184,7 @@ func (c *Client) handlePing(buffer []byte) error {
 	if err := proto.Unmarshal(buffer, &packet); err != nil {
 		return err
 	}
-	c.pingStats.TCPPackets++
+	atomic.AddUint32(&c.pingStats.TCPPackets, 1)
 	return nil
 }
 
