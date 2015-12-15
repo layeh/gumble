@@ -14,8 +14,6 @@ import (
 	"github.com/layeh/gumble/gumble/varint"
 )
 
-type handlerFunc func(*Client, []byte) error
-
 var (
 	errUnimplementedHandler = errors.New("gumble: the handler has not been implemented")
 	errIncompleteProtobuf   = errors.New("gumble: protobuf message is missing a required field")
@@ -24,33 +22,35 @@ var (
 	errNoCodec              = errors.New("gumble: no audio codec")
 )
 
-var handlers = map[uint16]handlerFunc{
-	0:  (*Client).handleVersion,
-	1:  (*Client).handleUdpTunnel,
-	2:  (*Client).handleAuthenticate,
-	3:  (*Client).handlePing,
-	4:  (*Client).handleReject,
-	5:  (*Client).handleServerSync,
-	6:  (*Client).handleChannelRemove,
-	7:  (*Client).handleChannelState,
-	8:  (*Client).handleUserRemove,
-	9:  (*Client).handleUserState,
-	10: (*Client).handleBanList,
-	11: (*Client).handleTextMessage,
-	12: (*Client).handlePermissionDenied,
-	13: (*Client).handleACL,
-	14: (*Client).handleQueryUsers,
-	15: (*Client).handleCryptSetup,
-	16: (*Client).handleContextActionModify,
-	17: (*Client).handleContextAction,
-	18: (*Client).handleUserList,
-	19: (*Client).handleVoiceTarget,
-	20: (*Client).handlePermissionQuery,
-	21: (*Client).handleCodecVersion,
-	22: (*Client).handleUserStats,
-	23: (*Client).handleRequestBlob,
-	24: (*Client).handleServerConfig,
-	25: (*Client).handleSuggestConfig,
+type handlerFunc func(*Client, []byte) error
+
+var handlers = [26]handlerFunc{
+	(*Client).handleVersion,
+	(*Client).handleUdpTunnel,
+	(*Client).handleAuthenticate,
+	(*Client).handlePing,
+	(*Client).handleReject,
+	(*Client).handleServerSync,
+	(*Client).handleChannelRemove,
+	(*Client).handleChannelState,
+	(*Client).handleUserRemove,
+	(*Client).handleUserState,
+	(*Client).handleBanList,
+	(*Client).handleTextMessage,
+	(*Client).handlePermissionDenied,
+	(*Client).handleACL,
+	(*Client).handleQueryUsers,
+	(*Client).handleCryptSetup,
+	(*Client).handleContextActionModify,
+	(*Client).handleContextAction,
+	(*Client).handleUserList,
+	(*Client).handleVoiceTarget,
+	(*Client).handlePermissionQuery,
+	(*Client).handleCodecVersion,
+	(*Client).handleUserStats,
+	(*Client).handleRequestBlob,
+	(*Client).handleServerConfig,
+	(*Client).handleSuggestConfig,
 }
 
 func parseVersion(packet *MumbleProto.Version) Version {

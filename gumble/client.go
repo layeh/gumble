@@ -194,8 +194,9 @@ func (c *Client) readRoutine() {
 		if err != nil {
 			break
 		}
-		if handle, ok := handlers[pType]; ok {
-			handle(c, data)
+		index := int(pType)
+		if index < len(handlers) && index >= 0 {
+			handlers[pType](c, data)
 		}
 	}
 
