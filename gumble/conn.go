@@ -39,16 +39,13 @@ func NewConn(conn net.Conn) *Conn {
 //
 // This function should only be called by a single go routine.
 func (c *Conn) ReadPacket() (uint16, []byte, error) {
-	var pType uint16
-	var pLength uint32
-
 	c.Conn.SetReadDeadline(time.Now().Add(c.Timeout))
-	if err := binary.Read(c.Conn, binary.BigEndian, &pType); err != nil {
+	var header [6]byte
+	if _, err := io.ReadFull(c.Conn, header[:]); err != nil {
 		return 0, nil, err
 	}
-	if err := binary.Read(c.Conn, binary.BigEndian, &pLength); err != nil {
-		return 0, nil, err
-	}
+	pType := binary.BigEndian.Uint16(header[:])
+	pLength := binary.BigEndian.Uint32(header[2:])
 	pLengthInt := int(pLength)
 	if pLengthInt > c.MaximumPacketBytes {
 		return 0, nil, errors.New("gumble: packet larger than maximum allowed size")
