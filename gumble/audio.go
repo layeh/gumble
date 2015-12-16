@@ -40,7 +40,7 @@ type AudioListener interface {
 	OnAudioStream(e *AudioStreamEvent)
 }
 
-// AudioPacketEvent is event that is passed to AudioListener.OnAudioStream.
+// AudioStreamEvent is event that is passed to AudioListener.OnAudioStream.
 type AudioStreamEvent struct {
 	Client *Client
 	User   *User
