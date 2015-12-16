@@ -50,7 +50,7 @@ func (c *Conn) ReadPacket() (uint16, []byte, error) {
 	if pLengthInt > c.MaximumPacketBytes {
 		return 0, nil, errors.New("gumble: packet larger than maximum allowed size")
 	}
-	if pLengthInt > cap(c.buffer) {
+	if pLengthInt > len(c.buffer) {
 		c.buffer = make([]byte, pLengthInt)
 	}
 	if _, err := io.ReadFull(c.Conn, c.buffer[:pLengthInt]); err != nil {
