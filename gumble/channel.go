@@ -45,7 +45,7 @@ func (c *Channel) Add(name string, temporary bool) {
 		Name:      &name,
 		Temporary: &temporary,
 	}
-	c.client.Send(protoMessage{&packet})
+	c.client.WriteProto(&packet)
 }
 
 // Remove will remove the given channel and all sub-channels from the server's
@@ -54,7 +54,7 @@ func (c *Channel) Remove() {
 	packet := MumbleProto.ChannelRemove{
 		ChannelId: &c.ID,
 	}
-	c.client.Send(protoMessage{&packet})
+	c.client.WriteProto(&packet)
 }
 
 // SetName will set the name of the channel. This will have no effect if the
@@ -64,7 +64,7 @@ func (c *Channel) SetName(name string) {
 		ChannelId: &c.ID,
 		Name:      &name,
 	}
-	c.client.Send(protoMessage{&packet})
+	c.client.WriteProto(&packet)
 }
 
 // SetDescription will set the description of the channel.
@@ -73,7 +73,7 @@ func (c *Channel) SetDescription(description string) {
 		ChannelId:   &c.ID,
 		Description: &description,
 	}
-	c.client.Send(protoMessage{&packet})
+	c.client.WriteProto(&packet)
 }
 
 // Find returns a channel whose path (by channel name) from the current channel
@@ -112,20 +112,20 @@ func (c *Channel) Request(request Request) {
 		packet := MumbleProto.RequestBlob{
 			ChannelDescription: []uint32{c.ID},
 		}
-		c.client.Send(protoMessage{&packet})
+		c.client.WriteProto(&packet)
 	}
 	if (request & RequestACL) != 0 {
 		packet := MumbleProto.ACL{
 			ChannelId: &c.ID,
 			Query:     proto.Bool(true),
 		}
-		c.client.Send(protoMessage{&packet})
+		c.client.WriteProto(&packet)
 	}
 	if (request & RequestPermission) != 0 {
 		packet := MumbleProto.PermissionQuery{
 			ChannelId: &c.ID,
 		}
-		c.client.Send(protoMessage{&packet})
+		c.client.WriteProto(&packet)
 	}
 }
 
@@ -157,7 +157,7 @@ func (c *Channel) Link(channel ...*Channel) {
 	for i, ch := range channel {
 		packet.LinksAdd[i] = ch.ID
 	}
-	c.client.Send(protoMessage{&packet})
+	c.client.WriteProto(&packet)
 }
 
 // Unlink unlinks the given channels from the channel. If no arguments are
@@ -179,5 +179,5 @@ func (c *Channel) Unlink(channel ...*Channel) {
 			packet.LinksRemove[i] = ch.ID
 		}
 	}
-	c.client.Send(protoMessage{&packet})
+	c.client.WriteProto(&packet)
 }

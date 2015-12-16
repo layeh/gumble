@@ -70,6 +70,5 @@ func (pm RegisteredUsers) writeMessage(client *Client) error {
 	if len(packet.Users) <= 0 {
 		return nil
 	}
-	proto := protoMessage{&packet}
-	return proto.writeMessage(client)
+	return client.WriteProto(&packet)
 }

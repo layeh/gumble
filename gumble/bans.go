@@ -97,6 +97,5 @@ func (bl BanList) writeMessage(client *Client) error {
 		}
 	}
 
-	proto := protoMessage{&packet}
-	return proto.writeMessage(client)
+	return client.WriteProto(&packet)
 }

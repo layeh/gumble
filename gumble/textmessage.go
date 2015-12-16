@@ -41,6 +41,5 @@ func (tm *TextMessage) writeMessage(client *Client) error {
 			packet.TreeId[i] = channel.ID
 		}
 	}
-	proto := protoMessage{&packet}
-	return proto.writeMessage(client)
+	return client.WriteProto(&packet)
 }

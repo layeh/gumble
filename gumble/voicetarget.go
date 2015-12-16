@@ -76,6 +76,5 @@ func (vt *VoiceTarget) writeMessage(client *Client) error {
 		packet.Targets = append(packet.Targets, target)
 	}
 
-	proto := protoMessage{&packet}
-	return proto.writeMessage(client)
+	return client.WriteProto(&packet)
 }

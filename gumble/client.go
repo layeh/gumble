@@ -123,8 +123,8 @@ func (c *Client) Connect() error {
 		Opus:     proto.Bool(true),
 		Tokens:   c.Config.Tokens,
 	}
-	c.Send(protoMessage{&versionPacket})
-	c.Send(protoMessage{&authenticationPacket})
+	c.WriteProto(&versionPacket)
+	c.WriteProto(&authenticationPacket)
 	return nil
 }
 
@@ -165,19 +165,18 @@ func (c *Client) pingRoutine() {
 	ticker := time.NewTicker(time.Second * 10)
 	defer ticker.Stop()
 
-	pingPacket := MumbleProto.Ping{
+	packet := MumbleProto.Ping{
 		Timestamp:  proto.Uint64(0),
 		TcpPackets: &c.pingStats.TCPPackets,
 	}
-	pingProto := protoMessage{&pingPacket}
 
 	for {
 		select {
 		case <-c.end:
 			return
 		case time := <-ticker.C:
-			*pingPacket.Timestamp = uint64(time.Unix())
-			c.Send(pingProto)
+			*packet.Timestamp = uint64(time.Unix())
+			c.WriteProto(&packet)
 		}
 	}
 }
@@ -215,15 +214,13 @@ func (c *Client) readRoutine() {
 func (c *Client) Request(request Request) {
 	if (request & RequestUserList) != 0 {
 		packet := MumbleProto.UserList{}
-		proto := protoMessage{&packet}
-		c.Send(proto)
+		c.WriteProto(&packet)
 	}
 	if (request & RequestBanList) != 0 {
 		packet := MumbleProto.BanList{
 			Query: proto.Bool(true),
 		}
-		proto := protoMessage{&packet}
-		c.Send(proto)
+		c.WriteProto(&packet)
 	}
 }
 
