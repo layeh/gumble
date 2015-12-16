@@ -124,10 +124,10 @@ func (c *Conn) WritePacket(ptype uint16, data []byte) error {
 }
 
 func (c *Conn) writeHeader(pType uint16, pLength uint32) error {
-	if err := binary.Write(c.Conn, binary.BigEndian, pType); err != nil {
-		return err
-	}
-	if err := binary.Write(c.Conn, binary.BigEndian, pLength); err != nil {
+	var header [6]byte
+	binary.BigEndian.PutUint16(header[:], pType)
+	binary.BigEndian.PutUint32(header[2:], pLength)
+	if _, err := c.Conn.Write(header[:]); err != nil {
 		return err
 	}
 	return nil
