@@ -1,7 +1,6 @@
 package gumble
 
 import (
-	"bytes"
 	"encoding/binary"
 	"errors"
 	"io"
@@ -61,21 +60,21 @@ func (c *Conn) ReadPacket() (uint16, []byte, error) {
 
 // WriteAudio writes an audio packet to the connection.
 func (c *Conn) WriteAudio(format, target byte, sequence int64, final bool, data []byte, X, Y, Z *float32) error {
-	var header bytes.Buffer
-	formatTarget := (format << 5) | target
-	if err := header.WriteByte(formatTarget); err != nil {
-		return err
-	}
-	if _, err := varint.WriteTo(&header, sequence); err != nil {
-		return err
+	var buff [1 + varint.MaxVarintLen*2]byte
+	buff[0] = (format << 5) | target
+	n := varint.Encode(buff[1:], sequence)
+	if n == 0 {
+		return errors.New("gumble: varint out of range")
 	}
 	l := int64(len(data))
 	if final {
 		l |= 0x2000
 	}
-	if _, err := varint.WriteTo(&header, l); err != nil {
-		return err
+	m := varint.Encode(buff[1 + n:], l)
+	if m == 0 {
+		return errors.New("gumble: varint out of range")
 	}
+	header := buff[:1 + n + m]
 
 	var positionalLength int
 	if X != nil {
@@ -85,10 +84,10 @@ func (c *Conn) WriteAudio(format, target byte, sequence int64, final bool, data 
 	c.Lock()
 	defer c.Unlock()
 
-	if err := c.writeHeader(1, uint32(header.Len()+len(data)+positionalLength)); err != nil {
+	if err := c.writeHeader(1, uint32(len(header)+len(data)+positionalLength)); err != nil {
 		return err
 	}
-	if _, err := header.WriteTo(c.Conn); err != nil {
+	if _, err := c.Conn.Write(header); err != nil {
 		return err
 	}
 	if _, err := c.Conn.Write(data); err != nil {
