@@ -70,11 +70,11 @@ func (c *Conn) WriteAudio(format, target byte, sequence int64, final bool, data 
 	if final {
 		l |= 0x2000
 	}
-	m := varint.Encode(buff[1 + n:], l)
+	m := varint.Encode(buff[1+n:], l)
 	if m == 0 {
 		return errors.New("gumble: varint out of range")
 	}
-	header := buff[:1 + n + m]
+	header := buff[:1+n+m]
 
 	var positionalLength int
 	if X != nil {
