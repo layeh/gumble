@@ -234,7 +234,7 @@ func (c *Client) Disconnect() error {
 	return nil
 }
 
-// Send will send a message to the server.
-func (c *Client) Send(message Message) error {
-	return message.writeMessage(c)
+// Send will send a Message to the server.
+func (c *Client) Send(message Message) {
+	message.writeMessage(c)
 }
