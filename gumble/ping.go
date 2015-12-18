@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"encoding/binary"
+	"errors"
 	"io"
 	"net"
 	"time"
@@ -31,6 +32,9 @@ type PingResponse struct {
 // nil on success. The function will return nil and an error if a valid
 // response is not received after the given timeout.
 func Ping(address string, timeout time.Duration) (*PingResponse, error) {
+	if timeout < 0 {
+		return nil, errors.New("gumble: timeout must be positive")
+	}
 	addr, err := net.ResolveUDPAddr("udp", address)
 	if err != nil {
 		return nil, err
