@@ -28,10 +28,12 @@ type PingResponse struct {
 	MaximumBitrate int
 }
 
-// Ping sends a UDP ping packet to the given server. Returns a PingResponse and
-// nil on success. The function will return nil and an error if a valid
-// response is not received after the given timeout.
-func Ping(address string, timeout time.Duration) (*PingResponse, error) {
+// Ping sends a UDP ping packet to the given server. If interval is positive,
+// the packet is retransmitted at every interval.
+//
+// Returns a PingResponse and nil on success. The function will return nil and
+// an error if a valid response is not received after the given timeout.
+func Ping(address string, interval, timeout time.Duration) (*PingResponse, error) {
 	if timeout < 0 {
 		return nil, errors.New("gumble: timeout must be positive")
 	}
@@ -51,6 +53,23 @@ func Ping(address string, timeout time.Duration) (*PingResponse, error) {
 	start := time.Now()
 	if _, err := conn.Write(packet[:]); err != nil {
 		return nil, err
+	}
+
+	if interval > 0 {
+		end := make(chan struct{})
+		defer close(end)
+		go func() {
+			ticker := time.NewTicker(interval)
+			defer ticker.Stop()
+			for {
+				select {
+				case <-ticker.C:
+					conn.Write(packet[:])
+				case <-end:
+					return
+				}
+			}
+		}()
 	}
 
 	conn.SetReadDeadline(time.Now().Add(timeout))
