@@ -30,6 +30,9 @@ const (
 // ClientVersion is the protocol version that Client implements.
 const ClientVersion = 1<<16 | 3<<8 | 0
 
+// DefaultPort is the default port on which Mumble servers listen.
+const DefaultPort = 64738
+
 // Client is the type used to create a connection to a server.
 type Client struct {
 	// The current state of the client.
