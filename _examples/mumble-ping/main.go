@@ -3,7 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"net"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/layeh/gumble/gumble"
@@ -15,7 +17,13 @@ func main() {
 	timeout := flag.Duration("timeout", time.Second*5, "ping timeout until failure")
 	flag.Parse()
 
-	resp, err := gumble.Ping(*server, *interval, *timeout)
+	host, port, err := net.SplitHostPort(*server)
+	if err != nil {
+		host = *server
+		port = strconv.Itoa(gumble.DefaultPort)
+	}
+
+	resp, err := gumble.Ping(net.JoinHostPort(host, port), *interval, *timeout)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s: %s\n", os.Args[0], err)
 		os.Exit(1)
