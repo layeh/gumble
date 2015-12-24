@@ -45,6 +45,7 @@ func Ping(address string, interval, timeout time.Duration) (*PingResponse, error
 	if err != nil {
 		return nil, err
 	}
+	defer conn.Close()
 
 	var packet [12]byte
 	if _, err := rand.Read(packet[4:]); err != nil {
