@@ -4,7 +4,9 @@ import (
 	"crypto/tls"
 	"flag"
 	"fmt"
+	"net"
 	"os"
+	"strconv"
 
 	"github.com/layeh/gumble/gumble"
 )
@@ -26,13 +28,19 @@ func Main(init func(client *gumble.Client), listener gumble.EventListener) {
 		flag.Parse()
 	}
 
+	host, port, err := net.SplitHostPort(*server)
+	if err != nil {
+		host = *server
+		port = strconv.Itoa(gumble.DefaultPort)
+	}
+
 	keepAlive := make(chan bool)
 
 	// client
 	config := gumble.NewConfig()
 	config.Username = *username
 	config.Password = *password
-	config.Address = *server
+	config.Address = net.JoinHostPort(host, port)
 	client := gumble.NewClient(config)
 	if *insecure {
 		config.TLSConfig.InsecureSkipVerify = true
