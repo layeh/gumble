@@ -221,6 +221,12 @@ func (c *Client) readRoutine() {
 	c.audioCodec = nil
 	c.AudioEncoder = nil
 	c.pingStats = pingStats{}
+	for _, user := range c.Users {
+		user.client = nil
+	}
+	for _, channel := range c.Channels {
+		channel.client = nil
+	}
 	atomic.StoreUint32(&c.state, uint32(StateDisconnected))
 	c.listeners.OnDisconnect(&c.disconnectEvent)
 }
