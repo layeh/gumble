@@ -7,6 +7,8 @@ import (
 
 var Codec gumble.AudioCodec
 
+const ID = 4
+
 func init() {
 	Codec = &generator{}
 	gumble.RegisterAudioCodec(4, Codec)
@@ -18,7 +20,7 @@ type generator struct {
 }
 
 func (*generator) ID() int {
-	return 4
+	return ID
 }
 
 func (*generator) NewEncoder() gumble.AudioEncoder {
@@ -43,7 +45,7 @@ type Encoder struct {
 }
 
 func (*Encoder) ID() int {
-	return 4
+	return ID
 }
 
 func (e *Encoder) Encode(pcm []int16, mframeSize, maxDataBytes int) ([]byte, error) {
