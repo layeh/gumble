@@ -100,6 +100,12 @@ func (c *Client) Connect() error {
 		return errors.New("gumble: client is already connected")
 	}
 
+	c.Self = nil
+	c.Users = Users{}
+	c.Channels = Channels{}
+	c.permissions = make(map[uint32]*Permission)
+	c.ContextActions = ContextActions{}
+
 	tlsConn, err := tls.DialWithDialer(&c.Config.Dialer, "tcp", c.Config.Address, &c.Config.TLSConfig)
 	if err != nil {
 		atomic.StoreUint32(&c.state, uint32(StateDisconnected))
@@ -120,11 +126,6 @@ func (c *Client) Connect() error {
 		}
 	}
 	c.Conn = NewConn(tlsConn)
-
-	c.Users = Users{}
-	c.Channels = Channels{}
-	c.permissions = make(map[uint32]*Permission)
-	c.ContextActions = ContextActions{}
 	atomic.StoreUint32(&c.state, uint32(StateConnected))
 
 	// Channels and goroutines
