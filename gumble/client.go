@@ -210,8 +210,7 @@ func (c *Client) readRoutine() {
 		if err != nil {
 			break
 		}
-		index := int(pType)
-		if index < len(handlers) && index >= 0 {
+		if pType < handlerCount {
 			handlers[pType](c, data)
 		}
 	}
