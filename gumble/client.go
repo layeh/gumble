@@ -5,6 +5,7 @@ import (
 	"errors"
 	"math"
 	"runtime"
+	"sync/atomic"
 	"time"
 
 	"github.com/golang/protobuf/proto"
@@ -17,6 +18,10 @@ type State int
 const (
 	// StateDisconnected means the client is not connected to a server.
 	StateDisconnected State = iota
+
+	// StateConnecting means the client is in the process of establishing a
+	// connection to the server.
+	StateConnecting
 
 	// StateConnected means the client is connected to a server, but has yet to
 	// receive the initial server state.
@@ -35,8 +40,6 @@ const DefaultPort = 64738
 
 // Client is the type used to create a connection to a server.
 type Client struct {
-	// The current state of the client.
-	State State
 	// The User associated with the client (nil if the client has not yet been
 	// synced).
 	Self *User
@@ -68,6 +71,8 @@ type Client struct {
 	// will disable voice targeting (i.e. switch back to regular speaking).
 	VoiceTarget *VoiceTarget
 
+	state uint32
+
 	end             chan bool
 	disconnectEvent DisconnectEvent
 }
@@ -84,20 +89,33 @@ func NewClient(config *Config) *Client {
 	return client
 }
 
+// State returns the current state of the client.
+func (c *Client) State() State {
+	return State(atomic.LoadUint32(&c.state))
+}
+
 // Connect connects to the server.
 func (c *Client) Connect() error {
-	if c.State != StateDisconnected {
+	if !atomic.CompareAndSwapUint32(&c.state, uint32(StateDisconnected), uint32(StateConnecting)) {
 		return errors.New("gumble: client is already connected")
 	}
 
 	tlsConn, err := tls.DialWithDialer(&c.Config.Dialer, "tcp", c.Config.Address, &c.Config.TLSConfig)
 	if err != nil {
+		atomic.StoreUint32(&c.state, uint32(StateDisconnected))
 		return err
 	}
 	if verify := c.Config.TLSVerify; verify != nil {
 		state := tlsConn.ConnectionState()
+		defer func() {
+			if v := recover(); v != nil {
+				atomic.StoreUint32(&c.state, uint32(StateDisconnected))
+				panic(v)
+			}
+		}()
 		if err := verify(&state); err != nil {
 			tlsConn.Close()
+			atomic.StoreUint32(&c.state, uint32(StateDisconnected))
 			return err
 		}
 	}
@@ -107,7 +125,7 @@ func (c *Client) Connect() error {
 	c.Channels = Channels{}
 	c.permissions = make(map[uint32]*Permission)
 	c.ContextActions = ContextActions{}
-	c.State = StateConnected
+	atomic.StoreUint32(&c.state, uint32(StateConnected))
 
 	// Channels and goroutines
 	go c.readRoutine()
@@ -204,11 +222,11 @@ func (c *Client) readRoutine() {
 
 	c.end <- true
 	c.Conn = nil
-	c.State = StateDisconnected
 	c.tmpACL = nil
 	c.audioCodec = nil
 	c.AudioEncoder = nil
 	c.pingStats = pingStats{}
+	atomic.StoreUint32(&c.state, uint32(StateDisconnected))
 	c.listeners.OnDisconnect(&c.disconnectEvent)
 }
 
@@ -229,7 +247,7 @@ func (c *Client) Request(request Request) {
 
 // Disconnect disconnects the client from the server.
 func (c *Client) Disconnect() error {
-	if c.State == StateDisconnected {
+	if c.State() == StateDisconnected {
 		return errors.New("gumble: client is already disconnected")
 	}
 	c.disconnectEvent.Type = DisconnectUser

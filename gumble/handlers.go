@@ -223,7 +223,7 @@ func (c *Client) handleServerSync(buffer []byte) error {
 		val := int(*packet.MaxBandwidth)
 		event.MaximumBitrate = &val
 	}
-	c.State = StateSynced
+	atomic.StoreUint32(&c.state, uint32(StateSynced))
 
 	c.listeners.OnConnect(&event)
 	return nil
@@ -252,7 +252,7 @@ func (c *Client) handleChannelRemove(buffer []byte) error {
 		delete(link.Links, channelID)
 	}
 
-	if c.State == StateSynced {
+	if c.State() == StateSynced {
 		event := ChannelChangeEvent{
 			Client:  c,
 			Type:    ChannelChangeRemoved,
@@ -348,7 +348,7 @@ func (c *Client) handleChannelState(buffer []byte) error {
 		channel.Description = ""
 	}
 
-	if c.State == StateSynced {
+	if c.State() == StateSynced {
 		c.listeners.OnChannelChange(&event)
 	}
 	return nil
@@ -399,7 +399,7 @@ func (c *Client) handleUserRemove(buffer []byte) error {
 		}
 	}
 
-	if c.State == StateSynced {
+	if c.State() == StateSynced {
 		c.listeners.OnUserChange(&event)
 	}
 	return nil
@@ -544,7 +544,7 @@ func (c *Client) handleUserState(buffer []byte) error {
 		user.Recording = *packet.Recording
 	}
 
-	if c.State == StateSynced {
+	if c.State() == StateSynced {
 		c.listeners.OnUserChange(&event)
 	}
 	return nil
