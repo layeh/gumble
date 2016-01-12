@@ -957,7 +957,7 @@ func (c *Client) handleCodecVersion(buffer []byte) error {
 	var codec AudioCodec
 	switch {
 	case *event.CodecOpus:
-		codec = audioCodecs[audioCodecIDOpus]
+		codec = getAudioCodec(audioCodecIDOpus)
 	}
 	if codec != nil {
 		c.audioCodec = codec

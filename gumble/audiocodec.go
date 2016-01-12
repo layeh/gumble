@@ -1,19 +1,35 @@
 package gumble
 
+import (
+	"sync"
+)
+
 const (
 	audioCodecIDOpus = 4
 )
 
-var audioCodecs [8]AudioCodec
+var (
+	audioCodecsLock sync.Mutex
+	audioCodecs     [8]AudioCodec
+)
 
 // RegisterAudioCodec registers an audio codec that can be used for encoding
 // and decoding outgoing and incoming audio data. The function panics if the
 // ID is invalid.
 func RegisterAudioCodec(id int, codec AudioCodec) {
+	audioCodecsLock.Lock()
+	defer audioCodecsLock.Unlock()
+
 	if id < 0 || id >= len(audioCodecs) {
 		panic("id out of range")
 	}
 	audioCodecs[id] = codec
+}
+
+func getAudioCodec(id int) AudioCodec {
+	audioCodecsLock.Lock()
+	defer audioCodecsLock.Unlock()
+	return audioCodecs[id]
 }
 
 // AudioCodec can create a encoder and a decoder for outgoing and incoming
