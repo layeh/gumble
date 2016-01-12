@@ -101,32 +101,34 @@ func (c *Channel) Find(names ...string) *Channel {
 	return nil
 }
 
-// Request requests channel information that has not yet been sent to the
-// client. The supported request types are: RequestACL, RequestDescription,
-// RequestPermission.
+// RequestDescription requests that the actual channel description
+// (i.e. non-hashed) be sent to the client.
+func (c *Channel) RequestDescription() {
+	packet := MumbleProto.RequestBlob{
+		ChannelDescription: []uint32{c.ID},
+	}
+	c.client.WriteProto(&packet)
+}
+
+// RequestACL requests that the channel's ACL to be sent to the client.
+func (c *Channel) RequestACL() {
+	packet := MumbleProto.ACL{
+		ChannelId: &c.ID,
+		Query:     proto.Bool(true),
+	}
+	c.client.WriteProto(&packet)
+}
+
+// RequestPermission requests that the channel's permission information to be
+// sent to the client.
 //
-// Note: the server will not reply to a RequestPermission request if the client
-// has up-to-date permission information.
-func (c *Channel) Request(request Request) {
-	if (request & RequestDescription) != 0 {
-		packet := MumbleProto.RequestBlob{
-			ChannelDescription: []uint32{c.ID},
-		}
-		c.client.WriteProto(&packet)
+// Note: the server will not reply to the request if the client has up-to-date
+// permission information.
+func (c *Channel) RequestPermission() {
+	packet := MumbleProto.PermissionQuery{
+		ChannelId: &c.ID,
 	}
-	if (request & RequestACL) != 0 {
-		packet := MumbleProto.ACL{
-			ChannelId: &c.ID,
-			Query:     proto.Bool(true),
-		}
-		c.client.WriteProto(&packet)
-	}
-	if (request & RequestPermission) != 0 {
-		packet := MumbleProto.PermissionQuery{
-			ChannelId: &c.ID,
-		}
-		c.client.WriteProto(&packet)
-	}
+	c.client.WriteProto(&packet)
 }
 
 // Send will send a text message to the channel.

@@ -25,6 +25,7 @@ var (
 type handlerFunc func(*Client, []byte) error
 
 const handlerCount = 26
+
 var handlers = [handlerCount]handlerFunc{
 	(*Client).handleVersion,
 	(*Client).handleUdpTunnel,

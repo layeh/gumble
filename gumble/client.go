@@ -123,7 +123,7 @@ func (c *Client) Connect() error {
 	}
 	c.Conn = NewConn(tlsConn)
 
-	// Channels and goroutines
+	// Background workers
 	go c.readRoutine()
 	go c.pingRoutine()
 
@@ -225,19 +225,19 @@ func (c *Client) readRoutine() {
 	c.listeners.OnDisconnect(&c.disconnectEvent)
 }
 
-// Request requests that specific server information be sent to the client. The
-// supported request types are: RequestUserList, and RequestBanList.
-func (c *Client) Request(request Request) {
-	if (request & RequestUserList) != 0 {
-		packet := MumbleProto.UserList{}
-		c.WriteProto(&packet)
+// RequestUserList requests that the server's registered user list be sent to
+// the client.
+func (c *Client) RequestUserList() {
+	packet := MumbleProto.UserList{}
+	c.WriteProto(&packet)
+}
+
+// RequestBanList requests that the server's ban list be sent to the client.
+func (c *Client) RequestBanList() {
+	packet := MumbleProto.BanList{
+		Query: proto.Bool(true),
 	}
-	if (request & RequestBanList) != 0 {
-		packet := MumbleProto.BanList{
-			Query: proto.Bool(true),
-		}
-		c.WriteProto(&packet)
-	}
+	c.WriteProto(&packet)
 }
 
 // Disconnect disconnects the client from the server.

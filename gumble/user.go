@@ -181,27 +181,30 @@ func (u *User) SetSelfDeafened(muted bool) {
 	u.client.WriteProto(&packet)
 }
 
-// Request requests user information that has not yet been sent to the client.
-// The supported request types are: RequestStats, RequestTexture, and
-// RequestComment.
-func (u *User) Request(request Request) {
-	if (request & RequestStats) != 0 {
-		packet := MumbleProto.UserStats{
-			Session: &u.Session,
-		}
-		u.client.WriteProto(&packet)
+// RequestStats requests that the user's stats be sent to the client.
+func (u *User) RequestStats() {
+	packet := MumbleProto.UserStats{
+		Session: &u.Session,
 	}
+	u.client.WriteProto(&packet)
+}
 
-	packet := MumbleProto.RequestBlob{}
-	if (request & RequestTexture) != 0 {
-		packet.SessionTexture = []uint32{u.Session}
+// RequestTexture requests that the user's actual texture (i.e. non-hashed) be
+// sent to the client.
+func (u *User) RequestTexture() {
+	packet := MumbleProto.RequestBlob{
+		SessionTexture: []uint32{u.Session},
 	}
-	if (request & RequestComment) != 0 {
-		packet.SessionComment = []uint32{u.Session}
+	u.client.WriteProto(&packet)
+}
+
+// RequestComment requests that the user's actual comment (i.e. non-hashed) be
+// sent to the client.
+func (u *User) RequestComment() {
+	packet := MumbleProto.RequestBlob{
+		SessionComment: []uint32{u.Session},
 	}
-	if packet.SessionTexture != nil || packet.SessionComment != nil {
-		u.client.WriteProto(&packet)
-	}
+	u.client.WriteProto(&packet)
 }
 
 // Send will send a text message to the user.
