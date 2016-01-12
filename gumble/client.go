@@ -23,10 +23,6 @@ const (
 	// connection to the server.
 	StateConnecting
 
-	// StateConnected means the client is connected to a server, but has yet to
-	// receive the initial server state.
-	StateConnected
-
 	// StateSynced means the client is connected to a server and has been sent
 	// the server state.
 	StateSynced
@@ -126,7 +122,6 @@ func (c *Client) Connect() error {
 		}
 	}
 	c.Conn = NewConn(tlsConn)
-	atomic.StoreUint32(&c.state, uint32(StateConnected))
 
 	// Channels and goroutines
 	go c.readRoutine()
