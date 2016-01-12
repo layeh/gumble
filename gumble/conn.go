@@ -13,6 +13,9 @@ import (
 	"github.com/layeh/gumble/gumble/varint"
 )
 
+// DefaultPort is the default port on which Mumble servers listen.
+const DefaultPort = 64738
+
 // Conn represents a connection to a Mumble client/server.
 type Conn struct {
 	sync.Mutex
