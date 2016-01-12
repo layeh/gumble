@@ -134,7 +134,7 @@ func (c *Client) Connect() error {
 	authenticationPacket := MumbleProto.Authenticate{
 		Username: &c.Config.Username,
 		Password: &c.Config.Password,
-		Opus:     proto.Bool(true),
+		Opus:     proto.Bool(getAudioCodec(audioCodecIDOpus) != nil),
 		Tokens:   c.Config.Tokens,
 	}
 	c.WriteProto(&versionPacket)
