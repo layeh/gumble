@@ -265,6 +265,7 @@ func (c *Client) handleChannelRemove(buffer []byte) error {
 			c.volatileLock.Unlock()
 			return errInvalidProtobuf
 		}
+		channel.client = nil
 		delete(c.Channels, channelID)
 		delete(c.permissions, channelID)
 		if parent := channel.Parent; parent != nil {
@@ -411,6 +412,7 @@ func (c *Client) handleUserRemove(buffer []byte) error {
 			c.volatileLock.Unlock()
 			return errInvalidProtobuf
 		}
+		event.User.client = nil
 		if event.User.Channel != nil {
 			delete(event.User.Channel.Users, session)
 		}
