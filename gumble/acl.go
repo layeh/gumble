@@ -8,7 +8,7 @@ type ACL struct {
 	Groups []*ACLGroup
 	// The ACL's rules.
 	Rules []*ACLRule
-	// Does the ACL inherits the parent channel's ACL?s
+	// Does the ACL inherits the parent channel's ACLs?
 	Inherits bool
 }
 
@@ -31,8 +31,10 @@ type ACLGroup struct {
 	// Are group members are inherited from the parent channel's ACL?
 	InheritUsers bool
 	// Can the group be inherited by child channels?
-	Inheritable                           bool
-	usersAdd, usersRemove, usersInherited map[uint32]*ACLUser
+	Inheritable bool
+	// The users who are explicitly added to, explicitly removed from, and
+	// inherited into the group.
+	UsersAdd, UsersRemove, UsersInherited map[uint32]*ACLUser
 }
 
 // ACL group names that are built-in.

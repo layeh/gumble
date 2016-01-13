@@ -755,25 +755,25 @@ func (c *Client) handleACL(buffer []byte) error {
 				Inheritable:  group.GetInheritable(),
 			}
 			if group.Add != nil {
-				aclGroup.usersAdd = make(map[uint32]*ACLUser)
+				aclGroup.UsersAdd = make(map[uint32]*ACLUser)
 				for _, userID := range group.Add {
-					aclGroup.usersAdd[userID] = &ACLUser{
+					aclGroup.UsersAdd[userID] = &ACLUser{
 						UserID: userID,
 					}
 				}
 			}
 			if group.Remove != nil {
-				aclGroup.usersRemove = make(map[uint32]*ACLUser)
+				aclGroup.UsersRemove = make(map[uint32]*ACLUser)
 				for _, userID := range group.Remove {
-					aclGroup.usersRemove[userID] = &ACLUser{
+					aclGroup.UsersRemove[userID] = &ACLUser{
 						UserID: userID,
 					}
 				}
 			}
 			if group.InheritedMembers != nil {
-				aclGroup.usersInherited = make(map[uint32]*ACLUser)
+				aclGroup.UsersInherited = make(map[uint32]*ACLUser)
 				for _, userID := range group.InheritedMembers {
-					aclGroup.usersInherited[userID] = &ACLUser{
+					aclGroup.UsersInherited[userID] = &ACLUser{
 						UserID: userID,
 					}
 				}
@@ -835,13 +835,13 @@ func (c *Client) handleQueryUsers(buffer []byte) error {
 	}
 
 	for _, group := range acl.Groups {
-		for _, user := range group.usersAdd {
+		for _, user := range group.UsersAdd {
 			user.Name = userMap[user.UserID]
 		}
-		for _, user := range group.usersRemove {
+		for _, user := range group.UsersRemove {
 			user.Name = userMap[user.UserID]
 		}
-		for _, user := range group.usersInherited {
+		for _, user := range group.UsersInherited {
 			user.Name = userMap[user.UserID]
 		}
 	}
