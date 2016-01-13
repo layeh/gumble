@@ -1,5 +1,10 @@
 package gumble
 
+import (
+	"github.com/golang/protobuf/proto"
+	"github.com/layeh/gumble/gumble/MumbleProto"
+)
+
 // ACL contains a list of ACLGroups and ACLRules linked to a channel.
 type ACL struct {
 	// The channel to which the ACL belongs.
@@ -10,6 +15,56 @@ type ACL struct {
 	Rules []*ACLRule
 	// Does the ACL inherits the parent channel's ACLs?
 	Inherits bool
+}
+
+func (a *ACL) writeMessage(client *Client) error {
+	groups := make([]*MumbleProto.ACL_ChanGroup, len(a.Groups))
+	for i, group := range a.Groups {
+		add := make([]uint32, 0, len(group.UsersAdd))
+		for _, user := range group.UsersAdd {
+			add = append(add, user.UserID)
+		}
+		remove := make([]uint32, 0, len(group.UsersRemove))
+		for _, user := range group.UsersRemove {
+			remove = append(remove, user.UserID)
+		}
+		groups[i] = &MumbleProto.ACL_ChanGroup{
+			Name:        &group.Name,
+			Inherit:     &group.InheritUsers,
+			Inheritable: &group.Inheritable,
+			Add:         add,
+			Remove:      remove,
+		}
+	}
+
+	acls := make([]*MumbleProto.ACL_ChanACL, len(a.Rules))
+	for i, rule := range a.Rules {
+		var user *uint32
+		if rule.User != nil {
+			user = &rule.User.UserID
+		}
+		var group *string
+		if rule.Group != nil {
+			group = &rule.Group.Name
+		}
+		acls[i] = &MumbleProto.ACL_ChanACL{
+			ApplyHere: &rule.AppliesCurrent,
+			ApplySubs: &rule.AppliesChildren,
+			UserId:    user,
+			Group:     group,
+			Grant:     proto.Uint32(uint32(rule.Granted)),
+			Deny:      proto.Uint32(uint32(rule.Denied)),
+		}
+	}
+
+	packet := MumbleProto.ACL{
+		ChannelId:   &a.Channel.ID,
+		Groups:      groups,
+		Acls:        acls,
+		InheritAcls: &a.Inherits,
+		Query:       proto.Bool(false),
+	}
+	return client.WriteProto(&packet)
 }
 
 // ACLUser is a registered user who is part of or can be part of an ACL group
