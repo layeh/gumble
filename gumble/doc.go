@@ -39,4 +39,11 @@
 // from your server, add the following line to your murmur configuration file:
 //
 //  opusthreshold=0
+//
+// Thread safety
+//
+// As an easy, general rule, a connecting/connected Client, and everything that
+// is associated with it (e.g. Users, Channels), is thread-unsafe. Accessing or
+// modifying such a Client should only be done from inside of an event listener
+// or a Client.Do function.
 package gumble

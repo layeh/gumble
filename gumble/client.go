@@ -5,6 +5,7 @@ import (
 	"errors"
 	"math"
 	"runtime"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -66,6 +67,9 @@ type Client struct {
 
 	state uint32
 
+	volatileWg   sync.WaitGroup
+	volatileLock sync.Mutex
+
 	end             chan bool
 	disconnectEvent DisconnectEvent
 }
@@ -78,6 +82,9 @@ func NewClient(config *Config) *Client {
 	client := &Client{
 		Config: config,
 		end:    make(chan bool),
+	}
+	client.listeners = eventMultiplexer{
+		client: client,
 	}
 	return client
 }
@@ -93,11 +100,18 @@ func (c *Client) Connect() error {
 		return errors.New("gumble: client is already connected")
 	}
 
-	c.Self = nil
-	c.Users = Users{}
-	c.Channels = Channels{}
-	c.permissions = make(map[uint32]*Permission)
-	c.ContextActions = ContextActions{}
+	{
+		c.volatileLock.Lock()
+		c.volatileWg.Wait()
+
+		c.Self = nil
+		c.Users = Users{}
+		c.Channels = Channels{}
+		c.permissions = make(map[uint32]*Permission)
+		c.ContextActions = ContextActions{}
+
+		c.volatileLock.Unlock()
+	}
 
 	tlsConn, err := tls.DialWithDialer(&c.Config.Dialer, "tcp", c.Config.Address, &c.Config.TLSConfig)
 	if err != nil {
@@ -118,7 +132,15 @@ func (c *Client) Connect() error {
 			return err
 		}
 	}
-	c.Conn = NewConn(tlsConn)
+
+	{
+		c.volatileLock.Lock()
+		c.volatileWg.Wait()
+
+		c.Conn = NewConn(tlsConn)
+
+		c.volatileLock.Unlock()
+	}
 
 	// Background workers
 	go c.readRoutine()
@@ -212,19 +234,26 @@ func (c *Client) readRoutine() {
 		}
 	}
 
-	c.end <- true
-	c.Conn = nil
-	c.tmpACL = nil
-	c.audioCodec = nil
-	c.AudioEncoder = nil
-	c.pingStats = pingStats{}
-	for _, user := range c.Users {
-		user.client = nil
+	{
+		c.volatileLock.Lock()
+		c.volatileWg.Wait()
+
+		c.end <- true
+		c.Conn = nil
+		c.tmpACL = nil
+		c.audioCodec = nil
+		c.AudioEncoder = nil
+		c.pingStats = pingStats{}
+		for _, user := range c.Users {
+			user.client = nil
+		}
+		for _, channel := range c.Channels {
+			channel.client = nil
+		}
+		atomic.StoreUint32(&c.state, uint32(StateDisconnected))
+
+		c.volatileLock.Unlock()
 	}
-	for _, channel := range c.Channels {
-		channel.client = nil
-	}
-	atomic.StoreUint32(&c.state, uint32(StateDisconnected))
 	c.listeners.OnDisconnect(&c.disconnectEvent)
 }
 
@@ -251,6 +280,18 @@ func (c *Client) Disconnect() error {
 	c.disconnectEvent.Type = DisconnectUser
 	c.Conn.Close()
 	return nil
+}
+
+// Do executes f in a thread-safe manner. It ensures that Client and its
+// associated data will not be changed during the lifetime of the function
+// call.
+func (c *Client) Do(f func()) {
+	c.volatileLock.Lock()
+	c.volatileWg.Add(1)
+	c.volatileLock.Unlock()
+	defer c.volatileWg.Done()
+
+	f()
 }
 
 // Send will send a Message to the server.
