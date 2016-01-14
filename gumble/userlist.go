@@ -70,5 +70,5 @@ func (pm RegisteredUsers) writeMessage(client *Client) error {
 	if len(packet.Users) <= 0 {
 		return nil
 	}
-	return client.WriteProto(&packet)
+	return client.Conn.WriteProto(&packet)
 }

@@ -57,7 +57,7 @@ func (a *ACL) writeMessage(client *Client) error {
 		}
 	}
 
-	return client.WriteProto(&packet)
+	return client.Conn.WriteProto(&packet)
 }
 
 // ACLUser is a registered user who is part of or can be part of an ACL group

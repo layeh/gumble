@@ -45,7 +45,7 @@ func (c *Channel) Add(name string, temporary bool) {
 		Name:      &name,
 		Temporary: &temporary,
 	}
-	c.client.WriteProto(&packet)
+	c.client.Conn.WriteProto(&packet)
 }
 
 // Remove will remove the given channel and all sub-channels from the server's
@@ -54,7 +54,7 @@ func (c *Channel) Remove() {
 	packet := MumbleProto.ChannelRemove{
 		ChannelId: &c.ID,
 	}
-	c.client.WriteProto(&packet)
+	c.client.Conn.WriteProto(&packet)
 }
 
 // SetName will set the name of the channel. This will have no effect if the
@@ -64,7 +64,7 @@ func (c *Channel) SetName(name string) {
 		ChannelId: &c.ID,
 		Name:      &name,
 	}
-	c.client.WriteProto(&packet)
+	c.client.Conn.WriteProto(&packet)
 }
 
 // SetDescription will set the description of the channel.
@@ -73,7 +73,7 @@ func (c *Channel) SetDescription(description string) {
 		ChannelId:   &c.ID,
 		Description: &description,
 	}
-	c.client.WriteProto(&packet)
+	c.client.Conn.WriteProto(&packet)
 }
 
 // Find returns a channel whose path (by channel name) from the current channel
@@ -107,7 +107,7 @@ func (c *Channel) RequestDescription() {
 	packet := MumbleProto.RequestBlob{
 		ChannelDescription: []uint32{c.ID},
 	}
-	c.client.WriteProto(&packet)
+	c.client.Conn.WriteProto(&packet)
 }
 
 // RequestACL requests that the channel's ACL to be sent to the client.
@@ -116,7 +116,7 @@ func (c *Channel) RequestACL() {
 		ChannelId: &c.ID,
 		Query:     proto.Bool(true),
 	}
-	c.client.WriteProto(&packet)
+	c.client.Conn.WriteProto(&packet)
 }
 
 // RequestPermission requests that the channel's permission information to be
@@ -128,7 +128,7 @@ func (c *Channel) RequestPermission() {
 	packet := MumbleProto.PermissionQuery{
 		ChannelId: &c.ID,
 	}
-	c.client.WriteProto(&packet)
+	c.client.Conn.WriteProto(&packet)
 }
 
 // Send will send a text message to the channel.
@@ -159,7 +159,7 @@ func (c *Channel) Link(channel ...*Channel) {
 	for i, ch := range channel {
 		packet.LinksAdd[i] = ch.ID
 	}
-	c.client.WriteProto(&packet)
+	c.client.Conn.WriteProto(&packet)
 }
 
 // Unlink unlinks the given channels from the channel. If no arguments are
@@ -181,5 +181,5 @@ func (c *Channel) Unlink(channel ...*Channel) {
 			packet.LinksRemove[i] = ch.ID
 		}
 	}
-	c.client.WriteProto(&packet)
+	c.client.Conn.WriteProto(&packet)
 }

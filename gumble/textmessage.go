@@ -41,5 +41,5 @@ func (tm *TextMessage) writeMessage(client *Client) error {
 			packet.TreeId[i] = channel.ID
 		}
 	}
-	return client.WriteProto(&packet)
+	return client.Conn.WriteProto(&packet)
 }

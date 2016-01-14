@@ -63,5 +63,5 @@ func (at AccessTokens) writeMessage(client *Client) error {
 	packet := MumbleProto.Authenticate{
 		Tokens: at,
 	}
-	return client.WriteProto(&packet)
+	return client.Conn.WriteProto(&packet)
 }

@@ -97,5 +97,5 @@ func (bl BanList) writeMessage(client *Client) error {
 		}
 	}
 
-	return client.WriteProto(&packet)
+	return client.Conn.WriteProto(&packet)
 }

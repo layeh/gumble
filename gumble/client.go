@@ -40,7 +40,7 @@ type Client struct {
 	// The client's configuration.
 	Config *Config
 	// The underlying Conn to the server.
-	*Conn
+	Conn *Conn
 
 	listeners      eventMultiplexer
 	audioListeners audioEventMultiplexer
@@ -159,8 +159,8 @@ func (c *Client) Connect() error {
 		Opus:     proto.Bool(getAudioCodec(audioCodecIDOpus) != nil),
 		Tokens:   c.Config.Tokens,
 	}
-	c.WriteProto(&versionPacket)
-	c.WriteProto(&authenticationPacket)
+	c.Conn.WriteProto(&versionPacket)
+	c.Conn.WriteProto(&authenticationPacket)
 	return nil
 }
 
@@ -212,7 +212,7 @@ func (c *Client) pingRoutine() {
 			return
 		case time := <-ticker.C:
 			*packet.Timestamp = uint64(time.Unix())
-			c.WriteProto(&packet)
+			c.Conn.WriteProto(&packet)
 		}
 	}
 }
@@ -261,7 +261,7 @@ func (c *Client) readRoutine() {
 // the client.
 func (c *Client) RequestUserList() {
 	packet := MumbleProto.UserList{}
-	c.WriteProto(&packet)
+	c.Conn.WriteProto(&packet)
 }
 
 // RequestBanList requests that the server's ban list be sent to the client.
@@ -269,7 +269,7 @@ func (c *Client) RequestBanList() {
 	packet := MumbleProto.BanList{
 		Query: proto.Bool(true),
 	}
-	c.WriteProto(&packet)
+	c.Conn.WriteProto(&packet)
 }
 
 // Disconnect disconnects the client from the server.
@@ -278,7 +278,7 @@ func (c *Client) Disconnect() error {
 		return errors.New("gumble: client is already disconnected")
 	}
 	c.disconnectEvent.Type = DisconnectUser
-	c.Conn.Close()
+	c.Conn.Close() // nil pointer dereference if called between start of Connect and setting of
 	return nil
 }
 
