@@ -378,6 +378,10 @@ func (c *Client) handleChannelState(buffer []byte) error {
 			channel.DescriptionHash = packet.DescriptionHash
 			channel.Description = ""
 		}
+		if packet.MaxUsers != nil {
+			event.Type |= ChannelChangeMaxUsers
+			channel.MaxUsers = *packet.MaxUsers
+		}
 
 		c.volatileLock.Unlock()
 	}

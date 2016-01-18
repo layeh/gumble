@@ -121,6 +121,7 @@ const (
 	ChannelChangeDescription
 	ChannelChangePosition
 	ChannelChangePermission
+	ChannelChangeMaxUsers
 )
 
 // Has returns true if the ChannelChangeType has changeType part of its

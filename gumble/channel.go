@@ -25,6 +25,10 @@ type Channel struct {
 	// The channel's description hash. Contains nil if Channel.Description has
 	// been populated.
 	DescriptionHash []byte
+	// The maximum number of users allowed in the channel. If the value is zero,
+	// the maximum number of users per-channel is dictated by the server's
+	// "usersperchannel" setting.
+	MaxUsers uint32
 	// The position at which the channel should be displayed in an ordered list.
 	Position int32
 	// Is the channel temporary?
@@ -81,6 +85,15 @@ func (c *Channel) SetPosition(position int32) {
 	packet := MumbleProto.ChannelState{
 		ChannelId: &c.ID,
 		Position:  &position,
+	}
+	c.client.Conn.WriteProto(&packet)
+}
+
+// SetMaxUsers will set the maximum number of users allowed in the channel.
+func (c *Channel) SetMaxUsers(maxUsers uint32) {
+	packet := MumbleProto.ChannelState{
+		ChannelId: &c.ID,
+		MaxUsers:  &maxUsers,
 	}
 	c.client.Conn.WriteProto(&packet)
 }
