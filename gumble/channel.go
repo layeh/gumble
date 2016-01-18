@@ -76,6 +76,15 @@ func (c *Channel) SetDescription(description string) {
 	c.client.Conn.WriteProto(&packet)
 }
 
+// SetPosition will set the position of the channel.
+func (c *Channel) SetPosition(position int32) {
+	packet := MumbleProto.ChannelState{
+		ChannelId: &c.ID,
+		Position:  &position,
+	}
+	c.client.Conn.WriteProto(&packet)
+}
+
 // Find returns a channel whose path (by channel name) from the current channel
 // is equal to the arguments passed.
 //
