@@ -966,45 +966,45 @@ func (c *Client) handlePermissionQuery(buffer []byte) error {
 		return err
 	}
 
-	if packet.Flush != nil && *packet.Flush {
-		oldPermissions := c.permissions
-		{
-			c.volatileLock.Lock()
-			c.volatileWg.Wait()
-
-			c.permissions = make(map[uint32]*Permission)
-
-			c.volatileLock.Unlock()
-		}
-		for channelID := range oldPermissions {
-			channel := c.Channels[channelID]
-			event := ChannelChangeEvent{
-				Client:  c,
-				Type:    ChannelChangePermission,
-				Channel: channel,
-			}
-			c.listeners.OnChannelChange(&event)
+	var singleChannel *Channel
+	if packet.ChannelId != nil && packet.Permissions != nil {
+		singleChannel = c.Channels[*packet.ChannelId]
+		if singleChannel == nil {
+			return errInvalidProtobuf
 		}
 	}
-	if packet.ChannelId != nil {
-		channel := c.Channels[*packet.ChannelId]
-		if packet.Permissions != nil {
-			p := Permission(*packet.Permissions)
-			{
-				c.volatileLock.Lock()
-				c.volatileWg.Wait()
 
-				c.permissions[channel.ID] = &p
+	var changedChannels []*Channel
 
-				c.volatileLock.Unlock()
+	{
+		c.volatileLock.Lock()
+		c.volatileWg.Wait()
+
+		if packet.GetFlush() {
+			oldPermissions := c.permissions
+			c.permissions = make(map[uint32]*Permission)
+			changedChannels = make([]*Channel, 0, len(oldPermissions))
+			for channelID := range oldPermissions {
+				changedChannels = append(changedChannels, c.Channels[channelID])
 			}
-			event := ChannelChangeEvent{
-				Client:  c,
-				Type:    ChannelChangePermission,
-				Channel: channel,
-			}
-			c.listeners.OnChannelChange(&event)
 		}
+
+		if singleChannel != nil {
+			p := Permission(*packet.Permissions)
+			c.permissions[singleChannel.ID] = &p
+			changedChannels = append(changedChannels, singleChannel)
+		}
+
+		c.volatileLock.Unlock()
+	}
+
+	for _, channel := range changedChannels {
+		event := ChannelChangeEvent{
+			Client:  c,
+			Type:    ChannelChangePermission,
+			Channel: channel,
+		}
+		c.listeners.OnChannelChange(&event)
 	}
 
 	return nil
