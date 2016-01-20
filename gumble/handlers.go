@@ -28,7 +28,7 @@ const handlerCount = 26
 
 var handlers = [handlerCount]handlerFunc{
 	(*Client).handleVersion,
-	(*Client).handleUdpTunnel,
+	(*Client).handleUDPTunnel,
 	(*Client).handleAuthenticate,
 	(*Client).handlePing,
 	(*Client).handleReject,
@@ -80,7 +80,7 @@ func (c *Client) handleVersion(buffer []byte) error {
 	return nil
 }
 
-func (c *Client) handleUdpTunnel(buffer []byte) error {
+func (c *Client) handleUDPTunnel(buffer []byte) error {
 	if len(buffer) < 1 {
 		return errInvalidProtobuf
 	}
