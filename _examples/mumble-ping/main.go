@@ -12,14 +12,23 @@ import (
 )
 
 func main() {
-	server := flag.String("server", "localhost:64738", "mumble server address")
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "usage: %s [flags] <destination>\n", os.Args[0])
+		flag.PrintDefaults()
+	}
 	interval := flag.Duration("interval", time.Second*1, "ping packet retransmission interval")
 	timeout := flag.Duration("timeout", time.Second*5, "ping timeout until failure")
 	flag.Parse()
+	if flag.NArg() != 1 {
+		flag.Usage()
+		os.Exit(1)
+	}
 
-	host, port, err := net.SplitHostPort(*server)
+	server := flag.Arg(0)
+
+	host, port, err := net.SplitHostPort(server)
 	if err != nil {
-		host = *server
+		host = server
 		port = strconv.Itoa(gumble.DefaultPort)
 	}
 
