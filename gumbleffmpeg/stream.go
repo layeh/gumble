@@ -58,6 +58,7 @@ func New(client *gumble.Client, source Source) *Stream {
 		Source:  source,
 		Command: "ffmpeg",
 		pause:   make(chan struct{}),
+		state:   StateInitial,
 	}
 }
 
