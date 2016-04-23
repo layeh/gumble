@@ -37,7 +37,7 @@ func New(client *gumble.Client) (*Stream, error) {
 	s.contextSink = s.deviceSink.CreateContext()
 	s.contextSink.Activate()
 
-	s.link = client.AttachAudio(s)
+	s.link = client.Config.AttachAudio(s)
 
 	return s, nil
 }

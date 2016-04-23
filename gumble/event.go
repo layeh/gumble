@@ -37,20 +37,10 @@ type DisconnectType int
 
 // Client disconnect reasons.
 const (
-	DisconnectError DisconnectType = 0xFE - iota
+	DisconnectError DisconnectType = iota + 1
 	DisconnectKicked
 	DisconnectBanned
 	DisconnectUser
-
-	DisconnectOther             DisconnectType = DisconnectType(MumbleProto.Reject_None)
-	DisconnectVersion           DisconnectType = DisconnectType(MumbleProto.Reject_WrongVersion)
-	DisconnectUserName          DisconnectType = DisconnectType(MumbleProto.Reject_InvalidUsername)
-	DisconnectUserCredentials   DisconnectType = DisconnectType(MumbleProto.Reject_WrongUserPW)
-	DisconnectServerPassword    DisconnectType = DisconnectType(MumbleProto.Reject_WrongServerPW)
-	DisconnectUsernameInUse     DisconnectType = DisconnectType(MumbleProto.Reject_UsernameInUse)
-	DisconnectServerFull        DisconnectType = DisconnectType(MumbleProto.Reject_ServerFull)
-	DisconnectNoCertificate     DisconnectType = DisconnectType(MumbleProto.Reject_NoCertificate)
-	DisconnectAuthenticatorFail DisconnectType = DisconnectType(MumbleProto.Reject_AuthenticatorFail)
 )
 
 // Has returns true if the DisconnectType has changeType part of its bitmask.

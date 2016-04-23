@@ -48,7 +48,7 @@ func UserGroups(client *gumble.Client, user *gumble.User, channel *gumble.Channe
 			close(ch)
 		},
 	}
-	detacher = client.Attach(&listener)
+	detacher = client.Config.Attach(&listener)
 	channel.RequestACL()
 
 	return ch

@@ -21,20 +21,16 @@ func main() {
 		flag.PrintDefaults()
 	}
 
-	gumbleutil.Main(func(client *gumble.Client) {
-		client.Attach(gumbleutil.AutoBitrate)
-
-		for _, file := range flag.Args() {
-			key := filepath.Base(file)
-			files[key] = file
-		}
-	}, gumbleutil.Listener{
-		// Connect event
+	gumbleutil.Main(gumbleutil.AutoBitrate, gumbleutil.Listener{
 		Connect: func(e *gumble.ConnectEvent) {
+			for _, file := range flag.Args() {
+				key := filepath.Base(file)
+				files[key] = file
+			}
+
 			fmt.Printf("audio player loaded! (%d files)\n", len(files))
 		},
 
-		// Text message event
 		TextMessage: func(e *gumble.TextMessageEvent) {
 			if e.Sender == nil {
 				return

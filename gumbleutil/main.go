@@ -12,11 +12,14 @@ import (
 )
 
 // Main aids in the creation of a basic command line gumble bot. It accepts the
-// following flag arguments: --server, --username, --password, --insecure,
-// --certificate, and --key.
-//
-// If init is non-nil, it is called before attempting to connect to the server.
-func Main(init func(client *gumble.Client), listener gumble.EventListener) {
+// following flag arguments:
+//  --server
+//  --username
+//  --password
+//  --insecure,
+//  --certificate
+//  --key
+func Main(listeners ...gumble.EventListener) {
 	server := flag.String("server", "localhost:64738", "Mumble server address")
 	username := flag.String("username", "gumble-bot", "client username")
 	password := flag.String("password", "", "client password")
@@ -36,14 +39,15 @@ func Main(init func(client *gumble.Client), listener gumble.EventListener) {
 
 	keepAlive := make(chan bool)
 
-	// client
 	config := gumble.NewConfig()
 	config.Username = *username
 	config.Password = *password
-	config.Address = net.JoinHostPort(host, port)
-	client := gumble.NewClient(config)
+	address := net.JoinHostPort(host, port)
+
+	var tlsConfig tls.Config
+
 	if *insecure {
-		config.TLSConfig.InsecureSkipVerify = true
+		tlsConfig.InsecureSkipVerify = true
 	}
 	if *certificateFile != "" {
 		if *keyFile == "" {
@@ -53,20 +57,20 @@ func Main(init func(client *gumble.Client), listener gumble.EventListener) {
 			fmt.Printf("%s: %s\n", os.Args[0], err)
 			os.Exit(1)
 		} else {
-			config.TLSConfig.Certificates = append(config.TLSConfig.Certificates, certificate)
+			tlsConfig.Certificates = append(tlsConfig.Certificates, certificate)
 		}
 	}
-	client.Attach(AutoBitrate)
-	client.Attach(listener)
-	client.Attach(Listener{
+	config.Attach(AutoBitrate)
+	for _, listener := range listeners {
+		config.Attach(listener)
+	}
+	config.Attach(Listener{
 		Disconnect: func(e *gumble.DisconnectEvent) {
 			keepAlive <- true
 		},
 	})
-	if init != nil {
-		init(client)
-	}
-	if err := client.Connect(); err != nil {
+	_, err = gumble.DialWithDialer(new(net.Dialer), address, config, &tlsConfig)
+	if err != nil {
 		fmt.Printf("%s: %s\n", os.Args[0], err)
 		os.Exit(1)
 	}

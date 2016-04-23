@@ -161,7 +161,7 @@ func (c *Client) handleUDPTunnel(buffer []byte) error {
 
 	c.volatileLock.Lock()
 	c.volatileWg.Wait()
-	for item := c.audioListeners.head; item != nil; item = item.next {
+	for item := c.Config.AudioListeners.head; item != nil; item = item.next {
 		c.volatileLock.Unlock()
 		ch := item.streams[user]
 		if ch == nil {
@@ -202,12 +202,19 @@ func (c *Client) handleReject(buffer []byte) error {
 		return err
 	}
 
+	if c.State() != StateConnected {
+		return errInvalidProtobuf
+	}
+
+	err := &RejectError{}
+
 	if packet.Type != nil {
-		c.disconnectEvent.Type = DisconnectType(*packet.Type)
+		err.Type = RejectType(*packet.Type)
 	}
 	if packet.Reason != nil {
-		c.disconnectEvent.String = *packet.Reason
+		err.Reason = *packet.Reason
 	}
+	c.connect <- err
 	c.Conn.Close()
 	return nil
 }
@@ -239,8 +246,8 @@ func (c *Client) handleServerSync(buffer []byte) error {
 		event.MaximumBitrate = &val
 	}
 	atomic.StoreUint32(&c.state, uint32(StateSynced))
-
-	c.listeners.OnConnect(&event)
+	c.Config.Listeners.onConnect(&event)
+	close(c.connect)
 	return nil
 }
 
@@ -284,7 +291,7 @@ func (c *Client) handleChannelRemove(buffer []byte) error {
 			Type:    ChannelChangeRemoved,
 			Channel: channel,
 		}
-		c.listeners.OnChannelChange(&event)
+		c.Config.Listeners.onChannelChange(&event)
 	}
 	return nil
 }
@@ -387,7 +394,7 @@ func (c *Client) handleChannelState(buffer []byte) error {
 	}
 
 	if c.State() == StateSynced {
-		c.listeners.OnChannelChange(&event)
+		c.Config.Listeners.onChannelChange(&event)
 	}
 	return nil
 }
@@ -447,7 +454,7 @@ func (c *Client) handleUserRemove(buffer []byte) error {
 	}
 
 	if c.State() == StateSynced {
-		c.listeners.OnUserChange(&event)
+		c.Config.Listeners.onUserChange(&event)
 	}
 	return nil
 }
@@ -601,7 +608,7 @@ func (c *Client) handleUserState(buffer []byte) error {
 	}
 
 	if c.State() == StateSynced {
-		c.listeners.OnUserChange(&event)
+		c.Config.Listeners.onUserChange(&event)
 	}
 	return nil
 }
@@ -646,7 +653,7 @@ func (c *Client) handleBanList(buffer []byte) error {
 		event.BanList = append(event.BanList, ban)
 	}
 
-	c.listeners.OnBanList(&event)
+	c.Config.Listeners.onBanList(&event)
 	return nil
 }
 
@@ -690,7 +697,7 @@ func (c *Client) handleTextMessage(buffer []byte) error {
 		event.Message = *packet.Message
 	}
 
-	c.listeners.OnTextMessage(&event)
+	c.Config.Listeners.onTextMessage(&event)
 	return nil
 }
 
@@ -730,7 +737,7 @@ func (c *Client) handlePermissionDenied(buffer []byte) error {
 		event.Permission = Permission(*packet.Permission)
 	}
 
-	c.listeners.OnPermissionDenied(&event)
+	c.Config.Listeners.onPermissionDenied(&event)
 	return nil
 }
 
@@ -861,7 +868,7 @@ func (c *Client) handleQueryUsers(buffer []byte) error {
 		Client: c,
 		ACL:    acl,
 	}
-	c.listeners.OnACL(&event)
+	c.Config.Listeners.onACL(&event)
 	return nil
 }
 
@@ -919,7 +926,7 @@ func (c *Client) handleContextActionModify(buffer []byte) error {
 		c.volatileLock.Unlock()
 	}
 
-	c.listeners.OnContextActionChange(&event)
+	c.Config.Listeners.onContextActionChange(&event)
 	return nil
 }
 
@@ -956,7 +963,7 @@ func (c *Client) handleUserList(buffer []byte) error {
 		event.UserList = append(event.UserList, registeredUser)
 	}
 
-	c.listeners.OnUserList(&event)
+	c.Config.Listeners.onUserList(&event)
 	return nil
 }
 
@@ -1008,7 +1015,7 @@ func (c *Client) handlePermissionQuery(buffer []byte) error {
 			Type:    ChannelChangePermission,
 			Channel: channel,
 		}
-		c.listeners.OnChannelChange(&event)
+		c.Config.Listeners.onChannelChange(&event)
 	}
 
 	return nil
@@ -1051,7 +1058,7 @@ func (c *Client) handleCodecVersion(buffer []byte) error {
 		}
 	}
 
-	c.listeners.OnServerConfig(&event)
+	c.Config.Listeners.onServerConfig(&event)
 	return nil
 }
 
@@ -1121,7 +1128,7 @@ func (c *Client) handleUserStats(buffer []byte) error {
 		User:   user,
 	}
 
-	c.listeners.OnUserChange(&event)
+	c.Config.Listeners.onUserChange(&event)
 	return nil
 }
 
@@ -1159,7 +1166,7 @@ func (c *Client) handleServerConfig(buffer []byte) error {
 		val := int(*packet.MaxUsers)
 		event.MaximumUsers = &val
 	}
-	c.listeners.OnServerConfig(&event)
+	c.Config.Listeners.onServerConfig(&event)
 	return nil
 }
 
@@ -1182,6 +1189,6 @@ func (c *Client) handleSuggestConfig(buffer []byte) error {
 	if packet.PushToTalk != nil {
 		event.SuggestPushToTalk = packet.PushToTalk
 	}
-	c.listeners.OnServerConfig(&event)
+	c.Config.Listeners.onServerConfig(&event)
 	return nil
 }
