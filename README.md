@@ -21,7 +21,7 @@
     )
 
     func main() {
-      gumbleutil.Main(nil, gumbleutil.Listener{
+      gumbleutil.Main(gumbleutil.Listener{
         UserChange: func(e *gumble.UserChangeEvent) {
           if e.Type.Has(gumble.UserChangeConnected) {
             e.User.Send("Welcome to the server, " + e.User.Name + "!")
