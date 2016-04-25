@@ -34,14 +34,14 @@ type User struct {
 	// The user's comment. Contains the empty string if the user does not have a
 	// comment, or if the comment needs to be requested.
 	Comment string
-	// The user's comment hash. Contains nil if User.Comment has been populated.
+	// The user's comment hash. nil if User.Comment has been populated.
 	CommentHash []byte
 	// The hash of the user's certificate (can be empty).
 	Hash string
-	// The user's texture (avatar). Contains nil if the user does not have a
+	// The user's texture (avatar). nil if the user does not have a
 	// texture, or if the texture needs to be requested.
 	Texture []byte
-	// The user's texture hash. Contains nil if User.Texture has been populated.
+	// The user's texture hash. nil if User.Texture has been populated.
 	TextureHash []byte
 
 	// The user's stats. Containts nil if the stats have not yet been requested.

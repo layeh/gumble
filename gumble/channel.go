@@ -11,7 +11,7 @@ type Channel struct {
 	ID uint32
 	// The channel's name.
 	Name string
-	// The channel's parent. Contains nil if the channel is the root channel.
+	// The channel's parent. nil if the channel is the root channel.
 	Parent *Channel
 	// The channels directly underneath the channel.
 	Children Channels
@@ -22,7 +22,7 @@ type Channel struct {
 	// The channel's description. Contains the empty string if the channel does
 	// not have a description, or if it needs to be requested.
 	Description string
-	// The channel's description hash. Contains nil if Channel.Description has
+	// The channel's description hash. nil if Channel.Description has
 	// been populated.
 	DescriptionHash []byte
 	// The maximum number of users allowed in the channel. If the value is zero,
