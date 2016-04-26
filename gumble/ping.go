@@ -1,12 +1,12 @@
 package gumble
 
 import (
-	"bytes"
 	"crypto/rand"
 	"encoding/binary"
 	"errors"
 	"io"
 	"net"
+	"sync"
 	"time"
 )
 
@@ -47,13 +47,21 @@ func Ping(address string, interval, timeout time.Duration) (*PingResponse, error
 	}
 	defer conn.Close()
 
-	var packet [12]byte
-	if _, err := rand.Read(packet[4:]); err != nil {
-		return nil, err
-	}
-	start := time.Now()
-	if _, err := conn.Write(packet[:]); err != nil {
-		return nil, err
+	var (
+		idsLock sync.Mutex
+		ids     = make(map[string]time.Time)
+	)
+
+	buildSendPacket := func() {
+		var packet [12]byte
+		if _, err := rand.Read(packet[4:]); err != nil {
+			return
+		}
+		id := string(packet[4:])
+		idsLock.Lock()
+		ids[id] = time.Now()
+		idsLock.Unlock()
+		conn.Write(packet[:])
 	}
 
 	if interval > 0 {
@@ -65,7 +73,7 @@ func Ping(address string, interval, timeout time.Duration) (*PingResponse, error
 			for {
 				select {
 				case <-ticker.C:
-					conn.Write(packet[:])
+					buildSendPacket()
 				case <-end:
 					return
 				}
@@ -73,19 +81,25 @@ func Ping(address string, interval, timeout time.Duration) (*PingResponse, error
 		}()
 	}
 
+	buildSendPacket()
+
 	conn.SetReadDeadline(time.Now().Add(timeout))
 	for {
 		var incoming [24]byte
 		if _, err := io.ReadFull(conn, incoming[:]); err != nil {
 			return nil, err
 		}
-		if !bytes.Equal(incoming[4:12], packet[4:]) {
+		id := string(incoming[4:12])
+		idsLock.Lock()
+		sendTime, ok := ids[id]
+		idsLock.Unlock()
+		if !ok {
 			continue
 		}
 
 		return &PingResponse{
 			Address: addr,
-			Ping:    time.Since(start),
+			Ping:    time.Since(sendTime),
 			Version: Version{
 				Version: binary.BigEndian.Uint32(incoming[0:]),
 			},
