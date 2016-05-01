@@ -42,7 +42,4 @@
 // (Users, Channels, Config, etc.), is thread-unsafe. Accessing or modifying
 // those structures should only be done from inside of an event listener or via
 // Client.Do.
-//
-// Additionally, Client.Do should be used from inside event listeners if
-// multiple Clients share a single Config.Lock.
 package gumble
