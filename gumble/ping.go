@@ -37,15 +37,13 @@ func Ping(address string, interval, timeout time.Duration) (*PingResponse, error
 	if timeout < 0 {
 		return nil, errors.New("gumble: timeout must be positive")
 	}
-	addr, err := net.ResolveUDPAddr("udp", address)
-	if err != nil {
-		return nil, err
-	}
-	conn, err := net.DialUDP("udp", nil, addr)
+	deadline := time.Now().Add(timeout)
+	conn, err := net.DialTimeout("udp", address, timeout)
 	if err != nil {
 		return nil, err
 	}
 	defer conn.Close()
+	conn.SetReadDeadline(deadline)
 
 	var (
 		idsLock sync.Mutex
@@ -83,7 +81,6 @@ func Ping(address string, interval, timeout time.Duration) (*PingResponse, error
 
 	buildSendPacket()
 
-	conn.SetReadDeadline(time.Now().Add(timeout))
 	for {
 		var incoming [24]byte
 		if _, err := io.ReadFull(conn, incoming[:]); err != nil {
@@ -98,7 +95,7 @@ func Ping(address string, interval, timeout time.Duration) (*PingResponse, error
 		}
 
 		return &PingResponse{
-			Address: addr,
+			Address: conn.RemoteAddr().(*net.UDPAddr),
 			Ping:    time.Since(sendTime),
 			Version: Version{
 				Version: binary.BigEndian.Uint32(incoming[0:]),
