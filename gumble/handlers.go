@@ -94,11 +94,12 @@ func (c *Client) handleUDPTunnel(buffer []byte) error {
 	}
 
 	// Session
+	buffer = buffer[1:]
 	session, n := varint.Decode(buffer)
 	if n <= 0 {
 		return errInvalidProtobuf
 	}
-	buff := buffer[n:]
+	buffer = buffer[n:]
 	user := c.Users[uint32(session)]
 	if user == nil {
 		return errInvalidProtobuf
@@ -117,25 +118,25 @@ func (c *Client) handleUDPTunnel(buffer []byte) error {
 
 	// Sequence
 	// TODO: use in jitter buffer
-	_, n = varint.Decode(buff)
+	_, n = varint.Decode(buffer)
 	if n <= 0 {
 		return errInvalidProtobuf
 	}
-	buff = buff[n:]
+	buffer = buffer[n:]
 
 	// Length
-	length, n := varint.Decode(buff)
+	length, n := varint.Decode(buffer)
 	if n <= 0 {
 		return errInvalidProtobuf
 	}
-	buff = buff[n:]
+	buffer = buffer[n:]
 	// Opus audio packets set the 13th bit in the size field as the terminator.
 	audioLength := int(length) &^ 0x2000
-	if audioLength > len(buff) {
+	if audioLength > len(buffer) {
 		return errInvalidProtobuf
 	}
 
-	pcm, err := decoder.Decode(buff[:audioLength], AudioMaximumFrameSize)
+	pcm, err := decoder.Decode(buffer[:audioLength], AudioMaximumFrameSize)
 	if err != nil {
 		return err
 	}
@@ -149,13 +150,13 @@ func (c *Client) handleUDPTunnel(buffer []byte) error {
 		AudioBuffer: AudioBuffer(pcm),
 	}
 
-	if len(buff)-audioLength == 3*4 {
+	if len(buffer)-audioLength == 3*4 {
 		// the packet has positional audio data; 3x float32
-		buff = buff[audioLength:]
+		buffer = buffer[audioLength:]
 
-		event.X = math.Float32frombits(binary.LittleEndian.Uint32(buff))
-		event.Y = math.Float32frombits(binary.LittleEndian.Uint32(buff[4:]))
-		event.Z = math.Float32frombits(binary.LittleEndian.Uint32(buff[8:]))
+		event.X = math.Float32frombits(binary.LittleEndian.Uint32(buffer))
+		event.Y = math.Float32frombits(binary.LittleEndian.Uint32(buffer[4:]))
+		event.Z = math.Float32frombits(binary.LittleEndian.Uint32(buffer[8:]))
 		event.HasPosition = true
 	}
 
