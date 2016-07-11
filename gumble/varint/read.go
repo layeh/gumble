@@ -36,7 +36,17 @@ func Decode(b []byte) (int64, int) {
 	if (b[0]&0xFC) == 0xF4 && len(b) >= 9 {
 		return int64(binary.BigEndian.Uint64(b[1:])), 9
 	}
-	// TODO: 111110__ + varint Negative recursive varint
-	// TODO: 111111xx Byte-inverted negative two bit number (~xx)
+	// 111110__ + varint Negative recursive varint
+	if b[0]&0xFC == 0xF8 {
+		if v, n := Decode(b[1:]); n > 0 {
+			return -v, n + 1
+		}
+		return 0, 0
+	}
+	// 111111xx Byte-inverted negative two bit number (~xx)
+	if b[0]&0xFC == 0xFC {
+		return ^int64(b[0] & 0x03), 1
+	}
+
 	return 0, 0
 }

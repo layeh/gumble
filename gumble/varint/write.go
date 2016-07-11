@@ -11,7 +11,11 @@ const MaxVarintLen = 10
 
 // Encode encodes the given value to varint format.
 func Encode(b []byte, value int64) int {
-	// TODO: 111111xx Byte-inverted negative two bit number (~xx)
+	// 111111xx Byte-inverted negative two bit number (~xx)
+	if value <= -1 && value >= -4 {
+		b[0] = 0xFC | byte(^value&0xFF)
+		return 1
+	}
 	// 111110__ + varint Negative recursive varint
 	if value < 0 {
 		b[0] = 0xF8
