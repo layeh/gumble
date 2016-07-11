@@ -47,10 +47,17 @@ var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
 
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the proto package it is being compiled against.
+// A compilation error at this line likely means your copy of the
+// proto package needs to be updated.
+const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+
 type Reject_RejectType int32
 
 const (
-	// TODO ??
+	// The rejection reason is unknown (details should be available
+	// in Reject.reason).
 	Reject_None Reject_RejectType = 0
 	// The client attempted to connect with an incompatible version.
 	Reject_WrongVersion Reject_RejectType = 1
@@ -110,6 +117,7 @@ func (x *Reject_RejectType) UnmarshalJSON(data []byte) error {
 	*x = Reject_RejectType(value)
 	return nil
 }
+func (Reject_RejectType) EnumDescriptor() ([]byte, []int) { return fileDescriptor0, []int{4, 0} }
 
 type PermissionDenied_DenyType int32
 
@@ -180,6 +188,9 @@ func (x *PermissionDenied_DenyType) UnmarshalJSON(data []byte) error {
 	*x = PermissionDenied_DenyType(value)
 	return nil
 }
+func (PermissionDenied_DenyType) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor0, []int{12, 0}
+}
 
 type ContextActionModify_Context int32
 
@@ -219,6 +230,9 @@ func (x *ContextActionModify_Context) UnmarshalJSON(data []byte) error {
 	*x = ContextActionModify_Context(value)
 	return nil
 }
+func (ContextActionModify_Context) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor0, []int{16, 0}
+}
 
 type ContextActionModify_Operation int32
 
@@ -252,6 +266,9 @@ func (x *ContextActionModify_Operation) UnmarshalJSON(data []byte) error {
 	*x = ContextActionModify_Operation(value)
 	return nil
 }
+func (ContextActionModify_Operation) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor0, []int{16, 1}
+}
 
 type Version struct {
 	// 2-byte Major, 1-byte Minor and 1-byte Patch version number.
@@ -261,13 +278,14 @@ type Version struct {
 	// Client OS name.
 	Os *string `protobuf:"bytes,3,opt,name=os" json:"os,omitempty"`
 	// Client OS version.
-	OsVersion        *string `protobuf:"bytes,4,opt,name=os_version" json:"os_version,omitempty"`
+	OsVersion        *string `protobuf:"bytes,4,opt,name=os_version,json=osVersion" json:"os_version,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
 
-func (m *Version) Reset()         { *m = Version{} }
-func (m *Version) String() string { return proto.CompactTextString(m) }
-func (*Version) ProtoMessage()    {}
+func (m *Version) Reset()                    { *m = Version{} }
+func (m *Version) String() string            { return proto.CompactTextString(m) }
+func (*Version) ProtoMessage()               {}
+func (*Version) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
 func (m *Version) GetVersion() uint32 {
 	if m != nil && m.Version != nil {
@@ -304,9 +322,10 @@ type UDPTunnel struct {
 	XXX_unrecognized []byte `json:"-"`
 }
 
-func (m *UDPTunnel) Reset()         { *m = UDPTunnel{} }
-func (m *UDPTunnel) String() string { return proto.CompactTextString(m) }
-func (*UDPTunnel) ProtoMessage()    {}
+func (m *UDPTunnel) Reset()                    { *m = UDPTunnel{} }
+func (m *UDPTunnel) String() string            { return proto.CompactTextString(m) }
+func (*UDPTunnel) ProtoMessage()               {}
+func (*UDPTunnel) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
 
 func (m *UDPTunnel) GetPacket() []byte {
 	if m != nil {
@@ -324,14 +343,15 @@ type Authenticate struct {
 	// Additional access tokens for server ACL groups.
 	Tokens []string `protobuf:"bytes,3,rep,name=tokens" json:"tokens,omitempty"`
 	// A list of CELT bitstream version constants supported by the client.
-	CeltVersions     []int32 `protobuf:"varint,4,rep,name=celt_versions" json:"celt_versions,omitempty"`
+	CeltVersions     []int32 `protobuf:"varint,4,rep,name=celt_versions,json=celtVersions" json:"celt_versions,omitempty"`
 	Opus             *bool   `protobuf:"varint,5,opt,name=opus,def=0" json:"opus,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
 
-func (m *Authenticate) Reset()         { *m = Authenticate{} }
-func (m *Authenticate) String() string { return proto.CompactTextString(m) }
-func (*Authenticate) ProtoMessage()    {}
+func (m *Authenticate) Reset()                    { *m = Authenticate{} }
+func (m *Authenticate) String() string            { return proto.CompactTextString(m) }
+func (*Authenticate) ProtoMessage()               {}
+func (*Authenticate) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
 
 const Default_Authenticate_Opus bool = false
 
@@ -385,23 +405,24 @@ type Ping struct {
 	// The amount of nonce resyncs.
 	Resync *uint32 `protobuf:"varint,5,opt,name=resync" json:"resync,omitempty"`
 	// The total amount of UDP packets received.
-	UdpPackets *uint32 `protobuf:"varint,6,opt,name=udp_packets" json:"udp_packets,omitempty"`
+	UdpPackets *uint32 `protobuf:"varint,6,opt,name=udp_packets,json=udpPackets" json:"udp_packets,omitempty"`
 	// The total amount of TCP packets received.
-	TcpPackets *uint32 `protobuf:"varint,7,opt,name=tcp_packets" json:"tcp_packets,omitempty"`
+	TcpPackets *uint32 `protobuf:"varint,7,opt,name=tcp_packets,json=tcpPackets" json:"tcp_packets,omitempty"`
 	// UDP ping average.
-	UdpPingAvg *float32 `protobuf:"fixed32,8,opt,name=udp_ping_avg" json:"udp_ping_avg,omitempty"`
+	UdpPingAvg *float32 `protobuf:"fixed32,8,opt,name=udp_ping_avg,json=udpPingAvg" json:"udp_ping_avg,omitempty"`
 	// UDP ping variance.
-	UdpPingVar *float32 `protobuf:"fixed32,9,opt,name=udp_ping_var" json:"udp_ping_var,omitempty"`
+	UdpPingVar *float32 `protobuf:"fixed32,9,opt,name=udp_ping_var,json=udpPingVar" json:"udp_ping_var,omitempty"`
 	// TCP ping average.
-	TcpPingAvg *float32 `protobuf:"fixed32,10,opt,name=tcp_ping_avg" json:"tcp_ping_avg,omitempty"`
+	TcpPingAvg *float32 `protobuf:"fixed32,10,opt,name=tcp_ping_avg,json=tcpPingAvg" json:"tcp_ping_avg,omitempty"`
 	// TCP ping variance.
-	TcpPingVar       *float32 `protobuf:"fixed32,11,opt,name=tcp_ping_var" json:"tcp_ping_var,omitempty"`
+	TcpPingVar       *float32 `protobuf:"fixed32,11,opt,name=tcp_ping_var,json=tcpPingVar" json:"tcp_ping_var,omitempty"`
 	XXX_unrecognized []byte   `json:"-"`
 }
 
-func (m *Ping) Reset()         { *m = Ping{} }
-func (m *Ping) String() string { return proto.CompactTextString(m) }
-func (*Ping) ProtoMessage()    {}
+func (m *Ping) Reset()                    { *m = Ping{} }
+func (m *Ping) String() string            { return proto.CompactTextString(m) }
+func (*Ping) ProtoMessage()               {}
+func (*Ping) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
 
 func (m *Ping) GetTimestamp() uint64 {
 	if m != nil && m.Timestamp != nil {
@@ -489,9 +510,10 @@ type Reject struct {
 	XXX_unrecognized []byte  `json:"-"`
 }
 
-func (m *Reject) Reset()         { *m = Reject{} }
-func (m *Reject) String() string { return proto.CompactTextString(m) }
-func (*Reject) ProtoMessage()    {}
+func (m *Reject) Reset()                    { *m = Reject{} }
+func (m *Reject) String() string            { return proto.CompactTextString(m) }
+func (*Reject) ProtoMessage()               {}
+func (*Reject) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
 
 func (m *Reject) GetType() Reject_RejectType {
 	if m != nil && m.Type != nil {
@@ -513,17 +535,18 @@ type ServerSync struct {
 	// The session of the current user.
 	Session *uint32 `protobuf:"varint,1,opt,name=session" json:"session,omitempty"`
 	// Maximum bandwidth that the user should use.
-	MaxBandwidth *uint32 `protobuf:"varint,2,opt,name=max_bandwidth" json:"max_bandwidth,omitempty"`
+	MaxBandwidth *uint32 `protobuf:"varint,2,opt,name=max_bandwidth,json=maxBandwidth" json:"max_bandwidth,omitempty"`
 	// Server welcome text.
-	WelcomeText *string `protobuf:"bytes,3,opt,name=welcome_text" json:"welcome_text,omitempty"`
-	// Current user permissions TODO: Confirm??
+	WelcomeText *string `protobuf:"bytes,3,opt,name=welcome_text,json=welcomeText" json:"welcome_text,omitempty"`
+	// Current user permissions in the root channel.
 	Permissions      *uint64 `protobuf:"varint,4,opt,name=permissions" json:"permissions,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
 
-func (m *ServerSync) Reset()         { *m = ServerSync{} }
-func (m *ServerSync) String() string { return proto.CompactTextString(m) }
-func (*ServerSync) ProtoMessage()    {}
+func (m *ServerSync) Reset()                    { *m = ServerSync{} }
+func (m *ServerSync) String() string            { return proto.CompactTextString(m) }
+func (*ServerSync) ProtoMessage()               {}
+func (*ServerSync) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
 
 func (m *ServerSync) GetSession() uint32 {
 	if m != nil && m.Session != nil {
@@ -556,13 +579,14 @@ func (m *ServerSync) GetPermissions() uint64 {
 // Sent by the client when it wants a channel removed. Sent by the server when
 // a channel has been removed and clients should be notified.
 type ChannelRemove struct {
-	ChannelId        *uint32 `protobuf:"varint,1,req,name=channel_id" json:"channel_id,omitempty"`
+	ChannelId        *uint32 `protobuf:"varint,1,req,name=channel_id,json=channelId" json:"channel_id,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
 
-func (m *ChannelRemove) Reset()         { *m = ChannelRemove{} }
-func (m *ChannelRemove) String() string { return proto.CompactTextString(m) }
-func (*ChannelRemove) ProtoMessage()    {}
+func (m *ChannelRemove) Reset()                    { *m = ChannelRemove{} }
+func (m *ChannelRemove) String() string            { return proto.CompactTextString(m) }
+func (*ChannelRemove) ProtoMessage()               {}
+func (*ChannelRemove) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
 
 func (m *ChannelRemove) GetChannelId() uint32 {
 	if m != nil && m.ChannelId != nil {
@@ -576,7 +600,7 @@ func (m *ChannelRemove) GetChannelId() uint32 {
 // updated. Client may use this message to update said channel properties.
 type ChannelState struct {
 	// Unique ID for the channel within the server.
-	ChannelId *uint32 `protobuf:"varint,1,opt,name=channel_id" json:"channel_id,omitempty"`
+	ChannelId *uint32 `protobuf:"varint,1,opt,name=channel_id,json=channelId" json:"channel_id,omitempty"`
 	// channel_id of the parent channel.
 	Parent *uint32 `protobuf:"varint,2,opt,name=parent" json:"parent,omitempty"`
 	// UTF-8 encoded channel name.
@@ -588,25 +612,26 @@ type ChannelState struct {
 	// 128 bytes
 	Description *string `protobuf:"bytes,5,opt,name=description" json:"description,omitempty"`
 	// A collection of channel_id values that should be added to links.
-	LinksAdd []uint32 `protobuf:"varint,6,rep,name=links_add" json:"links_add,omitempty"`
+	LinksAdd []uint32 `protobuf:"varint,6,rep,name=links_add,json=linksAdd" json:"links_add,omitempty"`
 	// A collection of channel_id values that should be removed from links.
-	LinksRemove []uint32 `protobuf:"varint,7,rep,name=links_remove" json:"links_remove,omitempty"`
+	LinksRemove []uint32 `protobuf:"varint,7,rep,name=links_remove,json=linksRemove" json:"links_remove,omitempty"`
 	// True if the channel is temporary.
 	Temporary *bool `protobuf:"varint,8,opt,name=temporary,def=0" json:"temporary,omitempty"`
 	// Position weight to tweak the channel position in the channel list.
 	Position *int32 `protobuf:"varint,9,opt,name=position,def=0" json:"position,omitempty"`
 	// SHA1 hash of the description if the description is 128 bytes or more.
-	DescriptionHash []byte `protobuf:"bytes,10,opt,name=description_hash" json:"description_hash,omitempty"`
+	DescriptionHash []byte `protobuf:"bytes,10,opt,name=description_hash,json=descriptionHash" json:"description_hash,omitempty"`
 	// Maximum number of users allowed in the channel. If this value is zero,
 	// the maximum number of users allowed in the channel is given by the
 	// server's "usersperchannel" setting.
-	MaxUsers         *uint32 `protobuf:"varint,11,opt,name=max_users" json:"max_users,omitempty"`
+	MaxUsers         *uint32 `protobuf:"varint,11,opt,name=max_users,json=maxUsers" json:"max_users,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
 
-func (m *ChannelState) Reset()         { *m = ChannelState{} }
-func (m *ChannelState) String() string { return proto.CompactTextString(m) }
-func (*ChannelState) ProtoMessage()    {}
+func (m *ChannelState) Reset()                    { *m = ChannelState{} }
+func (m *ChannelState) String() string            { return proto.CompactTextString(m) }
+func (*ChannelState) ProtoMessage()               {}
+func (*ChannelState) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
 
 const Default_ChannelState_Temporary bool = false
 const Default_ChannelState_Position int32 = 0
@@ -705,9 +730,10 @@ type UserRemove struct {
 	XXX_unrecognized []byte `json:"-"`
 }
 
-func (m *UserRemove) Reset()         { *m = UserRemove{} }
-func (m *UserRemove) String() string { return proto.CompactTextString(m) }
-func (*UserRemove) ProtoMessage()    {}
+func (m *UserRemove) Reset()                    { *m = UserRemove{} }
+func (m *UserRemove) String() string            { return proto.CompactTextString(m) }
+func (*UserRemove) ProtoMessage()               {}
+func (*UserRemove) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
 
 func (m *UserRemove) GetSession() uint32 {
 	if m != nil && m.Session != nil {
@@ -749,9 +775,9 @@ type UserState struct {
 	// User name, UTF-8 encoded.
 	Name *string `protobuf:"bytes,3,opt,name=name" json:"name,omitempty"`
 	// Registered user ID if the user is registered.
-	UserId *uint32 `protobuf:"varint,4,opt,name=user_id" json:"user_id,omitempty"`
+	UserId *uint32 `protobuf:"varint,4,opt,name=user_id,json=userId" json:"user_id,omitempty"`
 	// Channel on which the user is.
-	ChannelId *uint32 `protobuf:"varint,5,opt,name=channel_id" json:"channel_id,omitempty"`
+	ChannelId *uint32 `protobuf:"varint,5,opt,name=channel_id,json=channelId" json:"channel_id,omitempty"`
 	// True if the user is muted by admin.
 	Mute *bool `protobuf:"varint,6,opt,name=mute" json:"mute,omitempty"`
 	// True if the user is deafened by admin.
@@ -760,33 +786,39 @@ type UserState struct {
 	// being muted.
 	Suppress *bool `protobuf:"varint,8,opt,name=suppress" json:"suppress,omitempty"`
 	// True if the user has muted self.
-	SelfMute *bool `protobuf:"varint,9,opt,name=self_mute" json:"self_mute,omitempty"`
+	SelfMute *bool `protobuf:"varint,9,opt,name=self_mute,json=selfMute" json:"self_mute,omitempty"`
 	// True if the user has deafened self.
-	SelfDeaf *bool `protobuf:"varint,10,opt,name=self_deaf" json:"self_deaf,omitempty"`
+	SelfDeaf *bool `protobuf:"varint,10,opt,name=self_deaf,json=selfDeaf" json:"self_deaf,omitempty"`
 	// User image if it is less than 128 bytes.
 	Texture []byte `protobuf:"bytes,11,opt,name=texture" json:"texture,omitempty"`
-	// TODO ??
-	PluginContext []byte `protobuf:"bytes,12,opt,name=plugin_context" json:"plugin_context,omitempty"`
-	// TODO ??
-	PluginIdentity *string `protobuf:"bytes,13,opt,name=plugin_identity" json:"plugin_identity,omitempty"`
+	// The positional audio plugin identifier.
+	// Positional audio information is only sent to users who share
+	// identical plugin contexts.
+	//
+	// This value is not trasmitted to clients.
+	PluginContext []byte `protobuf:"bytes,12,opt,name=plugin_context,json=pluginContext" json:"plugin_context,omitempty"`
+	// The user's plugin-specific identity.
+	// This value is not transmitted to clients.
+	PluginIdentity *string `protobuf:"bytes,13,opt,name=plugin_identity,json=pluginIdentity" json:"plugin_identity,omitempty"`
 	// User comment if it is less than 128 bytes.
 	Comment *string `protobuf:"bytes,14,opt,name=comment" json:"comment,omitempty"`
 	// The hash of the user certificate.
 	Hash *string `protobuf:"bytes,15,opt,name=hash" json:"hash,omitempty"`
 	// SHA1 hash of the user comment if it 128 bytes or more.
-	CommentHash []byte `protobuf:"bytes,16,opt,name=comment_hash" json:"comment_hash,omitempty"`
+	CommentHash []byte `protobuf:"bytes,16,opt,name=comment_hash,json=commentHash" json:"comment_hash,omitempty"`
 	// SHA1 hash of the user picture if it 128 bytes or more.
-	TextureHash []byte `protobuf:"bytes,17,opt,name=texture_hash" json:"texture_hash,omitempty"`
+	TextureHash []byte `protobuf:"bytes,17,opt,name=texture_hash,json=textureHash" json:"texture_hash,omitempty"`
 	// True if the user is a priority speaker.
-	PrioritySpeaker *bool `protobuf:"varint,18,opt,name=priority_speaker" json:"priority_speaker,omitempty"`
+	PrioritySpeaker *bool `protobuf:"varint,18,opt,name=priority_speaker,json=prioritySpeaker" json:"priority_speaker,omitempty"`
 	// True if the user is currently recording.
 	Recording        *bool  `protobuf:"varint,19,opt,name=recording" json:"recording,omitempty"`
 	XXX_unrecognized []byte `json:"-"`
 }
 
-func (m *UserState) Reset()         { *m = UserState{} }
-func (m *UserState) String() string { return proto.CompactTextString(m) }
-func (*UserState) ProtoMessage()    {}
+func (m *UserState) Reset()                    { *m = UserState{} }
+func (m *UserState) String() string            { return proto.CompactTextString(m) }
+func (*UserState) ProtoMessage()               {}
+func (*UserState) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
 
 func (m *UserState) GetSession() uint32 {
 	if m != nil && m.Session != nil {
@@ -933,9 +965,10 @@ type BanList struct {
 	XXX_unrecognized []byte `json:"-"`
 }
 
-func (m *BanList) Reset()         { *m = BanList{} }
-func (m *BanList) String() string { return proto.CompactTextString(m) }
-func (*BanList) ProtoMessage()    {}
+func (m *BanList) Reset()                    { *m = BanList{} }
+func (m *BanList) String() string            { return proto.CompactTextString(m) }
+func (*BanList) ProtoMessage()               {}
+func (*BanList) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{10} }
 
 const Default_BanList_Query bool = false
 
@@ -960,7 +993,7 @@ type BanList_BanEntry struct {
 	Mask *uint32 `protobuf:"varint,2,req,name=mask" json:"mask,omitempty"`
 	// User name for identification purposes (does not affect the ban).
 	Name *string `protobuf:"bytes,3,opt,name=name" json:"name,omitempty"`
-	// TODO ??
+	// The certificate hash of the banned user.
 	Hash *string `protobuf:"bytes,4,opt,name=hash" json:"hash,omitempty"`
 	// Reason for the ban (does not affect the ban).
 	Reason *string `protobuf:"bytes,5,opt,name=reason" json:"reason,omitempty"`
@@ -971,9 +1004,10 @@ type BanList_BanEntry struct {
 	XXX_unrecognized []byte  `json:"-"`
 }
 
-func (m *BanList_BanEntry) Reset()         { *m = BanList_BanEntry{} }
-func (m *BanList_BanEntry) String() string { return proto.CompactTextString(m) }
-func (*BanList_BanEntry) ProtoMessage()    {}
+func (m *BanList_BanEntry) Reset()                    { *m = BanList_BanEntry{} }
+func (m *BanList_BanEntry) String() string            { return proto.CompactTextString(m) }
+func (*BanList_BanEntry) ProtoMessage()               {}
+func (*BanList_BanEntry) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{10, 0} }
 
 func (m *BanList_BanEntry) GetAddress() []byte {
 	if m != nil {
@@ -1032,18 +1066,19 @@ type TextMessage struct {
 	Session []uint32 `protobuf:"varint,2,rep,name=session" json:"session,omitempty"`
 	// The channels to which the message is sent, identified by their
 	// channel_ids.
-	ChannelId []uint32 `protobuf:"varint,3,rep,name=channel_id" json:"channel_id,omitempty"`
+	ChannelId []uint32 `protobuf:"varint,3,rep,name=channel_id,json=channelId" json:"channel_id,omitempty"`
 	// The root channels when sending message recursively to several channels,
 	// identified by their channel_ids.
-	TreeId []uint32 `protobuf:"varint,4,rep,name=tree_id" json:"tree_id,omitempty"`
+	TreeId []uint32 `protobuf:"varint,4,rep,name=tree_id,json=treeId" json:"tree_id,omitempty"`
 	// The UTF-8 encoded message. May be HTML if the server allows.
 	Message          *string `protobuf:"bytes,5,req,name=message" json:"message,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
 
-func (m *TextMessage) Reset()         { *m = TextMessage{} }
-func (m *TextMessage) String() string { return proto.CompactTextString(m) }
-func (*TextMessage) ProtoMessage()    {}
+func (m *TextMessage) Reset()                    { *m = TextMessage{} }
+func (m *TextMessage) String() string            { return proto.CompactTextString(m) }
+func (*TextMessage) ProtoMessage()               {}
+func (*TextMessage) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11} }
 
 func (m *TextMessage) GetActor() uint32 {
 	if m != nil && m.Actor != nil {
@@ -1085,7 +1120,7 @@ type PermissionDenied struct {
 	Permission *uint32 `protobuf:"varint,1,opt,name=permission" json:"permission,omitempty"`
 	// channel_id for the channel where the permission was denied when type is
 	// Permission.
-	ChannelId *uint32 `protobuf:"varint,2,opt,name=channel_id" json:"channel_id,omitempty"`
+	ChannelId *uint32 `protobuf:"varint,2,opt,name=channel_id,json=channelId" json:"channel_id,omitempty"`
 	// The user who was denied permissions, identified by session.
 	Session *uint32 `protobuf:"varint,3,opt,name=session" json:"session,omitempty"`
 	// Textual reason for the denial.
@@ -1097,9 +1132,10 @@ type PermissionDenied struct {
 	XXX_unrecognized []byte  `json:"-"`
 }
 
-func (m *PermissionDenied) Reset()         { *m = PermissionDenied{} }
-func (m *PermissionDenied) String() string { return proto.CompactTextString(m) }
-func (*PermissionDenied) ProtoMessage()    {}
+func (m *PermissionDenied) Reset()                    { *m = PermissionDenied{} }
+func (m *PermissionDenied) String() string            { return proto.CompactTextString(m) }
+func (*PermissionDenied) ProtoMessage()               {}
+func (*PermissionDenied) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{12} }
 
 func (m *PermissionDenied) GetPermission() uint32 {
 	if m != nil && m.Permission != nil {
@@ -1145,9 +1181,9 @@ func (m *PermissionDenied) GetName() string {
 
 type ACL struct {
 	// Channel ID of the channel this message affects.
-	ChannelId *uint32 `protobuf:"varint,1,req,name=channel_id" json:"channel_id,omitempty"`
+	ChannelId *uint32 `protobuf:"varint,1,req,name=channel_id,json=channelId" json:"channel_id,omitempty"`
 	// True if the channel inherits its parent's ACLs.
-	InheritAcls *bool `protobuf:"varint,2,opt,name=inherit_acls,def=1" json:"inherit_acls,omitempty"`
+	InheritAcls *bool `protobuf:"varint,2,opt,name=inherit_acls,json=inheritAcls,def=1" json:"inherit_acls,omitempty"`
 	// User group specifications.
 	Groups []*ACL_ChanGroup `protobuf:"bytes,3,rep,name=groups" json:"groups,omitempty"`
 	// ACL specifications.
@@ -1157,9 +1193,10 @@ type ACL struct {
 	XXX_unrecognized []byte `json:"-"`
 }
 
-func (m *ACL) Reset()         { *m = ACL{} }
-func (m *ACL) String() string { return proto.CompactTextString(m) }
-func (*ACL) ProtoMessage()    {}
+func (m *ACL) Reset()                    { *m = ACL{} }
+func (m *ACL) String() string            { return proto.CompactTextString(m) }
+func (*ACL) ProtoMessage()               {}
+func (*ACL) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13} }
 
 const Default_ACL_InheritAcls bool = true
 const Default_ACL_Query bool = false
@@ -1214,13 +1251,14 @@ type ACL_ChanGroup struct {
 	// has been inherited, identified by user_id.
 	Remove []uint32 `protobuf:"varint,6,rep,name=remove" json:"remove,omitempty"`
 	// Users inherited, identified by user_id.
-	InheritedMembers []uint32 `protobuf:"varint,7,rep,name=inherited_members" json:"inherited_members,omitempty"`
+	InheritedMembers []uint32 `protobuf:"varint,7,rep,name=inherited_members,json=inheritedMembers" json:"inherited_members,omitempty"`
 	XXX_unrecognized []byte   `json:"-"`
 }
 
-func (m *ACL_ChanGroup) Reset()         { *m = ACL_ChanGroup{} }
-func (m *ACL_ChanGroup) String() string { return proto.CompactTextString(m) }
-func (*ACL_ChanGroup) ProtoMessage()    {}
+func (m *ACL_ChanGroup) Reset()                    { *m = ACL_ChanGroup{} }
+func (m *ACL_ChanGroup) String() string            { return proto.CompactTextString(m) }
+func (*ACL_ChanGroup) ProtoMessage()               {}
+func (*ACL_ChanGroup) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13, 0} }
 
 const Default_ACL_ChanGroup_Inherited bool = true
 const Default_ACL_ChanGroup_Inherit bool = true
@@ -1277,13 +1315,13 @@ func (m *ACL_ChanGroup) GetInheritedMembers() []uint32 {
 
 type ACL_ChanACL struct {
 	// True if this ACL applies to the current channel.
-	ApplyHere *bool `protobuf:"varint,1,opt,name=apply_here,def=1" json:"apply_here,omitempty"`
+	ApplyHere *bool `protobuf:"varint,1,opt,name=apply_here,json=applyHere,def=1" json:"apply_here,omitempty"`
 	// True if this ACL applies to the sub channels.
-	ApplySubs *bool `protobuf:"varint,2,opt,name=apply_subs,def=1" json:"apply_subs,omitempty"`
+	ApplySubs *bool `protobuf:"varint,2,opt,name=apply_subs,json=applySubs,def=1" json:"apply_subs,omitempty"`
 	// True if the ACL has been inherited from the parent.
 	Inherited *bool `protobuf:"varint,3,opt,name=inherited,def=1" json:"inherited,omitempty"`
 	// ID of the user that is affected by this ACL.
-	UserId *uint32 `protobuf:"varint,4,opt,name=user_id" json:"user_id,omitempty"`
+	UserId *uint32 `protobuf:"varint,4,opt,name=user_id,json=userId" json:"user_id,omitempty"`
 	// ID of the group that is affected by this ACL.
 	Group *string `protobuf:"bytes,5,opt,name=group" json:"group,omitempty"`
 	// Bit flag field of the permissions granted by this ACL.
@@ -1293,9 +1331,10 @@ type ACL_ChanACL struct {
 	XXX_unrecognized []byte  `json:"-"`
 }
 
-func (m *ACL_ChanACL) Reset()         { *m = ACL_ChanACL{} }
-func (m *ACL_ChanACL) String() string { return proto.CompactTextString(m) }
-func (*ACL_ChanACL) ProtoMessage()    {}
+func (m *ACL_ChanACL) Reset()                    { *m = ACL_ChanACL{} }
+func (m *ACL_ChanACL) String() string            { return proto.CompactTextString(m) }
+func (*ACL_ChanACL) ProtoMessage()               {}
+func (*ACL_ChanACL) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13, 1} }
 
 const Default_ACL_ChanACL_ApplyHere bool = true
 const Default_ACL_ChanACL_ApplySubs bool = true
@@ -1361,9 +1400,10 @@ type QueryUsers struct {
 	XXX_unrecognized []byte   `json:"-"`
 }
 
-func (m *QueryUsers) Reset()         { *m = QueryUsers{} }
-func (m *QueryUsers) String() string { return proto.CompactTextString(m) }
-func (*QueryUsers) ProtoMessage()    {}
+func (m *QueryUsers) Reset()                    { *m = QueryUsers{} }
+func (m *QueryUsers) String() string            { return proto.CompactTextString(m) }
+func (*QueryUsers) ProtoMessage()               {}
+func (*QueryUsers) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{14} }
 
 func (m *QueryUsers) GetIds() []uint32 {
 	if m != nil {
@@ -1387,15 +1427,16 @@ type CryptSetup struct {
 	// Encryption key.
 	Key []byte `protobuf:"bytes,1,opt,name=key" json:"key,omitempty"`
 	// Client nonce.
-	ClientNonce []byte `protobuf:"bytes,2,opt,name=client_nonce" json:"client_nonce,omitempty"`
+	ClientNonce []byte `protobuf:"bytes,2,opt,name=client_nonce,json=clientNonce" json:"client_nonce,omitempty"`
 	// Server nonce.
-	ServerNonce      []byte `protobuf:"bytes,3,opt,name=server_nonce" json:"server_nonce,omitempty"`
+	ServerNonce      []byte `protobuf:"bytes,3,opt,name=server_nonce,json=serverNonce" json:"server_nonce,omitempty"`
 	XXX_unrecognized []byte `json:"-"`
 }
 
-func (m *CryptSetup) Reset()         { *m = CryptSetup{} }
-func (m *CryptSetup) String() string { return proto.CompactTextString(m) }
-func (*CryptSetup) ProtoMessage()    {}
+func (m *CryptSetup) Reset()                    { *m = CryptSetup{} }
+func (m *CryptSetup) String() string            { return proto.CompactTextString(m) }
+func (*CryptSetup) ProtoMessage()               {}
+func (*CryptSetup) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{15} }
 
 func (m *CryptSetup) GetKey() []byte {
 	if m != nil {
@@ -1429,9 +1470,10 @@ type ContextActionModify struct {
 	XXX_unrecognized []byte                         `json:"-"`
 }
 
-func (m *ContextActionModify) Reset()         { *m = ContextActionModify{} }
-func (m *ContextActionModify) String() string { return proto.CompactTextString(m) }
-func (*ContextActionModify) ProtoMessage()    {}
+func (m *ContextActionModify) Reset()                    { *m = ContextActionModify{} }
+func (m *ContextActionModify) String() string            { return proto.CompactTextString(m) }
+func (*ContextActionModify) ProtoMessage()               {}
+func (*ContextActionModify) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{16} }
 
 func (m *ContextActionModify) GetAction() string {
 	if m != nil && m.Action != nil {
@@ -1466,15 +1508,16 @@ type ContextAction struct {
 	// The target User for the action, identified by session.
 	Session *uint32 `protobuf:"varint,1,opt,name=session" json:"session,omitempty"`
 	// The target Channel for the action, identified by channel_id.
-	ChannelId *uint32 `protobuf:"varint,2,opt,name=channel_id" json:"channel_id,omitempty"`
+	ChannelId *uint32 `protobuf:"varint,2,opt,name=channel_id,json=channelId" json:"channel_id,omitempty"`
 	// The action that should be executed.
 	Action           *string `protobuf:"bytes,3,req,name=action" json:"action,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
 
-func (m *ContextAction) Reset()         { *m = ContextAction{} }
-func (m *ContextAction) String() string { return proto.CompactTextString(m) }
-func (*ContextAction) ProtoMessage()    {}
+func (m *ContextAction) Reset()                    { *m = ContextAction{} }
+func (m *ContextAction) String() string            { return proto.CompactTextString(m) }
+func (*ContextAction) ProtoMessage()               {}
+func (*ContextAction) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{17} }
 
 func (m *ContextAction) GetSession() uint32 {
 	if m != nil && m.Session != nil {
@@ -1504,9 +1547,10 @@ type UserList struct {
 	XXX_unrecognized []byte           `json:"-"`
 }
 
-func (m *UserList) Reset()         { *m = UserList{} }
-func (m *UserList) String() string { return proto.CompactTextString(m) }
-func (*UserList) ProtoMessage()    {}
+func (m *UserList) Reset()                    { *m = UserList{} }
+func (m *UserList) String() string            { return proto.CompactTextString(m) }
+func (*UserList) ProtoMessage()               {}
+func (*UserList) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{18} }
 
 func (m *UserList) GetUsers() []*UserList_User {
 	if m != nil {
@@ -1517,17 +1561,18 @@ func (m *UserList) GetUsers() []*UserList_User {
 
 type UserList_User struct {
 	// Registered user ID.
-	UserId *uint32 `protobuf:"varint,1,req,name=user_id" json:"user_id,omitempty"`
+	UserId *uint32 `protobuf:"varint,1,req,name=user_id,json=userId" json:"user_id,omitempty"`
 	// Registered user name.
 	Name             *string `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
-	LastSeen         *string `protobuf:"bytes,3,opt,name=last_seen" json:"last_seen,omitempty"`
-	LastChannel      *uint32 `protobuf:"varint,4,opt,name=last_channel" json:"last_channel,omitempty"`
+	LastSeen         *string `protobuf:"bytes,3,opt,name=last_seen,json=lastSeen" json:"last_seen,omitempty"`
+	LastChannel      *uint32 `protobuf:"varint,4,opt,name=last_channel,json=lastChannel" json:"last_channel,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
 
-func (m *UserList_User) Reset()         { *m = UserList_User{} }
-func (m *UserList_User) String() string { return proto.CompactTextString(m) }
-func (*UserList_User) ProtoMessage()    {}
+func (m *UserList_User) Reset()                    { *m = UserList_User{} }
+func (m *UserList_User) String() string            { return proto.CompactTextString(m) }
+func (*UserList_User) ProtoMessage()               {}
+func (*UserList_User) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{18, 0} }
 
 func (m *UserList_User) GetUserId() uint32 {
 	if m != nil && m.UserId != nil {
@@ -1569,9 +1614,10 @@ type VoiceTarget struct {
 	XXX_unrecognized []byte                `json:"-"`
 }
 
-func (m *VoiceTarget) Reset()         { *m = VoiceTarget{} }
-func (m *VoiceTarget) String() string { return proto.CompactTextString(m) }
-func (*VoiceTarget) ProtoMessage()    {}
+func (m *VoiceTarget) Reset()                    { *m = VoiceTarget{} }
+func (m *VoiceTarget) String() string            { return proto.CompactTextString(m) }
+func (*VoiceTarget) ProtoMessage()               {}
+func (*VoiceTarget) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{19} }
 
 func (m *VoiceTarget) GetId() uint32 {
 	if m != nil && m.Id != nil {
@@ -1590,9 +1636,9 @@ func (m *VoiceTarget) GetTargets() []*VoiceTarget_Target {
 type VoiceTarget_Target struct {
 	// Users that are included as targets.
 	Session []uint32 `protobuf:"varint,1,rep,name=session" json:"session,omitempty"`
-	// Channels that are included as targets.
-	ChannelId *uint32 `protobuf:"varint,2,opt,name=channel_id" json:"channel_id,omitempty"`
-	// TODO ??
+	// Channel that is included as a target.
+	ChannelId *uint32 `protobuf:"varint,2,opt,name=channel_id,json=channelId" json:"channel_id,omitempty"`
+	// ACL group that is included as a target.
 	Group *string `protobuf:"bytes,3,opt,name=group" json:"group,omitempty"`
 	// True if the voice should follow links from the specified channel.
 	Links *bool `protobuf:"varint,4,opt,name=links,def=0" json:"links,omitempty"`
@@ -1602,9 +1648,10 @@ type VoiceTarget_Target struct {
 	XXX_unrecognized []byte `json:"-"`
 }
 
-func (m *VoiceTarget_Target) Reset()         { *m = VoiceTarget_Target{} }
-func (m *VoiceTarget_Target) String() string { return proto.CompactTextString(m) }
-func (*VoiceTarget_Target) ProtoMessage()    {}
+func (m *VoiceTarget_Target) Reset()                    { *m = VoiceTarget_Target{} }
+func (m *VoiceTarget_Target) String() string            { return proto.CompactTextString(m) }
+func (*VoiceTarget_Target) ProtoMessage()               {}
+func (*VoiceTarget_Target) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{19, 0} }
 
 const Default_VoiceTarget_Target_Links bool = false
 const Default_VoiceTarget_Target_Children bool = false
@@ -1649,7 +1696,7 @@ func (m *VoiceTarget_Target) GetChildren() bool {
 // channel permissions.
 type PermissionQuery struct {
 	// channel_id of the channel for which the permissions are queried.
-	ChannelId *uint32 `protobuf:"varint,1,opt,name=channel_id" json:"channel_id,omitempty"`
+	ChannelId *uint32 `protobuf:"varint,1,opt,name=channel_id,json=channelId" json:"channel_id,omitempty"`
 	// Channel permissions.
 	Permissions *uint32 `protobuf:"varint,2,opt,name=permissions" json:"permissions,omitempty"`
 	// True if the client should drop its current permission information for all
@@ -1658,9 +1705,10 @@ type PermissionQuery struct {
 	XXX_unrecognized []byte `json:"-"`
 }
 
-func (m *PermissionQuery) Reset()         { *m = PermissionQuery{} }
-func (m *PermissionQuery) String() string { return proto.CompactTextString(m) }
-func (*PermissionQuery) ProtoMessage()    {}
+func (m *PermissionQuery) Reset()                    { *m = PermissionQuery{} }
+func (m *PermissionQuery) String() string            { return proto.CompactTextString(m) }
+func (*PermissionQuery) ProtoMessage()               {}
+func (*PermissionQuery) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{20} }
 
 const Default_PermissionQuery_Flush bool = false
 
@@ -1693,14 +1741,15 @@ type CodecVersion struct {
 	// The version of the CELT Beta codec.
 	Beta *int32 `protobuf:"varint,2,req,name=beta" json:"beta,omitempty"`
 	// True if the user should prefer Alpha over Beta.
-	PreferAlpha      *bool  `protobuf:"varint,3,req,name=prefer_alpha,def=1" json:"prefer_alpha,omitempty"`
+	PreferAlpha      *bool  `protobuf:"varint,3,req,name=prefer_alpha,json=preferAlpha,def=1" json:"prefer_alpha,omitempty"`
 	Opus             *bool  `protobuf:"varint,4,opt,name=opus,def=0" json:"opus,omitempty"`
 	XXX_unrecognized []byte `json:"-"`
 }
 
-func (m *CodecVersion) Reset()         { *m = CodecVersion{} }
-func (m *CodecVersion) String() string { return proto.CompactTextString(m) }
-func (*CodecVersion) ProtoMessage()    {}
+func (m *CodecVersion) Reset()                    { *m = CodecVersion{} }
+func (m *CodecVersion) String() string            { return proto.CompactTextString(m) }
+func (*CodecVersion) ProtoMessage()               {}
+func (*CodecVersion) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{21} }
 
 const Default_CodecVersion_PreferAlpha bool = true
 const Default_CodecVersion_Opus bool = false
@@ -1738,30 +1787,30 @@ type UserStats struct {
 	// User whose stats these are.
 	Session *uint32 `protobuf:"varint,1,opt,name=session" json:"session,omitempty"`
 	// True if the message contains only mutable stats (packets, ping).
-	StatsOnly *bool `protobuf:"varint,2,opt,name=stats_only,def=0" json:"stats_only,omitempty"`
+	StatsOnly *bool `protobuf:"varint,2,opt,name=stats_only,json=statsOnly,def=0" json:"stats_only,omitempty"`
 	// Full user certificate chain of the user certificate in DER format.
 	Certificates [][]byte `protobuf:"bytes,3,rep,name=certificates" json:"certificates,omitempty"`
 	// Packet statistics for packets received from the client.
-	FromClient *UserStats_Stats `protobuf:"bytes,4,opt,name=from_client" json:"from_client,omitempty"`
+	FromClient *UserStats_Stats `protobuf:"bytes,4,opt,name=from_client,json=fromClient" json:"from_client,omitempty"`
 	// Packet statistics for packets sent by the server.
-	FromServer *UserStats_Stats `protobuf:"bytes,5,opt,name=from_server" json:"from_server,omitempty"`
+	FromServer *UserStats_Stats `protobuf:"bytes,5,opt,name=from_server,json=fromServer" json:"from_server,omitempty"`
 	// Amount of UDP packets sent.
-	UdpPackets *uint32 `protobuf:"varint,6,opt,name=udp_packets" json:"udp_packets,omitempty"`
+	UdpPackets *uint32 `protobuf:"varint,6,opt,name=udp_packets,json=udpPackets" json:"udp_packets,omitempty"`
 	// Amount of TCP packets sent.
-	TcpPackets *uint32 `protobuf:"varint,7,opt,name=tcp_packets" json:"tcp_packets,omitempty"`
+	TcpPackets *uint32 `protobuf:"varint,7,opt,name=tcp_packets,json=tcpPackets" json:"tcp_packets,omitempty"`
 	// UDP ping average.
-	UdpPingAvg *float32 `protobuf:"fixed32,8,opt,name=udp_ping_avg" json:"udp_ping_avg,omitempty"`
+	UdpPingAvg *float32 `protobuf:"fixed32,8,opt,name=udp_ping_avg,json=udpPingAvg" json:"udp_ping_avg,omitempty"`
 	// UDP ping variance.
-	UdpPingVar *float32 `protobuf:"fixed32,9,opt,name=udp_ping_var" json:"udp_ping_var,omitempty"`
+	UdpPingVar *float32 `protobuf:"fixed32,9,opt,name=udp_ping_var,json=udpPingVar" json:"udp_ping_var,omitempty"`
 	// TCP ping average.
-	TcpPingAvg *float32 `protobuf:"fixed32,10,opt,name=tcp_ping_avg" json:"tcp_ping_avg,omitempty"`
+	TcpPingAvg *float32 `protobuf:"fixed32,10,opt,name=tcp_ping_avg,json=tcpPingAvg" json:"tcp_ping_avg,omitempty"`
 	// TCP ping variance.
-	TcpPingVar *float32 `protobuf:"fixed32,11,opt,name=tcp_ping_var" json:"tcp_ping_var,omitempty"`
+	TcpPingVar *float32 `protobuf:"fixed32,11,opt,name=tcp_ping_var,json=tcpPingVar" json:"tcp_ping_var,omitempty"`
 	// Client version.
 	Version *Version `protobuf:"bytes,12,opt,name=version" json:"version,omitempty"`
 	// A list of CELT bitstream version constants supported by the client of this
 	// user.
-	CeltVersions []int32 `protobuf:"varint,13,rep,name=celt_versions" json:"celt_versions,omitempty"`
+	CeltVersions []int32 `protobuf:"varint,13,rep,name=celt_versions,json=celtVersions" json:"celt_versions,omitempty"`
 	// Client IP address.
 	Address []byte `protobuf:"bytes,14,opt,name=address" json:"address,omitempty"`
 	// Bandwith used by this client.
@@ -1771,14 +1820,15 @@ type UserStats struct {
 	// Duration since last activity.
 	Idlesecs *uint32 `protobuf:"varint,17,opt,name=idlesecs" json:"idlesecs,omitempty"`
 	// True if the user has a strong certificate.
-	StrongCertificate *bool  `protobuf:"varint,18,opt,name=strong_certificate,def=0" json:"strong_certificate,omitempty"`
+	StrongCertificate *bool  `protobuf:"varint,18,opt,name=strong_certificate,json=strongCertificate,def=0" json:"strong_certificate,omitempty"`
 	Opus              *bool  `protobuf:"varint,19,opt,name=opus,def=0" json:"opus,omitempty"`
 	XXX_unrecognized  []byte `json:"-"`
 }
 
-func (m *UserStats) Reset()         { *m = UserStats{} }
-func (m *UserStats) String() string { return proto.CompactTextString(m) }
-func (*UserStats) ProtoMessage()    {}
+func (m *UserStats) Reset()                    { *m = UserStats{} }
+func (m *UserStats) String() string            { return proto.CompactTextString(m) }
+func (*UserStats) ProtoMessage()               {}
+func (*UserStats) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{22} }
 
 const Default_UserStats_StatsOnly bool = false
 const Default_UserStats_StrongCertificate bool = false
@@ -1929,9 +1979,10 @@ type UserStats_Stats struct {
 	XXX_unrecognized []byte  `json:"-"`
 }
 
-func (m *UserStats_Stats) Reset()         { *m = UserStats_Stats{} }
-func (m *UserStats_Stats) String() string { return proto.CompactTextString(m) }
-func (*UserStats_Stats) ProtoMessage()    {}
+func (m *UserStats_Stats) Reset()                    { *m = UserStats_Stats{} }
+func (m *UserStats_Stats) String() string            { return proto.CompactTextString(m) }
+func (*UserStats_Stats) ProtoMessage()               {}
+func (*UserStats_Stats) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{22, 0} }
 
 func (m *UserStats_Stats) GetGood() uint32 {
 	if m != nil && m.Good != nil {
@@ -1971,17 +2022,18 @@ func (m *UserStats_Stats) GetResync() uint32 {
 // normally be transmitted as hashes.
 type RequestBlob struct {
 	// sessions of the requested UserState textures.
-	SessionTexture []uint32 `protobuf:"varint,1,rep,name=session_texture" json:"session_texture,omitempty"`
+	SessionTexture []uint32 `protobuf:"varint,1,rep,name=session_texture,json=sessionTexture" json:"session_texture,omitempty"`
 	// sessions of the requested UserState comments.
-	SessionComment []uint32 `protobuf:"varint,2,rep,name=session_comment" json:"session_comment,omitempty"`
+	SessionComment []uint32 `protobuf:"varint,2,rep,name=session_comment,json=sessionComment" json:"session_comment,omitempty"`
 	// channel_ids of the requested ChannelState descriptions.
-	ChannelDescription []uint32 `protobuf:"varint,3,rep,name=channel_description" json:"channel_description,omitempty"`
+	ChannelDescription []uint32 `protobuf:"varint,3,rep,name=channel_description,json=channelDescription" json:"channel_description,omitempty"`
 	XXX_unrecognized   []byte   `json:"-"`
 }
 
-func (m *RequestBlob) Reset()         { *m = RequestBlob{} }
-func (m *RequestBlob) String() string { return proto.CompactTextString(m) }
-func (*RequestBlob) ProtoMessage()    {}
+func (m *RequestBlob) Reset()                    { *m = RequestBlob{} }
+func (m *RequestBlob) String() string            { return proto.CompactTextString(m) }
+func (*RequestBlob) ProtoMessage()               {}
+func (*RequestBlob) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{23} }
 
 func (m *RequestBlob) GetSessionTexture() []uint32 {
 	if m != nil {
@@ -2008,23 +2060,24 @@ func (m *RequestBlob) GetChannelDescription() []uint32 {
 // details.
 type ServerConfig struct {
 	// The maximum bandwidth the clients should use.
-	MaxBandwidth *uint32 `protobuf:"varint,1,opt,name=max_bandwidth" json:"max_bandwidth,omitempty"`
+	MaxBandwidth *uint32 `protobuf:"varint,1,opt,name=max_bandwidth,json=maxBandwidth" json:"max_bandwidth,omitempty"`
 	// Server welcome text.
-	WelcomeText *string `protobuf:"bytes,2,opt,name=welcome_text" json:"welcome_text,omitempty"`
+	WelcomeText *string `protobuf:"bytes,2,opt,name=welcome_text,json=welcomeText" json:"welcome_text,omitempty"`
 	// True if the server allows HTML.
-	AllowHtml *bool `protobuf:"varint,3,opt,name=allow_html" json:"allow_html,omitempty"`
+	AllowHtml *bool `protobuf:"varint,3,opt,name=allow_html,json=allowHtml" json:"allow_html,omitempty"`
 	// Maximum text message length.
-	MessageLength *uint32 `protobuf:"varint,4,opt,name=message_length" json:"message_length,omitempty"`
+	MessageLength *uint32 `protobuf:"varint,4,opt,name=message_length,json=messageLength" json:"message_length,omitempty"`
 	// Maximum image message length.
-	ImageMessageLength *uint32 `protobuf:"varint,5,opt,name=image_message_length" json:"image_message_length,omitempty"`
+	ImageMessageLength *uint32 `protobuf:"varint,5,opt,name=image_message_length,json=imageMessageLength" json:"image_message_length,omitempty"`
 	// The maximum number of users allowed on the server.
-	MaxUsers         *uint32 `protobuf:"varint,6,opt,name=max_users" json:"max_users,omitempty"`
+	MaxUsers         *uint32 `protobuf:"varint,6,opt,name=max_users,json=maxUsers" json:"max_users,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
 
-func (m *ServerConfig) Reset()         { *m = ServerConfig{} }
-func (m *ServerConfig) String() string { return proto.CompactTextString(m) }
-func (*ServerConfig) ProtoMessage()    {}
+func (m *ServerConfig) Reset()                    { *m = ServerConfig{} }
+func (m *ServerConfig) String() string            { return proto.CompactTextString(m) }
+func (*ServerConfig) ProtoMessage()               {}
+func (*ServerConfig) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{24} }
 
 func (m *ServerConfig) GetMaxBandwidth() uint32 {
 	if m != nil && m.MaxBandwidth != nil {
@@ -2077,13 +2130,14 @@ type SuggestConfig struct {
 	// server.
 	Positional *bool `protobuf:"varint,2,opt,name=positional" json:"positional,omitempty"`
 	// True if the administrator suggests push to talk to be used on this server.
-	PushToTalk       *bool  `protobuf:"varint,3,opt,name=push_to_talk" json:"push_to_talk,omitempty"`
+	PushToTalk       *bool  `protobuf:"varint,3,opt,name=push_to_talk,json=pushToTalk" json:"push_to_talk,omitempty"`
 	XXX_unrecognized []byte `json:"-"`
 }
 
-func (m *SuggestConfig) Reset()         { *m = SuggestConfig{} }
-func (m *SuggestConfig) String() string { return proto.CompactTextString(m) }
-func (*SuggestConfig) ProtoMessage()    {}
+func (m *SuggestConfig) Reset()                    { *m = SuggestConfig{} }
+func (m *SuggestConfig) String() string            { return proto.CompactTextString(m) }
+func (*SuggestConfig) ProtoMessage()               {}
+func (*SuggestConfig) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{25} }
 
 func (m *SuggestConfig) GetVersion() uint32 {
 	if m != nil && m.Version != nil {
@@ -2107,8 +2161,198 @@ func (m *SuggestConfig) GetPushToTalk() bool {
 }
 
 func init() {
+	proto.RegisterType((*Version)(nil), "MumbleProto.Version")
+	proto.RegisterType((*UDPTunnel)(nil), "MumbleProto.UDPTunnel")
+	proto.RegisterType((*Authenticate)(nil), "MumbleProto.Authenticate")
+	proto.RegisterType((*Ping)(nil), "MumbleProto.Ping")
+	proto.RegisterType((*Reject)(nil), "MumbleProto.Reject")
+	proto.RegisterType((*ServerSync)(nil), "MumbleProto.ServerSync")
+	proto.RegisterType((*ChannelRemove)(nil), "MumbleProto.ChannelRemove")
+	proto.RegisterType((*ChannelState)(nil), "MumbleProto.ChannelState")
+	proto.RegisterType((*UserRemove)(nil), "MumbleProto.UserRemove")
+	proto.RegisterType((*UserState)(nil), "MumbleProto.UserState")
+	proto.RegisterType((*BanList)(nil), "MumbleProto.BanList")
+	proto.RegisterType((*BanList_BanEntry)(nil), "MumbleProto.BanList.BanEntry")
+	proto.RegisterType((*TextMessage)(nil), "MumbleProto.TextMessage")
+	proto.RegisterType((*PermissionDenied)(nil), "MumbleProto.PermissionDenied")
+	proto.RegisterType((*ACL)(nil), "MumbleProto.ACL")
+	proto.RegisterType((*ACL_ChanGroup)(nil), "MumbleProto.ACL.ChanGroup")
+	proto.RegisterType((*ACL_ChanACL)(nil), "MumbleProto.ACL.ChanACL")
+	proto.RegisterType((*QueryUsers)(nil), "MumbleProto.QueryUsers")
+	proto.RegisterType((*CryptSetup)(nil), "MumbleProto.CryptSetup")
+	proto.RegisterType((*ContextActionModify)(nil), "MumbleProto.ContextActionModify")
+	proto.RegisterType((*ContextAction)(nil), "MumbleProto.ContextAction")
+	proto.RegisterType((*UserList)(nil), "MumbleProto.UserList")
+	proto.RegisterType((*UserList_User)(nil), "MumbleProto.UserList.User")
+	proto.RegisterType((*VoiceTarget)(nil), "MumbleProto.VoiceTarget")
+	proto.RegisterType((*VoiceTarget_Target)(nil), "MumbleProto.VoiceTarget.Target")
+	proto.RegisterType((*PermissionQuery)(nil), "MumbleProto.PermissionQuery")
+	proto.RegisterType((*CodecVersion)(nil), "MumbleProto.CodecVersion")
+	proto.RegisterType((*UserStats)(nil), "MumbleProto.UserStats")
+	proto.RegisterType((*UserStats_Stats)(nil), "MumbleProto.UserStats.Stats")
+	proto.RegisterType((*RequestBlob)(nil), "MumbleProto.RequestBlob")
+	proto.RegisterType((*ServerConfig)(nil), "MumbleProto.ServerConfig")
+	proto.RegisterType((*SuggestConfig)(nil), "MumbleProto.SuggestConfig")
 	proto.RegisterEnum("MumbleProto.Reject_RejectType", Reject_RejectType_name, Reject_RejectType_value)
 	proto.RegisterEnum("MumbleProto.PermissionDenied_DenyType", PermissionDenied_DenyType_name, PermissionDenied_DenyType_value)
 	proto.RegisterEnum("MumbleProto.ContextActionModify_Context", ContextActionModify_Context_name, ContextActionModify_Context_value)
 	proto.RegisterEnum("MumbleProto.ContextActionModify_Operation", ContextActionModify_Operation_name, ContextActionModify_Operation_value)
+}
+
+func init() { proto.RegisterFile("Mumble.proto", fileDescriptor0) }
+
+var fileDescriptor0 = []byte{
+	// 2418 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0xdc, 0x58, 0x4b, 0x73, 0x23, 0x49,
+	0x11, 0xa6, 0xf5, 0xb2, 0x94, 0x92, 0x6c, 0xb9, 0x67, 0x58, 0x84, 0xf7, 0xdd, 0x0b, 0xcb, 0x00,
+	0x1b, 0x66, 0x71, 0xec, 0x65, 0x27, 0x82, 0x83, 0xc7, 0xc3, 0xe2, 0x09, 0xc6, 0x5e, 0xd3, 0xf6,
+	0xce, 0x1e, 0x38, 0x34, 0x6d, 0x75, 0x59, 0x6a, 0xdc, 0xea, 0x6e, 0xba, 0x5a, 0x9e, 0x55, 0x04,
+	0x47, 0xe0, 0x0a, 0x11, 0x1c, 0xb8, 0xf1, 0x03, 0x08, 0x62, 0x23, 0xf8, 0x01, 0x5c, 0xf8, 0x05,
+	0xfc, 0x01, 0x2e, 0x5c, 0xb9, 0x11, 0xc1, 0x9d, 0x7c, 0x54, 0xbf, 0x6c, 0xcd, 0xce, 0x72, 0xe5,
+	0x22, 0x55, 0x7e, 0x99, 0x5d, 0x95, 0x95, 0x95, 0xaf, 0x2a, 0x18, 0x9d, 0xac, 0x96, 0x97, 0x91,
+	0xda, 0x4f, 0xb3, 0x24, 0x4f, 0xec, 0xa1, 0x50, 0x67, 0x44, 0x38, 0x11, 0x6c, 0x3d, 0x53, 0x99,
+	0x0e, 0x93, 0xd8, 0x9e, 0xc2, 0xd6, 0x8d, 0x0c, 0xa7, 0xd6, 0x5b, 0xd6, 0x83, 0xb1, 0x5b, 0x90,
+	0xc4, 0xc9, 0x54, 0xa4, 0x7c, 0xad, 0xa6, 0x2d, 0xe4, 0x0c, 0xdc, 0x82, 0xb4, 0xb7, 0xa1, 0x95,
+	0xe8, 0x69, 0x9b, 0x41, 0x1c, 0xd9, 0xaf, 0x03, 0x24, 0xda, 0x2b, 0xa6, 0xe9, 0x30, 0x3e, 0x48,
+	0xb4, 0x59, 0xc2, 0x79, 0x07, 0x06, 0x9f, 0x3c, 0x3e, 0xbb, 0x58, 0xc5, 0xb1, 0x8a, 0xec, 0x57,
+	0xa0, 0x97, 0xfa, 0xb3, 0x6b, 0x95, 0xe3, 0x72, 0xad, 0x07, 0x23, 0xd7, 0x50, 0xce, 0x1f, 0x2d,
+	0x18, 0x1d, 0xae, 0xf2, 0x85, 0x8a, 0xf3, 0x70, 0xe6, 0xe7, 0xca, 0xde, 0x83, 0xfe, 0x4a, 0xab,
+	0x2c, 0xf6, 0x97, 0x8a, 0x35, 0x1b, 0xb8, 0x25, 0x4d, 0xbc, 0xd4, 0xd7, 0xfa, 0x79, 0x92, 0x05,
+	0x46, 0xb7, 0x92, 0xa6, 0x05, 0xf2, 0xe4, 0x5a, 0xc5, 0xa4, 0x60, 0x1b, 0x39, 0x86, 0xb2, 0xdf,
+	0x81, 0xf1, 0x4c, 0x45, 0x79, 0xa1, 0xa6, 0x46, 0x3d, 0xdb, 0x0f, 0xba, 0xee, 0x88, 0x40, 0xa3,
+	0xa9, 0xb6, 0xbf, 0x0e, 0x9d, 0x24, 0x5d, 0xe9, 0x69, 0x17, 0x27, 0xed, 0x3f, 0xec, 0x5e, 0xf9,
+	0x91, 0x56, 0x2e, 0x43, 0xce, 0xdf, 0x5a, 0xd0, 0x39, 0x0b, 0xe3, 0xb9, 0xfd, 0x1a, 0x0c, 0xf2,
+	0x70, 0xa9, 0x74, 0xee, 0x2f, 0x53, 0xd6, 0xac, 0xe3, 0x56, 0x80, 0x6d, 0x43, 0x67, 0x9e, 0x24,
+	0xa2, 0xd6, 0xd8, 0xe5, 0x31, 0x61, 0x11, 0x6e, 0x89, 0x2d, 0x86, 0x18, 0x8d, 0x19, 0x4b, 0x74,
+	0xce, 0xd6, 0x22, 0x0c, 0xc7, 0xa4, 0x7a, 0xa6, 0xf4, 0x3a, 0x9e, 0xf1, 0xfa, 0x63, 0xd7, 0x50,
+	0xf6, 0x9b, 0x30, 0x5c, 0x05, 0xa9, 0x27, 0x96, 0xd2, 0xd3, 0x1e, 0x33, 0x01, 0xa1, 0x33, 0x41,
+	0x48, 0x20, 0x9f, 0x55, 0x02, 0x5b, 0x22, 0x80, 0x50, 0x21, 0xf0, 0x16, 0x8c, 0x78, 0x06, 0xd4,
+	0xdf, 0xf3, 0x6f, 0xe6, 0xd3, 0x3e, 0x4a, 0xb4, 0x64, 0x0a, 0x84, 0x0e, 0x6f, 0xe6, 0x0d, 0x89,
+	0x1b, 0x3f, 0x9b, 0x0e, 0x1a, 0x12, 0xcf, 0xfc, 0x8c, 0x24, 0x78, 0x91, 0x62, 0x0e, 0x10, 0x09,
+	0x5a, 0xa5, 0x9a, 0xa3, 0x94, 0xa0, 0x39, 0x86, 0x0d, 0x09, 0x9c, 0xc3, 0xf9, 0x75, 0x0b, 0x7a,
+	0xae, 0xfa, 0xb9, 0x9a, 0xe5, 0xf6, 0x01, 0x74, 0xf2, 0x75, 0x2a, 0x67, 0xbb, 0x7d, 0xf0, 0xc6,
+	0x7e, 0xcd, 0x3f, 0xf7, 0x45, 0xc4, 0xfc, 0x5d, 0xa0, 0x94, 0xcb, 0xb2, 0x62, 0x20, 0x5f, 0xa3,
+	0x93, 0xc9, 0xa9, 0x1b, 0xca, 0xf9, 0xdc, 0x02, 0xa8, 0x84, 0xed, 0x3e, 0x74, 0x4e, 0x93, 0x58,
+	0x4d, 0xbe, 0x62, 0x4f, 0x60, 0xf4, 0x69, 0x96, 0xe0, 0xda, 0x72, 0xc0, 0x13, 0xcb, 0xbe, 0x07,
+	0x3b, 0x4f, 0xe2, 0x1b, 0x3f, 0x0a, 0x83, 0x4f, 0x8c, 0x37, 0x4d, 0x5a, 0xf6, 0x0e, 0x0c, 0x59,
+	0x8c, 0xa0, 0xb3, 0x4f, 0x27, 0x6d, 0x7b, 0x17, 0xc6, 0x0c, 0x9c, 0xab, 0xec, 0x86, 0xa1, 0x0e,
+	0x41, 0xc5, 0x17, 0x4f, 0x62, 0x1c, 0x4d, 0xba, 0x18, 0x07, 0x20, 0x02, 0x1f, 0xad, 0xa2, 0x68,
+	0xd2, 0x23, 0x91, 0xd3, 0xe4, 0x48, 0x65, 0x79, 0x78, 0xc5, 0x3e, 0x3c, 0xd9, 0xb2, 0xbf, 0x0a,
+	0xbb, 0x35, 0xaf, 0x4e, 0xb2, 0x8f, 0xfc, 0x30, 0x9a, 0xf4, 0x9d, 0xdf, 0x59, 0xc5, 0xa7, 0xe7,
+	0x74, 0xc0, 0x18, 0x6a, 0x5a, 0xe9, 0x7a, 0x10, 0x1a, 0x92, 0xbc, 0x76, 0xe9, 0x7f, 0xe6, 0x5d,
+	0xfa, 0x71, 0xf0, 0x3c, 0x0c, 0xf2, 0x85, 0xf1, 0xab, 0x11, 0x82, 0x8f, 0x0a, 0xcc, 0x7e, 0x1b,
+	0x46, 0xcf, 0x55, 0x34, 0x4b, 0x96, 0xca, 0xcb, 0xd5, 0x67, 0xb9, 0x89, 0xcc, 0xa1, 0xc1, 0x2e,
+	0x10, 0xc2, 0xa3, 0x19, 0xa6, 0x2a, 0x5b, 0x86, 0xba, 0xf0, 0x7d, 0x72, 0xdb, 0x3a, 0xe4, 0xec,
+	0xc3, 0xf8, 0x68, 0xe1, 0x53, 0x8c, 0xba, 0x6a, 0x99, 0xdc, 0x28, 0x8a, 0xea, 0x99, 0x00, 0x5e,
+	0x18, 0x70, 0xb4, 0x8e, 0xdd, 0x81, 0x41, 0x9e, 0x04, 0xce, 0x3f, 0x5a, 0x30, 0x32, 0x1f, 0x9c,
+	0xe7, 0xe4, 0xd1, 0xb7, 0xe5, 0xad, 0x86, 0xbc, 0x04, 0x7e, 0x86, 0x86, 0x30, 0x5b, 0x30, 0x14,
+	0x05, 0x02, 0xc7, 0xb8, 0x28, 0xcd, 0x63, 0xfb, 0x3e, 0x74, 0xa3, 0x30, 0xbe, 0x96, 0x18, 0x1d,
+	0xbb, 0x42, 0xd0, 0x1e, 0x02, 0xa5, 0x67, 0x59, 0x98, 0xe6, 0x64, 0xa9, 0xae, 0xec, 0xb2, 0x06,
+	0xd9, 0xaf, 0xc2, 0x80, 0x45, 0x3d, 0x3f, 0x08, 0x30, 0x4c, 0xe8, 0xdb, 0x3e, 0x03, 0x87, 0x41,
+	0x40, 0x56, 0x12, 0x66, 0xc6, 0xfb, 0xc3, 0x28, 0x21, 0xfe, 0x90, 0x31, 0xb3, 0x65, 0xcc, 0x54,
+	0xb9, 0x5a, 0xa6, 0x49, 0xe6, 0x67, 0x6b, 0x8e, 0x91, 0x32, 0x07, 0x54, 0x38, 0xee, 0xb3, 0x9f,
+	0x26, 0x3a, 0x64, 0x1d, 0x28, 0x4a, 0xba, 0x0f, 0xad, 0xf7, 0xdd, 0x12, 0xb2, 0xbf, 0x0d, 0x93,
+	0x9a, 0x4a, 0xde, 0xc2, 0xd7, 0x0b, 0x0e, 0x95, 0x91, 0xbb, 0x53, 0xc3, 0x8f, 0x11, 0x26, 0x75,
+	0xe9, 0x70, 0x29, 0xad, 0x69, 0x0e, 0x16, 0x54, 0x17, 0x01, 0x72, 0x33, 0xed, 0x5c, 0x01, 0xd0,
+	0xc0, 0x68, 0xd6, 0xf0, 0x90, 0x56, 0xdd, 0x43, 0xd0, 0x56, 0xfe, 0x0c, 0x3d, 0xcb, 0x98, 0x55,
+	0x88, 0x5a, 0xa4, 0xb4, 0xeb, 0x91, 0x82, 0x01, 0xd1, 0x46, 0x5f, 0xe2, 0xf3, 0xef, 0xbb, 0x34,
+	0x74, 0xfe, 0xdc, 0xc1, 0xf4, 0x8c, 0x0b, 0xc9, 0x21, 0xbe, 0xd8, 0x13, 0x37, 0xaf, 0xb3, 0xe9,
+	0xf4, 0xbe, 0x06, 0x5b, 0xb4, 0x25, 0xf2, 0x02, 0xc9, 0x6e, 0x3d, 0x22, 0xd1, 0x05, 0x9a, 0x1e,
+	0xd2, 0xbd, 0xed, 0x21, 0x38, 0xd7, 0x72, 0x85, 0x69, 0xb2, 0xc7, 0xca, 0xf1, 0x98, 0xb0, 0x40,
+	0xf9, 0x57, 0x9c, 0xd2, 0x10, 0xa3, 0x31, 0x65, 0x7f, 0xbd, 0x4a, 0x53, 0x4c, 0x8e, 0x5a, 0x0e,
+	0xc9, 0x2d, 0x69, 0x32, 0xa9, 0x56, 0xd1, 0x95, 0xc7, 0x13, 0x0d, 0x0c, 0x13, 0x81, 0x13, 0x9a,
+	0xac, 0x60, 0xf2, 0x8c, 0x50, 0x31, 0x1f, 0xd3, 0xac, 0xb8, 0x73, 0x0a, 0x9e, 0x55, 0xa6, 0xf8,
+	0x28, 0x46, 0x6e, 0x41, 0xda, 0xdf, 0x84, 0xed, 0x34, 0x5a, 0xcd, 0xc3, 0xd8, 0x9b, 0x25, 0x31,
+	0x07, 0xd8, 0x88, 0x05, 0xc6, 0x82, 0x1e, 0x09, 0x68, 0x7f, 0x0b, 0x76, 0x8c, 0x58, 0x18, 0x50,
+	0xbc, 0xe7, 0xeb, 0xe9, 0x98, 0xad, 0x62, 0xbe, 0x7e, 0x62, 0x50, 0x5a, 0x09, 0xe3, 0x72, 0x49,
+	0xa1, 0xb0, 0x2d, 0x85, 0xd5, 0x90, 0xb4, 0x5b, 0xf6, 0x97, 0x1d, 0xb1, 0x26, 0x8d, 0xc9, 0x6d,
+	0x0d, 0x5b, 0x7c, 0x69, 0xc2, 0x6b, 0x0f, 0x0d, 0x76, 0x6c, 0x44, 0x8c, 0xae, 0x22, 0xb2, 0x2b,
+	0x22, 0x06, 0x63, 0x11, 0xf4, 0xca, 0x34, 0x0b, 0x93, 0x0c, 0xd7, 0xf7, 0x74, 0xaa, 0xfc, 0x6b,
+	0x95, 0x4d, 0x6d, 0xb6, 0xc0, 0x4e, 0x81, 0x9f, 0x0b, 0x4c, 0xf5, 0x2d, 0x53, 0x33, 0x2c, 0xa5,
+	0x98, 0xb3, 0xa7, 0xf7, 0x58, 0xa6, 0x02, 0x9c, 0xdf, 0xb4, 0x60, 0x0b, 0x33, 0xcf, 0xd3, 0x10,
+	0xeb, 0xd5, 0xf7, 0xa1, 0x83, 0x1e, 0xa4, 0xd1, 0x53, 0xda, 0x0f, 0x86, 0x07, 0xaf, 0x37, 0x52,
+	0xb8, 0x91, 0xa1, 0xff, 0x1f, 0xc6, 0x79, 0xb6, 0x76, 0x59, 0x14, 0x8f, 0xa0, 0xfb, 0x8b, 0x95,
+	0xc2, 0xe8, 0x6a, 0xd5, 0xa3, 0x4b, 0xb0, 0xbd, 0x3f, 0x59, 0xd0, 0x2f, 0xe4, 0xc9, 0x4a, 0x18,
+	0xc5, 0x7c, 0xc8, 0xd2, 0x29, 0x14, 0x24, 0xfb, 0x89, 0xaf, 0xaf, 0x71, 0x0a, 0x0a, 0x04, 0x1e,
+	0x6f, 0xf4, 0xc3, 0xc2, 0x9a, 0x9d, 0x9a, 0x35, 0xab, 0xb8, 0xe8, 0x36, 0xe2, 0x02, 0xbd, 0x1b,
+	0xeb, 0x77, 0x96, 0xb3, 0xf3, 0x0d, 0x5c, 0x21, 0xc8, 0xd3, 0x82, 0x55, 0xe6, 0x73, 0xa8, 0x4b,
+	0x51, 0x2d, 0x69, 0xe7, 0xb7, 0x16, 0x0c, 0x29, 0xb5, 0x9e, 0xa0, 0x4a, 0xfe, 0x5c, 0x55, 0xf1,
+	0x61, 0xd5, 0xe3, 0xa3, 0x16, 0x4f, 0x2d, 0xce, 0x37, 0x65, 0x3c, 0x35, 0x83, 0xa1, 0xcd, 0xcc,
+	0x5a, 0x30, 0x60, 0x10, 0xe5, 0x99, 0x52, 0x12, 0x44, 0xc4, 0xeb, 0x11, 0x89, 0x0c, 0x9c, 0x71,
+	0x29, 0x4b, 0xe2, 0x16, 0x5a, 0xe4, 0x3d, 0x86, 0x74, 0x7e, 0xdf, 0x86, 0xc9, 0x59, 0x99, 0xd1,
+	0x1f, 0xab, 0x38, 0x54, 0x81, 0xfd, 0x06, 0x40, 0x95, 0xe5, 0x8d, 0x6e, 0x35, 0xe4, 0x96, 0x1a,
+	0xad, 0xdb, 0x31, 0x59, 0xd3, 0xbf, 0xdd, 0xcc, 0x07, 0x95, 0x25, 0x3b, 0x0d, 0x4b, 0x3e, 0x34,
+	0x75, 0xbd, 0xcb, 0x75, 0xfd, 0xdd, 0x86, 0x53, 0xdc, 0xd6, 0x6e, 0x1f, 0xff, 0xd6, 0xb5, 0xfa,
+	0x5e, 0x9c, 0x62, 0xaf, 0x3a, 0x45, 0xe7, 0xaf, 0xe8, 0x14, 0x85, 0x18, 0x55, 0x76, 0xb2, 0x39,
+	0x56, 0x76, 0xac, 0xbd, 0xd5, 0x6c, 0x58, 0xd7, 0xc7, 0x30, 0x38, 0x5f, 0xe1, 0xbe, 0x28, 0x95,
+	0x49, 0x45, 0x37, 0xc5, 0xe9, 0x94, 0x4a, 0x7c, 0x9b, 0x00, 0xfa, 0xf2, 0x22, 0x49, 0x9e, 0x62,
+	0x5d, 0xc7, 0x7a, 0xbe, 0x05, 0xed, 0xe3, 0x0f, 0x7f, 0x8c, 0x55, 0xfc, 0x3e, 0x4c, 0x2e, 0x8a,
+	0xe4, 0x6e, 0xbe, 0xc1, 0x5a, 0xfe, 0x0a, 0xd8, 0x27, 0x34, 0x79, 0x3c, 0x6f, 0x16, 0xf4, 0x11,
+	0xf4, 0x69, 0x09, 0x9e, 0xb5, 0x5f, 0x5b, 0x86, 0x5b, 0x80, 0x01, 0x35, 0x1c, 0xa7, 0xd8, 0x09,
+	0xe2, 0x67, 0x4f, 0xc3, 0x65, 0x98, 0x4f, 0xc0, 0xf9, 0x55, 0x17, 0xda, 0x87, 0x47, 0x4f, 0x5f,
+	0x52, 0x4e, 0x31, 0x7b, 0x8c, 0xc2, 0x78, 0xa1, 0x30, 0x10, 0x3d, 0x7f, 0x16, 0x69, 0x13, 0x1f,
+	0x9d, 0x3c, 0x5b, 0x29, 0x77, 0x68, 0x38, 0x87, 0xc8, 0xc0, 0xbe, 0xa9, 0x37, 0xcf, 0x92, 0x55,
+	0x2a, 0xfd, 0xed, 0xf0, 0x60, 0xaf, 0x61, 0x61, 0x5c, 0x69, 0x9f, 0x34, 0xfa, 0x11, 0x89, 0xb8,
+	0x46, 0xd2, 0x7e, 0x0f, 0x3a, 0x3c, 0x69, 0x87, 0xbf, 0x98, 0x6e, 0xfc, 0x02, 0xff, 0x5d, 0x96,
+	0xaa, 0x62, 0xb4, 0xbb, 0x21, 0x46, 0xff, 0x69, 0xc1, 0xa0, 0x5c, 0xa0, 0x3c, 0x30, 0x8b, 0x3d,
+	0x51, 0xc2, 0xce, 0x81, 0x81, 0xd1, 0x57, 0x05, 0x8d, 0x6d, 0x54, 0x30, 0x7a, 0xe5, 0x96, 0x21,
+	0xd8, 0xad, 0x0a, 0x89, 0x02, 0xb4, 0xdf, 0x85, 0x62, 0xcf, 0x3e, 0x2a, 0x2a, 0xe5, 0xea, 0x96,
+	0x31, 0x88, 0x41, 0xe5, 0x8c, 0x4a, 0x7d, 0x97, 0x23, 0x84, 0x86, 0xe2, 0x96, 0x5c, 0xdf, 0xa5,
+	0xfe, 0x1b, 0xca, 0xfe, 0x2e, 0xec, 0x96, 0xcb, 0x7b, 0x4b, 0xb5, 0xbc, 0xa4, 0x9a, 0x2b, 0x2d,
+	0xc0, 0xa4, 0x64, 0x9c, 0x08, 0xbe, 0xf7, 0x77, 0x0b, 0xb6, 0x8c, 0x4d, 0xb0, 0x27, 0x00, 0x3f,
+	0x4d, 0xa3, 0xb5, 0x87, 0x32, 0xd2, 0xad, 0x96, 0xfb, 0x61, 0xfc, 0x18, 0xe1, 0x4a, 0x48, 0xaf,
+	0x2e, 0x9b, 0x67, 0x27, 0x42, 0xe7, 0x08, 0x37, 0x0d, 0xd3, 0xde, 0x6c, 0x98, 0x17, 0xd6, 0x4e,
+	0x4c, 0x2f, 0x7c, 0x98, 0x26, 0x6f, 0x09, 0x21, 0xa8, 0x1f, 0xe7, 0xe6, 0x4e, 0x20, 0x84, 0x14,
+	0xcd, 0x78, 0x6d, 0x52, 0x16, 0x8f, 0x9d, 0x0f, 0x00, 0x7e, 0x42, 0x07, 0xc8, 0xcd, 0x05, 0xd9,
+	0x2d, 0x0c, 0x24, 0x71, 0xa3, 0xdd, 0x70, 0x48, 0x33, 0xd1, 0xe9, 0x69, 0x4e, 0x53, 0x38, 0x3f,
+	0x13, 0x4e, 0x00, 0x70, 0x94, 0xad, 0xd3, 0xfc, 0x5c, 0xe5, 0xb8, 0x1a, 0x7e, 0x75, 0xad, 0xd6,
+	0x6c, 0x83, 0x91, 0x4b, 0x43, 0x2e, 0x4e, 0x51, 0x48, 0xb5, 0x29, 0x4e, 0xe2, 0x99, 0x5c, 0x14,
+	0xa9, 0x38, 0x31, 0x76, 0x4a, 0x10, 0x89, 0x68, 0xee, 0x74, 0x8d, 0x48, 0x5b, 0x44, 0x04, 0x63,
+	0x11, 0xe7, 0x3f, 0x16, 0xdc, 0x33, 0x55, 0xf4, 0x70, 0x46, 0xc9, 0xf5, 0x24, 0x09, 0xc2, 0xab,
+	0x35, 0x9d, 0xa5, 0xcf, 0xb4, 0xf1, 0x2f, 0x43, 0xd1, 0xfe, 0xb8, 0x0c, 0xcb, 0x25, 0x80, 0xc7,
+	0x52, 0x54, 0xe3, 0xb2, 0xfd, 0x1d, 0xbb, 0x05, 0x69, 0x1f, 0xc3, 0x20, 0xc1, 0xc4, 0x20, 0x59,
+	0xbc, 0xc3, 0x59, 0xe9, 0x3b, 0x8d, 0x08, 0xd8, 0xb0, 0xf4, 0xfe, 0xc7, 0xc5, 0x17, 0x6e, 0xf5,
+	0xb1, 0xf3, 0x1e, 0x7a, 0x85, 0x99, 0x14, 0xa0, 0x27, 0xfd, 0x3b, 0xa6, 0x9e, 0xa1, 0x38, 0x0b,
+	0xe5, 0x8d, 0x16, 0x65, 0x28, 0x4e, 0x41, 0x1d, 0xe7, 0x2d, 0x18, 0x94, 0xb3, 0x50, 0xb6, 0xc1,
+	0x1e, 0x14, 0xf3, 0x16, 0xd0, 0x05, 0x88, 0x3c, 0x72, 0x62, 0x39, 0x3f, 0xc3, 0x96, 0xbb, 0xbe,
+	0xf6, 0x17, 0x74, 0x5f, 0x2f, 0x49, 0xd3, 0x95, 0xa5, 0xda, 0x75, 0x4b, 0x39, 0x7f, 0xb1, 0x24,
+	0x5d, 0x71, 0xb9, 0x7e, 0x1f, 0xba, 0xd2, 0x6a, 0x5a, 0x1b, 0x12, 0x47, 0x21, 0xc5, 0x03, 0x57,
+	0x04, 0xf7, 0xb4, 0x6c, 0xa6, 0xee, 0x95, 0x92, 0xb8, 0x0a, 0xaf, 0x2c, 0xe2, 0xbf, 0x55, 0x2b,
+	0xbb, 0xd4, 0x84, 0xfb, 0x3a, 0xf7, 0xb4, 0x52, 0x45, 0xf7, 0xd9, 0x27, 0xe0, 0x1c, 0x69, 0x6e,
+	0xc2, 0x89, 0x69, 0x54, 0x37, 0x4e, 0x3e, 0x24, 0xcc, 0xd8, 0xd0, 0xf9, 0x37, 0x16, 0xd6, 0x67,
+	0x49, 0x38, 0x53, 0x17, 0x7e, 0x36, 0x57, 0x39, 0xbd, 0x36, 0x94, 0xf7, 0x09, 0x1c, 0xd9, 0x1f,
+	0x62, 0x65, 0x64, 0x8e, 0xf8, 0xea, 0xf0, 0xe0, 0xcd, 0xc6, 0x46, 0x6a, 0x9f, 0xee, 0xcb, 0x9f,
+	0x5b, 0xc8, 0xef, 0xfd, 0xc1, 0x82, 0x9e, 0x99, 0xb5, 0x61, 0xea, 0xf6, 0xff, 0x60, 0xea, 0x32,
+	0x10, 0xdb, 0xf5, 0x40, 0x7c, 0xb5, 0xba, 0xb1, 0xd4, 0x73, 0xa6, 0x5c, 0x5c, 0xde, 0x86, 0xfe,
+	0x6c, 0x11, 0x46, 0xd8, 0xbd, 0xc4, 0xcd, 0x9c, 0x5a, 0xc2, 0x4e, 0x02, 0x3b, 0x55, 0x39, 0xe3,
+	0x40, 0x7d, 0xd9, 0x7d, 0xea, 0xd6, 0x8d, 0x4e, 0xf4, 0xac, 0x43, 0xa4, 0xd3, 0x55, 0xb4, 0xc2,
+	0x06, 0xa8, 0xdd, 0xd0, 0x89, 0x31, 0xe7, 0x97, 0x78, 0x7b, 0x4b, 0x02, 0x35, 0x2b, 0xde, 0x81,
+	0xa8, 0x7d, 0x89, 0xd2, 0x85, 0xcf, 0x07, 0xdc, 0x75, 0x85, 0xa0, 0xf3, 0xbd, 0x54, 0xb9, 0xcf,
+	0xad, 0x56, 0xd7, 0xe5, 0x31, 0x55, 0x2a, 0xec, 0xb5, 0xaf, 0xd0, 0x1d, 0xe4, 0x03, 0xf2, 0xb8,
+	0x32, 0x39, 0x0b, 0xe7, 0x90, 0x3f, 0x2e, 0x1e, 0x53, 0x3a, 0x77, 0x1f, 0x53, 0x3e, 0xef, 0x55,
+	0x97, 0x0e, 0xfd, 0x05, 0x6e, 0xff, 0x0d, 0x00, 0x4d, 0x22, 0x5e, 0x12, 0x47, 0xb7, 0x7a, 0xc6,
+	0x01, 0x33, 0x3e, 0x46, 0x1c, 0x13, 0xeb, 0x68, 0x56, 0x15, 0x69, 0x29, 0x8c, 0x23, 0xb7, 0x81,
+	0xd9, 0x3f, 0x80, 0xe1, 0x55, 0x96, 0x2c, 0x3d, 0x49, 0x4d, 0xac, 0xd3, 0xf0, 0xe0, 0xb5, 0x3b,
+	0x21, 0xc0, 0x0a, 0xed, 0xf3, 0xaf, 0x0b, 0xf4, 0xc1, 0x11, 0xcb, 0x97, 0x9f, 0x4b, 0xda, 0xe2,
+	0x53, 0xfc, 0x52, 0x9f, 0x4b, 0x92, 0xf8, 0xff, 0x79, 0xc1, 0xb1, 0xf7, 0xab, 0xf7, 0xc2, 0x11,
+	0x1b, 0xe1, 0x7e, 0x33, 0xfa, 0x84, 0x57, 0xbd, 0x22, 0xde, 0x79, 0x76, 0x1b, 0x6f, 0x78, 0x76,
+	0xab, 0xf5, 0xfa, 0xdb, 0x72, 0xf7, 0x2a, 0x7a, 0x7d, 0xbc, 0x8c, 0x54, 0x6f, 0x1f, 0x3b, 0x12,
+	0x03, 0x25, 0x40, 0xcd, 0x2d, 0x3a, 0x46, 0x18, 0x2b, 0xad, 0x66, 0x9a, 0x6f, 0x46, 0x68, 0xb4,
+	0x0a, 0xa1, 0xfe, 0x3d, 0x0c, 0x22, 0xe1, 0xee, 0x4a, 0xff, 0x5e, 0xd0, 0xf6, 0x07, 0x60, 0xeb,
+	0x9c, 0xde, 0x78, 0xbc, 0x9a, 0x9f, 0xc8, 0x9d, 0xa8, 0x70, 0xb1, 0x5d, 0x11, 0xa8, 0x35, 0x80,
+	0xa5, 0x4f, 0xdf, 0xbb, 0xe3, 0xd3, 0x7b, 0x3f, 0x85, 0xae, 0xb8, 0x73, 0xf1, 0x04, 0x68, 0x6d,
+	0x78, 0x02, 0x6c, 0x6d, 0x78, 0x02, 0x6c, 0x6f, 0x7c, 0x02, 0xec, 0xd4, 0x9f, 0x00, 0xe9, 0xc1,
+	0x68, 0xe8, 0x2a, 0x6c, 0xc1, 0x74, 0xfe, 0x28, 0x4a, 0x2e, 0xe9, 0xb2, 0x69, 0x62, 0xc4, 0x2b,
+	0x6e, 0xad, 0x92, 0xc6, 0xb6, 0x0d, 0x7c, 0x61, 0x2e, 0xaf, 0x35, 0xc1, 0xe2, 0xd2, 0xd9, 0x6a,
+	0x08, 0x1e, 0x99, 0xbb, 0xe7, 0xf7, 0xe0, 0x5e, 0x91, 0x6e, 0xea, 0xaf, 0x2c, 0x72, 0x31, 0xb1,
+	0x0d, 0xeb, 0x71, 0xc5, 0x71, 0xfe, 0x65, 0xc1, 0x48, 0xdc, 0x1b, 0x8b, 0xd8, 0x55, 0x38, 0xbf,
+	0xfb, 0x56, 0x65, 0x7d, 0x89, 0xb7, 0xaa, 0xd6, 0xdd, 0xb7, 0x2a, 0x4c, 0x7c, 0x7e, 0x14, 0x25,
+	0xcf, 0xbd, 0x45, 0xbe, 0x8c, 0x24, 0x79, 0x61, 0x1b, 0x45, 0xc8, 0x31, 0x02, 0x74, 0x1d, 0x37,
+	0x37, 0x1e, 0x2f, 0x52, 0xf1, 0x3c, 0x5f, 0x18, 0x53, 0x8d, 0x0d, 0xfa, 0x94, 0x41, 0xac, 0x76,
+	0xf7, 0xc3, 0x25, 0x09, 0xdd, 0x12, 0x96, 0x67, 0x07, 0x9b, 0x79, 0x27, 0x8d, 0x2f, 0x1a, 0xcf,
+	0x31, 0xbd, 0x5b, 0xcf, 0x31, 0xd7, 0x30, 0x3e, 0x5f, 0xcd, 0xe7, 0x68, 0x7f, 0xb3, 0xdb, 0x17,
+	0x3f, 0x9c, 0xd3, 0x95, 0xcb, 0xbc, 0x06, 0xf9, 0x91, 0x24, 0x2d, 0xb7, 0x86, 0x50, 0x90, 0xa1,
+	0xbf, 0x2c, 0xbc, 0x3c, 0xf1, 0x72, 0x3f, 0xba, 0x36, 0x3b, 0x04, 0xc2, 0x2e, 0x92, 0x0b, 0x44,
+	0x1e, 0xb5, 0x8e, 0xad, 0xff, 0x06, 0x00, 0x00, 0xff, 0xff, 0x85, 0xe0, 0xf0, 0x3c, 0xbf, 0x17,
+	0x00, 0x00,
 }
