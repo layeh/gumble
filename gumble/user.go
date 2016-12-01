@@ -44,8 +44,11 @@ type User struct {
 	// The user's texture hash. nil if User.Texture has been populated.
 	TextureHash []byte
 
-	// The user's stats. Containts nil if the stats have not yet been requested.
+	// The user's stats. Contains nil if the stats have not yet been requested.
 	Stats *UserStats
+
+	// The user's jitter buffer, audio is held here for smoother playback.
+	buffer *jitterBuffer
 
 	client  *Client
 	decoder AudioDecoder

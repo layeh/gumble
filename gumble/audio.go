@@ -79,7 +79,6 @@ type AudioPacket struct {
 	Target *VoiceTarget
 
 	AudioBuffer
-
 	HasPosition bool
 	X, Y, Z     float32
 }

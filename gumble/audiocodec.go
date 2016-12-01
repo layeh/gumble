@@ -51,5 +51,7 @@ type AudioEncoder interface {
 type AudioDecoder interface {
 	ID() int
 	Decode(data []byte, frameSize int) ([]int16, error)
+	SampleSize(data []byte) (int, error)
+	CountFrames(data []byte) (int, error)
 	Reset()
 }
