@@ -13,7 +13,7 @@ import (
 
 const (
 	// JitterStartDelay is the starting delay we will start our buffer with
-	jitterStartDelay = 100 * time.Millisecond
+	jitterStartDelay = 200 * time.Millisecond
 )
 
 // jbAudioPacket holds pre-decoded audio samples
@@ -50,10 +50,8 @@ func (h *jitterBufferHeap) Pop() interface{} {
 
 // jitterBuffer struct holds all information to run the jitter buffer
 // seq is the current sequence number of the audio packets we have sent to be played
-//...
 type jitterBuffer struct {
 	seq           int64
-	delay         *time.Timer
 	jitter        time.Duration
 	heap          jitterBufferHeap
 	bufferSamples int64
@@ -65,7 +63,7 @@ type jitterBuffer struct {
 	RunningLock   *sync.Mutex
 }
 
-// Creates a new jitterBuffer, starts the go routine to handle all packets
+// Creates a new jitterBuffer
 func newJitterBuffer() *jitterBuffer {
 	jb := &jitterBuffer{
 		running:     false,
@@ -74,8 +72,6 @@ func newJitterBuffer() *jitterBuffer {
 		HeapLock:    &sync.Mutex{},
 		RunningLock: &sync.Mutex{},
 	}
-	//heap.Init(jb.heap)
-	//jb.process() ???
 	return jb
 }
 
@@ -83,7 +79,6 @@ func newJitterBuffer() *jitterBuffer {
 func (j *jitterBuffer) AddPacket(ap *jbAudioPacket) error {
 	samples, err := j.user.decoder.SampleSize(ap.Opus)
 	if err != nil {
-		//fmt.Fprintf(os.Stderr, "%s %v\n", err, ap.Opus)
 		return err
 	}
 	ap.Samples = samples
@@ -105,8 +100,7 @@ func (j *jitterBuffer) AddPacket(ap *jbAudioPacket) error {
 	return nil
 }
 
-// TODO Kill stream if no audio for X seconds, don't depend on is last
-// Should only be called once internally, handles all packets.
+// TODO don't depend on is last
 func (j *jitterBuffer) process() {
 	time.Sleep(j.jitter)
 	var chans []chan *AudioPacket
@@ -128,16 +122,8 @@ func (j *jitterBuffer) process() {
 	}
 	j.client.volatileLock.Unlock()
 	for {
-
-		// Handle jitter buffer/*|| float64((j.bufferSamples/(AudioSampleRate/1000))) < j.delayMs.Seconds()*1000*/
-		/*if len(j.heap) == 0  {
-			j.RunningLock.Lock()
-			j.running = false
-			j.RunningLock.Unlock()
-			break // TODO handle better (could run out w/ more audio on the way)
-		}*/
 		if len(j.heap) == 0 {
-			continue // TODO Not right? :\
+			continue
 		}
 		j.HeapLock.Lock()
 		if j.target != j.heap[0].Target {
