@@ -52,6 +52,9 @@ type Client struct {
 
 	// Ping stats
 	tcpPacketsReceived uint32
+	tcpPingTimes       [12]float32
+	tcpPingAvg         uint32
+	tcpPingVar         uint32
 
 	// A collection containing the server's context actions.
 	ContextActions ContextActions
@@ -195,9 +198,13 @@ func (c *Client) pingRoutine() {
 	defer ticker.Stop()
 
 	var timestamp uint64
+	var tcpPingAvg float32
+	var tcpPingVar float32
 	packet := MumbleProto.Ping{
 		Timestamp:  &timestamp,
 		TcpPackets: &c.tcpPacketsReceived,
+		TcpPingAvg: &tcpPingAvg,
+		TcpPingVar: &tcpPingVar,
 	}
 
 	for {
@@ -205,7 +212,9 @@ func (c *Client) pingRoutine() {
 		case <-c.end:
 			return
 		case t := <-ticker.C:
-			timestamp = uint64(t.Unix())
+			timestamp = uint64(t.UnixNano())
+			tcpPingAvg = math.Float32frombits(atomic.LoadUint32(&c.tcpPingAvg))
+			tcpPingVar = math.Float32frombits(atomic.LoadUint32(&c.tcpPingVar))
 			c.Conn.WriteProto(&packet)
 		}
 	}

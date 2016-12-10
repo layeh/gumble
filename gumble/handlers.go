@@ -189,7 +189,39 @@ func (c *Client) handlePing(buffer []byte) error {
 	if err := proto.Unmarshal(buffer, &packet); err != nil {
 		return err
 	}
+
 	atomic.AddUint32(&c.tcpPacketsReceived, 1)
+
+	if packet.Timestamp != nil {
+		diff := time.Since(time.Unix(0, int64(*packet.Timestamp)))
+
+		index := int(c.tcpPacketsReceived) - 1
+		if index >= len(c.tcpPingTimes) {
+			for i := 1; i < len(c.tcpPingTimes); i++ {
+				c.tcpPingTimes[i-1] = c.tcpPingTimes[i]
+			}
+			index = len(c.tcpPingTimes) - 1
+		}
+
+		// average is in milliseconds
+		ping := float32(diff.Seconds() * 1000)
+		c.tcpPingTimes[index] = ping
+
+		var sum float32
+		for i := 0; i <= index; i++ {
+			sum += c.tcpPingTimes[i]
+		}
+		avg := sum / float32(index+1)
+
+		sum = 0
+		for i := 0; i <= index; i++ {
+			sum += (avg - c.tcpPingTimes[i]) * (avg - c.tcpPingTimes[i])
+		}
+		variance := sum / float32(index+1)
+
+		atomic.StoreUint32(&c.tcpPingAvg, math.Float32bits(avg))
+		atomic.StoreUint32(&c.tcpPingVar, math.Float32bits(variance))
+	}
 	return nil
 }
 
