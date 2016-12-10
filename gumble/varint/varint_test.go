@@ -8,13 +8,13 @@ func TestRange(t *testing.T) {
 		var b [MaxVarintLen]byte
 		size := Encode(b[:], i)
 		if size == 0 {
-			t.Errorf("Encode returned size 0\n")
+			t.Error("Encode returned size 0\n")
 		}
 		s := b[:size]
 
 		val, size := Decode(s)
 		if size == 0 {
-			t.Errorf("Decode return size 0\n")
+			t.Error("Decode return size 0\n")
 		}
 
 		if i != val {
