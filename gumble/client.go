@@ -202,8 +202,8 @@ func (c *Client) pingRoutine() {
 		select {
 		case <-c.end:
 			return
-		case time := <-ticker.C:
-			*packet.Timestamp = uint64(time.Unix())
+		case t := <-ticker.C:
+			*packet.Timestamp = uint64(t.Unix())
 			c.Conn.WriteProto(&packet)
 		}
 	}
