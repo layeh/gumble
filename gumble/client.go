@@ -190,7 +190,7 @@ func (c *Client) AudioOutgoing() chan<- AudioBuffer {
 
 // pingRoutine sends ping packets to the server at regular intervals.
 func (c *Client) pingRoutine() {
-	ticker := time.NewTicker(time.Second * 10)
+	ticker := time.NewTicker(time.Second * 5)
 	defer ticker.Stop()
 
 	packet := MumbleProto.Ping{
