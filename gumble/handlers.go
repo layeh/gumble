@@ -22,11 +22,7 @@ var (
 	errNoCodec              = errors.New("gumble: no audio codec")
 )
 
-type handlerFunc func(*Client, []byte) error
-
-const handlerCount = 26
-
-var handlers = [handlerCount]handlerFunc{
+var handlers = [...]func(*Client, []byte) error{
 	(*Client).handleVersion,
 	(*Client).handleUDPTunnel,
 	(*Client).handleAuthenticate,

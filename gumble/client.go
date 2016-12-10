@@ -221,7 +221,7 @@ func (c *Client) readRoutine() {
 		if err != nil {
 			break
 		}
-		if pType < handlerCount {
+		if int(pType) < len(handlers) {
 			handlers[pType](c, data)
 		}
 	}
