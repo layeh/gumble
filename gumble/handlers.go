@@ -189,7 +189,7 @@ func (c *Client) handlePing(buffer []byte) error {
 	if err := proto.Unmarshal(buffer, &packet); err != nil {
 		return err
 	}
-	atomic.AddUint32(&c.pingStats.TCPPackets, 1)
+	atomic.AddUint32(&c.tcpPacketsReceived, 1)
 	return nil
 }
 

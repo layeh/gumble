@@ -50,7 +50,8 @@ type Client struct {
 	permissions map[uint32]*Permission
 	tmpACL      *ACL
 
-	pingStats pingStats
+	// Ping stats
+	tcpPacketsReceived uint32
 
 	// A collection containing the server's context actions.
 	ContextActions ContextActions
@@ -193,9 +194,10 @@ func (c *Client) pingRoutine() {
 	ticker := time.NewTicker(time.Second * 5)
 	defer ticker.Stop()
 
+	var timestamp uint64
 	packet := MumbleProto.Ping{
-		Timestamp:  proto.Uint64(0),
-		TcpPackets: &c.pingStats.TCPPackets,
+		Timestamp:  &timestamp,
+		TcpPackets: &c.tcpPacketsReceived,
 	}
 
 	for {
@@ -203,7 +205,7 @@ func (c *Client) pingRoutine() {
 		case <-c.end:
 			return
 		case t := <-ticker.C:
-			*packet.Timestamp = uint64(t.Unix())
+			timestamp = uint64(t.Unix())
 			c.Conn.WriteProto(&packet)
 		}
 	}
