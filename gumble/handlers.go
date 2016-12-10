@@ -1117,6 +1117,54 @@ func (c *Client) handleUserStats(buffer []byte) error {
 		}
 		stats := user.Stats
 
+		if packet.FromClient != nil {
+			if packet.FromClient.Good != nil {
+				stats.FromClient.Good = *packet.FromClient.Good
+			}
+			if packet.FromClient.Late != nil {
+				stats.FromClient.Late = *packet.FromClient.Late
+			}
+			if packet.FromClient.Lost != nil {
+				stats.FromClient.Lost = *packet.FromClient.Lost
+			}
+			if packet.FromClient.Resync != nil {
+				stats.FromClient.Resync = *packet.FromClient.Resync
+			}
+		}
+		if packet.FromServer != nil {
+			if packet.FromServer.Good != nil {
+				stats.FromServer.Good = *packet.FromServer.Good
+			}
+			if packet.FromClient.Late != nil {
+				stats.FromServer.Late = *packet.FromServer.Late
+			}
+			if packet.FromClient.Lost != nil {
+				stats.FromServer.Lost = *packet.FromServer.Lost
+			}
+			if packet.FromClient.Resync != nil {
+				stats.FromServer.Resync = *packet.FromServer.Resync
+			}
+		}
+
+		if packet.UdpPackets != nil {
+			stats.UDPPackets = *packet.UdpPackets
+		}
+		if packet.UdpPingAvg != nil {
+			stats.UDPPingAverage = *packet.UdpPingAvg
+		}
+		if packet.UdpPingVar != nil {
+			stats.UDPPingVariance = *packet.UdpPingVar
+		}
+		if packet.TcpPackets != nil {
+			stats.TCPPackets = *packet.TcpPackets
+		}
+		if packet.TcpPingAvg != nil {
+			stats.TCPPingAverage = *packet.TcpPingAvg
+		}
+		if packet.TcpPingVar != nil {
+			stats.TCPPingVariance = *packet.TcpPingVar
+		}
+
 		if packet.Version != nil {
 			stats.Version = parseVersion(packet.Version)
 		}
