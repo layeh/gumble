@@ -113,9 +113,7 @@ func DialWithDialer(dialer *net.Dialer, addr string, config *Config, tlsConfig *
 		end:     make(chan struct{}),
 	}
 
-	// Background workers
 	go client.readRoutine()
-	go client.pingRoutine()
 
 	// Initial packets
 	versionPacket := MumbleProto.Version{
@@ -132,6 +130,8 @@ func DialWithDialer(dialer *net.Dialer, addr string, config *Config, tlsConfig *
 	}
 	client.Conn.WriteProto(&versionPacket)
 	client.Conn.WriteProto(&authenticationPacket)
+
+	go client.pingRoutine()
 
 	var deadline time.Time
 	if !dialer.Deadline.IsZero() {
@@ -207,15 +207,18 @@ func (c *Client) pingRoutine() {
 		TcpPingVar: &tcpPingVar,
 	}
 
+	t := time.Now()
 	for {
+		timestamp = uint64(t.UnixNano())
+		tcpPingAvg = math.Float32frombits(atomic.LoadUint32(&c.tcpPingAvg))
+		tcpPingVar = math.Float32frombits(atomic.LoadUint32(&c.tcpPingVar))
+		c.Conn.WriteProto(&packet)
+
 		select {
 		case <-c.end:
 			return
-		case t := <-ticker.C:
-			timestamp = uint64(t.UnixNano())
-			tcpPingAvg = math.Float32frombits(atomic.LoadUint32(&c.tcpPingAvg))
-			tcpPingVar = math.Float32frombits(atomic.LoadUint32(&c.tcpPingVar))
-			c.Conn.WriteProto(&packet)
+		case t = <-ticker.C:
+			// continue to top of loop
 		}
 	}
 }
