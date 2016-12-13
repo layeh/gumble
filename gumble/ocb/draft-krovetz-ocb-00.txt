@@ -1,0 +1,787 @@
+
+
+
+
+
+
+CFRG Working Group                                            T. Krovetz
+INTERNET-DRAFT                                            CSU Sacramento
+Expires September 2005                                        P. Rogaway
+                                                                UC Davis
+                                                              March 2005
+
+               The OCB Authenticated-Encryption Algorithm
+                       <draft-krovetz-ocb-00.txt>
+
+   By submitting this Internet-Draft, we certify that any applicable
+   patent or other IPR claims of which we are aware have been disclosed,
+   or will be disclosed, and any of which we become aware will be
+   disclosed, in accordance with RFC 3668
+
+Status of this Memo
+
+   This document is an Internet-Draft and is in full conformance with
+   all provisions of Section 10 of RFC2026.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF), its areas, and its working groups.  Note that
+   other groups may also distribute working documents as Internet-
+   Drafts.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   The list of current Internet-Drafts can be accessed at
+   http://www.ietf.org/1id-abstracts.html
+
+   The list of Internet-Draft Shadow Directories can be accessed at
+   http://www.ietf.org/shadow.html.
+
+Abstract
+
+   This document specifies OCB 2.0, a shared-key encryption scheme
+   combining privacy and authenticity.  This blockcipher-based, single-
+   pass mechanism provides privacy and authenticity for a message, plus
+   authenticity for any associated header.  It does this in the most
+   simple and efficient way known.
+
+
+
+
+
+
+
+
+
+Krovetz, Rogaway         Expires September 2005                [Page 1]
+
+INTERNET-DRAFT                     OCB                        March 2005
+
+
+                           Table of Contents
+
+1  Introduction  . . . . . . . . . . . . . . . . . . . . . . . . . .   3
+2  Notation and Basic Operations . . . . . . . . . . . . . . . . . .   4
+3  OCB Parameters  . . . . . . . . . . . . . . . . . . . . . . . . .   5
+4  Header Authentication: PMAC . . . . . . . . . . . . . . . . . . .   5
+5  Encryption: OCB-ENCRYPT . . . . . . . . . . . . . . . . . . . . .   6
+6  Decryption: OCB-DECRYPT . . . . . . . . . . . . . . . . . . . . .   8
+7  Security Considerations . . . . . . . . . . . . . . . . . . . . .   9
+8  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . . .  11
+Appendix - Test Vectors  . . . . . . . . . . . . . . . . . . . . . .  11
+References . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  13
+Author Contact Information . . . . . . . . . . . . . . . . . . . . .  13
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Krovetz, Rogaway         Expires September 2005                [Page 2]
+
+INTERNET-DRAFT                     OCB                        March 2005
+
+
+1  Introduction
+
+   An authenticated-encryption scheme allows parties who share a key to
+   communicate in a way that ensures both privacy and authenticity.
+   This document specifies the authenticated-encryption scheme OCB 2.0.
+   The method is a refinement, based on work of Rogaway [Offsets], to
+   Rogaway, Bellare, and Black's original OCB [OCB1].  The latter was,
+   in turn, a refinement to Jutla's IAPM [Jutla].  Henceforth in this
+   document, "OCB" is understood to mean OCB 2.0.
+
+   OCB depends on a blockcipher, typically AES [AES].  Encryption and
+   decryption employ a nonce N, which must be selected as a new value
+   for each encryption.  OCB allows a header H to be specified when one
+   encrypts or decrypts a string.  The plaintext message M and the
+   header H can have any bitlength.  The ciphertext (C, T) one gets by
+   encrypting M in the presence of H consists of a ciphertext core C
+   having the same length as M, plus an authentication tag T.  If
+   desired, the user may truncate T.
+
+   OCB encryption protects the privacy of M and and the authenticity of
+   H, N, and M.  It does this using h + m + 2 blockcipher calls, where h
+   is the blocklength of H and m is the blocklength of M.  If H is fixed
+   during a session then, after preprocessing, there is effectively no
+   cost to have H authenticated, and the mode will use m + 2 blockcipher
+   calls.  OCB requires a single key K for the underlying blockcipher,
+   and all blockcipher calls are keyed by K.  OCB is on-line: one need
+   not know the length of H or M to proceed with encryption, nor need
+   one know the length of H or C to proceed with decryption.  OCB is
+   parallelizable: the bulk of its blockcipher calls can be performed
+   simultaneously.  Computational work beyond blockcipher calls consists
+   of a small and fixed number of logical operations per call.  OCB
+   enjoys provable security: the mode of operation is secure assuming
+   that the underlying blockcipher is secure.
+
+   Two characteristics differentiate OCB 2.0 from its predecessor.  The
+   first is the built-in capability of handling the header H, and the
+   second is the simpler way in which offsets are computed.
+
+   Pending patent applications submitted by Rogaway apply to OCB.
+   Rogaway grants free and unrestricted use of his OCB-related
+   intellectual property for code released under the GNU General Public
+   License [GPL].  Further royalty-free uses are also available.  Direct
+   licensing inquiries to Rogaway.  Two other parties, IBM and VDG Inc.,
+   are also known to have patent applications dealing with authenticated
+   encryption.
+
+
+
+
+
+
+Krovetz, Rogaway         Expires September 2005                [Page 3]
+
+INTERNET-DRAFT                     OCB                        March 2005
+
+
+2  Notation and Basic Operations
+
+   There are two types of variables used in this specification, strings
+   and integers.  String variables are always written with an initial
+   upper-case letter while integer variables are written in all lower-
+   case.  Functions, except for the simple ones defined in this section,
+   are written in all upper-case.  Whenever a variable is followed by an
+   underscore ("_"), the underscore is intended to denote a subscript,
+   with the subscripted expression requiring evaluation to resolve the
+   meaning of the variable.  For example, when i = 2, then M_i refers to
+   the variable M_2.
+
+   The following operations are used throughout the definition of OCB.
+
+     c^i            The integer c raised to the i-th power.
+
+     ceil(x)        The smallest integer no smaller than x.
+
+     bitlength(S)   The length of string S in bits (eg, bitlength(101) =
+                    3).
+
+     zeros(n)       The string made of n zero-bits.
+
+     S xor T        The string that is the bitwise exclusive-or of S and
+                    T.  Strings S and T must have the same length.
+
+     S[i]           The i-th bit of the string S (indices begin at 1).
+
+     S[i..j]        The substring of S consisting of bits i through j.
+
+     S || T         The string S concatenated with string T (eg, 000 ||
+                    111 = 000111).
+
+     S << n         The string S shifted left n bit positions.  More
+                    formally, S << n = S[n+1..bitlength(S)] || zeros(n).
+
+     num2str(x, n)  The n-bit binary representation of the integer x.
+                    More formally, the n-bit string S where x = S[1] *
+                    2^{n-1} + S[2] * 2^{n-2} + ... + S[n] * 2^{0}.  Only
+                    used when 0 <= x < 2^n.
+
+     const(n)       The lexicographically first n-bit string C among all
+                    strings that have a minimal possible number of "1"
+                    bits and which name a polynomial x^n + C[1] *
+                    x^{n-1} + ... + C[n-1] * x^1 + C[n] * x^0 that is
+                    irreducible over the field with two elements.  In
+                    particular, const(128) = num2str(135, 128).  For
+                    other values of n, refer to a standard table of
+
+
+
+Krovetz, Rogaway         Expires September 2005                [Page 4]
+
+INTERNET-DRAFT                     OCB                        March 2005
+
+
+                    irreducible polynomials [Irred].
+
+     times2(S)      S << 1 if S[1] = 0, and (S << 1) xor
+                    const(bitlength(S)) if S[1] = 1.
+
+     times3(S)      times2(S) xor S
+
+
+3  OCB Parameters
+
+   OCB requires the services of a blockcipher.  The selection of a
+   blockcipher defines the following constants and functions.
+
+     BLOCKLEN         The length of the plaintext block that the block-
+                      cipher operates on.
+
+     KEYLEN           The blockcipher's key length, in bits.
+
+     ENCIPHER(K,P)    The application of the blockcipher on P (a string
+                      of BLOCKLEN bits) using key K (a string of KEYLEN
+                      bits).
+
+     DECIPHER(K,C)    The application of the inverse of the blockcipher
+                      on C (a string of BLOCKLEN bits) using key K (a
+                      string of KEYLEN bits).
+
+   As an example, if AES is used with 192-bit keys, then BLOCKLEN would
+   equal 128 (because AES employs 128-bit blocks), KEYLEN would equal
+   192, ENCIPHER would refer to the AES function, and DECIPHER would
+   refer to its inverse.
+
+
+4  Header Authentication: PMAC
+
+   OCB has the ability to authenticate unencrypted data (a "header") at
+   the same time that it authenticates and encrypts a message.  The
+   following function is central to providing this functionality.
+
+   Function name:
+     PMAC
+   Input:
+     K, string of KEYLEN bits
+     H, string of any length        // Header to co-authenticate
+   Output:
+     Auth, string of BLOCKLEN bits  // Header authenticator
+
+   Compute Auth using the following algorithm.
+
+
+
+
+Krovetz, Rogaway         Expires September 2005                [Page 5]
+
+INTERNET-DRAFT                     OCB                        March 2005
+
+
+     //
+     // Break H into blocks
+     //
+     m = max(1, ceil(bitlength(H) / BLOCKLEN))
+     Let H_1, H_2, ..., H_m be strings such that H = H_1 || H_2 || ...
+       || H_m and bitlength(H_i) = BLOCKLEN for all 0 < i < m.
+
+     //
+     // Initialize strings used for offsets and checksums
+     //
+     Offset = ENCIPHER(K, zeros(BLOCKLEN))
+     Offset = times3(Offset)
+     Offset = times3(Offset)
+     Checksum = zeros(BLOCKLEN)
+
+     //
+     // Accumulate the first m - 1 blocks
+     //
+     for i = 1 to m - 1 do           // Skip if m < 2
+        Offset = times2(Offset)
+        Checksum = Checksum xor ENCIPHER(K, H_i xor Offset)
+     end for
+
+     //
+     // Accumulate the final block
+     //
+     Offset = times2(Offset)
+     if bitlength(H_m) = BLOCKLEN then
+        Offset = times3(Offset)
+        Checksum = Checksum xor H_m
+     else
+        Offset = times3(Offset)
+        Offset = times3(Offset)
+        Tmp = H_m || 1 || zeros(BLOCKLEN - (bitlength(H_m) + 1))
+        Checksum = Checksum xor Tmp
+     end if
+
+     //
+     // Compute result
+     //
+     Auth = ENCIPHER(K, Offset xor Checksum)
+
+
+5  Encryption: OCB-ENCRYPT
+
+   This function computes a ciphertext and authentication tag when given
+   a message, header, nonce and key.
+
+
+
+
+Krovetz, Rogaway         Expires September 2005                [Page 6]
+
+INTERNET-DRAFT                     OCB                        March 2005
+
+
+   Function name:
+     OCB-ENCRYPT
+   Input:
+     K, string of KEYLEN bits          // Key
+     N, string of BLOCKLEN bits        // Nonce
+     H, string of any length           // Header
+     M, string of any length           // Plaintext
+   Output:
+     C, string of length equal to M    // Ciphertext core
+     T, string of BLOCKLEN bits        // Authentication tag
+
+   Compute C and T using the following algorithm.
+
+     //
+     // Break M into blocks
+     //
+     m = max(1,ceil(bitlength(M) / BLOCKLEN))
+     Let M_1, M_2, ..., M_m be strings such that M = M_1 || M_2 || ...
+       || M_m and bitlength(M_i) = BLOCKLEN for all 0 < i < m.
+
+     //
+     // Initialize strings used for offsets and checksums
+     //
+     Offset = ENCIPHER(K,N)
+     Checksum = zeros(BLOCKLEN)
+
+     //
+     // Encrypt and accumulate first m - 1 blocks
+     //
+     for i = 1 to m - 1 do           // Skip if m < 2
+        Offset = times2(Offset)
+        Checksum = Checksum xor M_i
+        C_i = Offset xor ENCIPHER(K, M_i xor Offset)
+     end for
+
+     //
+     // Encrypt and accumulate final block
+     //
+     Offset = times2(Offset)
+     b = bitlength(M_m)              // Value in 0..BLOCKLEN
+     Pad = ENCIPHER(K, num2str(b, BLOCKLEN) xor Offset)
+     C_m = M_m xor Pad[1..b]         // Encrypt M_m
+     Tmp = M_m || Pad[b+1..BLOCKLEN]
+     Checksum = Checksum xor Tmp
+
+     //
+     // Compute authentication tag
+     //
+
+
+
+Krovetz, Rogaway         Expires September 2005                [Page 7]
+
+INTERNET-DRAFT                     OCB                        March 2005
+
+
+     Offset = times3(Offset)
+     T = ENCIPHER(K, Checksum xor Offset)
+     if bitlength(H) > 0 then
+        T = T xor PMAC(K, H)
+     end if
+
+     //
+     // Assemble the ciphertext
+     //
+     C = C_1 || C_2 || ... || C_m
+
+
+6  Decryption: OCB-DECRYPT
+
+   This function takes as input a ciphertext, header, authentication
+   tag, nonce and key, and returns a plaintext and a determination as to
+   whether the given tag is valid for the given ciphertext, header,
+   nonce and key.
+
+   Function name:
+     OCB-DECRYPT
+   Input:
+     K, string of KEYLEN bits                 // Key
+     N, string of BLOCKLEN bits               // Nonce
+     H, string of any length                  // Header
+     C, string of any length                  // Ciphertext core
+     T, string of no more than BLOCKLEN bits  // Authentication tag
+   Output:
+     M, string                                // Plaintext
+     V, boolean                               // Validity indicator
+
+   Compute M and V using the following algorithm.
+
+     //
+     // Break C into blocks
+     //
+     m = max(1,ceil(bitlength(C) / BLOCKLEN))
+     Let C_1, C_2, ..., C_m be strings such that C = C_1 || C_2 || ...
+       || C_m and bitlength(C_i) = BLOCKLEN for all 0 < i < m.
+
+     //
+     // Initialize strings used for offsets and checksums
+     //
+     Offset = ENCIPHER(K,N)
+     Checksum = zeros(BLOCKLEN)
+
+     //
+     // Decrypt and accumulate first m - 1 blocks
+
+
+
+Krovetz, Rogaway         Expires September 2005                [Page 8]
+
+INTERNET-DRAFT                     OCB                        March 2005
+
+
+     //
+     for i = 1 to m - 1 do           // Skip if a < 2
+        Offset = times2(Offset)
+        M_i = Offset xor DECIPHER(K, C_i xor Offset)
+        Checksum = Checksum xor M_i
+     end for
+
+     //
+     // Decrypt and accumulate final block
+     //
+     Offset = times2(Offset)
+     b = bitlength(C_m)              // Value in 0..BLOCKLEN
+     Pad = ENCIPHER(K, num2str(b, BLOCKLEN) xor Offset)
+     M_m = C_m xor Pad[1..b]
+     Tmp = M_m || Pad[b+1..BLOCKLEN]
+     Checksum = Checksum xor Tmp
+
+     //
+     // Compute valid authentication tag
+     //
+     Offset = times3(Offset)
+     FullValidTag = ENCIPHER(K, Offset xor Checksum)
+     if bitlength(H) > 0 then
+        FullValidTag = FullValidTag xor PMAC(K, H)
+     end if
+
+     //
+     // Compute results
+     //
+     if T = FullValidTag[1..bitlength(T)] then
+        V = true
+        M = M_1 || M_2 || ... || M_m
+     else
+        V = false
+        M = <emptystring>
+     end if
+
+
+7  Security Considerations
+
+   OCB achieves two security properties, message privacy and message
+   authenticity.  Privacy is "indistinguishability from random bits",
+   meaning that an adversary is unable to distinguish OCB-outputs from
+   an equal number of random bits.  Authenticity is "authenticity of
+   ciphertexts", meaning that an adversary is unable to produce any
+   valid (N,C,T) triple that it has not already acquired.  The privacy
+   and the authenticity guarantee depend on the underlying blockcipher
+   being secure in the sense of a strong pseudorandom permutation.  Thus
+
+
+
+Krovetz, Rogaway         Expires September 2005                [Page 9]
+
+INTERNET-DRAFT                     OCB                        March 2005
+
+
+   if OCB is used with a blockcipher that is not secure as a strong
+   pseudorandom permutation, the security guarantees vanish.  The need
+   for the strong pseudorandom permutation property means that OCB
+   should be used with a conservatively designed, well-trusted
+   blockcipher, such as AES.
+
+   Both the privacy and the authenticity properties of OCB degrade as
+   per s^2 / 2^BLOCKLEN, where s is the total number of blocks that the
+   adversary acquires.  The consequence of this formula is that the
+   proven security vanishes when s becomes as large as 2^{BLOCKLEN/2}.
+   Thus the user should never use a key to generate an amount of
+   ciphertext that is near to, or exceeds, 2^{BLOCKLEN/2} blocks.
+   Blockciphers typically have blocksizes of 64 or 128 bits, and the
+   above restriction is a significant one if the blocklength is not more
+   than 64 bits.  Therefore OCB should be used with a blockcipher having
+   a blocklength of 128 bits.  The mode may then be used to encrypt at
+   most 2^48 blocks (2^56 bits), to ensure that s^2 / 2^128 will be at
+   most 2^{-32}.
+
+   It is crucial that, as one encrypts strings, one does not repeat a
+   nonce.  The security definitions assume this, for both privacy and
+   authenticity.  The implementor must ensure that, with overwhelming
+   probability, this assumption is achieved by the implementation that
+   uses OCB.  The nonce need not be secret, and a counter may be used
+   for it.  If two parties send OCB-encrypted messages to one another
+   using the same key, then the space of nonces used by the two parties
+   should be partitioned so that no nonce that could be used by one
+   party to encrypt could be used by the other to encrypt.
+
+   When a ciphertext decrypts as "invalid" it is the implementor's
+   responsibility to make sure that no information beyond this fact is
+   made adversarially available.
+
+   OCB encryption produces a tag T of BLOCKLEN bits.  The user may
+   choose to use a prefix of T.  The length taglen of the prefix used
+   impacts the adversary's ability to forge: it will always be trivial
+   for the adversary to forge with probability 2^{-taglen}.  It is up to
+   the application designer to choose an appropriate value for taglen.
+   For typical applications, the value should be 64 or more.  The taglen
+   value should be determined at session setup and should be dictated by
+   the message recipient.  The taglen value is not authenticated by the
+   OCB algorithm and one must ensure that an attacker can not convince a
+   recipient to employ unreasonably short authentication tags.
+
+   Timing attacks are not a part of the formal model and an
+   implementation should take care to ensure that these are not
+   damaging.  To render timing attacks impotent, the amount of time to
+   encrypt or decrypt a string should be independent of the key and the
+
+
+
+Krovetz, Rogaway         Expires September 2005               [Page 10]
+
+INTERNET-DRAFT                     OCB                        March 2005
+
+
+   contents of the string.  Implementations of times2(S) that employ a
+   conditional for inspecting bit S[1] are particularly suspect and
+   should be avoided.  Power-usage attacks are likewise out of scope of
+   the formal model, and should be considered for environments where
+   they are threatening.
+
+   The OCB encryption scheme reveals in the ciphertext the length of the
+   plaintext.  Sometimes the length of the plaintext is a valuable piece
+   of information that should be hidden.  For environments where
+   "traffic analysis" is a concern, techniques beyond OCB encryption
+   (typically involving padding) would be necessary.
+
+
+8  Acknowledgments
+
+   The design of the original OCB scheme [OCB1] was done while Phil
+   Rogaway was at Chiang Mai University, Thailand.  Follow-up work
+   [Offsets] was done with support from NSF 0208842 and a gift from
+   Cisco.  Current funding for Rogaway is from the same NSF award and a
+   gift from Intel.
+
+
+Appendix - Test Vectors
+
+   The following test vectors have been developed for use in validating
+   implementations of OCB.  All strings are represented in hexadecimal
+   (ie, 0F represents the bitstring 00001111).  The blockcipher used in
+   all cases is AES with a 128-bit keylength.  The key (K) and nonce (N)
+   for all vectors are
+
+     K : 000102030405060708090A0B0C0D0E0F
+     N : 000102030405060708090A0B0C0D0E0F
+
+   The following is a collection of header (H) and message (M) pairs,
+   and the ciphertext (C) and authentication tag (T) pairs generated for
+   each defined <K, N, H, M>.  A blank entry indicates the empty string.
+
+     H :
+     M :
+     C :
+     T : BF3108130773AD5EC70EC69E7875A7B0
+
+     H :
+     M : 0001020304050607
+     C : C636B3A868F429BB
+     T : A45F5FDEA5C088D1D7C8BE37CABC8C5C
+
+     H :
+
+
+
+Krovetz, Rogaway         Expires September 2005               [Page 11]
+
+INTERNET-DRAFT                     OCB                        March 2005
+
+
+     M : 000102030405060708090A0B0C0D0E0F
+     C : 52E48F5D19FE2D9869F0C4A4B3D2BE57
+     T : F7EE49AE7AA5B5E6645DB6B3966136F9
+
+     H :
+     M : 000102030405060708090A0B0C0D0E0F1011121314151617
+     C : F75D6BC8B4DC8D66B836A2B08B32A636CC579E145D323BEB
+     T : A1A50F822819D6E0A216784AC24AC84C
+
+     H :
+     M : 000102030405060708090A0B0C0D0E0F1011121314151617
+         18191A1B1C1D1E1F
+     C : F75D6BC8B4DC8D66B836A2B08B32A636CEC3C55503757170
+         9DA25E1BB0421A27
+     T : 09CA6C73F0B5C6C5FD587122D75F2AA3
+
+     H :
+     M : 000102030405060708090A0B0C0D0E0F1011121314151617
+         18191A1B1C1D1E1F2021222324252627
+     C : F75D6BC8B4DC8D66B836A2B08B32A6369F1CD3C5228D79FD
+         6C267F5F6AA7B231C7DFB9D59951AE9C
+     T : 9DB0CDF880F73E3E10D4EB3217766688
+
+     H : 0001020304050607
+     M : 0001020304050607
+     C : C636B3A868F429BB
+     T : 8D059589EC3B6AC00CA31624BC3AF2C6
+
+     H : 000102030405060708090A0B0C0D0E0F
+     M : 000102030405060708090A0B0C0D0E0F
+     C : 52E48F5D19FE2D9869F0C4A4B3D2BE57
+     T : 4DA4391BCAC39D278C7A3F1FD39041E6
+
+     H : 000102030405060708090A0B0C0D0E0F1011121314151617
+     M : 000102030405060708090A0B0C0D0E0F1011121314151617
+     C : F75D6BC8B4DC8D66B836A2B08B32A636CC579E145D323BEB
+     T : 24B9AC3B9574D2202678E439D150F633
+
+     H : 000102030405060708090A0B0C0D0E0F1011121314151617
+         18191A1B1C1D1E1F
+     M : 000102030405060708090A0B0C0D0E0F1011121314151617
+         18191A1B1C1D1E1F
+     C : F75D6BC8B4DC8D66B836A2B08B32A636CEC3C55503757170
+         9DA25E1BB0421A27
+     T : 41A977C91D66F62C1E1FC30BC93823CA
+
+     H : 000102030405060708090A0B0C0D0E0F1011121314151617
+         18191A1B1C1D1E1F2021222324252627
+
+
+
+Krovetz, Rogaway         Expires September 2005               [Page 12]
+
+INTERNET-DRAFT                     OCB                        March 2005
+
+
+     M : 000102030405060708090A0B0C0D0E0F1011121314151617
+         18191A1B1C1D1E1F2021222324252627
+     C : F75D6BC8B4DC8D66B836A2B08B32A6369F1CD3C5228D79FD
+         6C267F5F6AA7B231C7DFB9D59951AE9C
+     T : 65A92715A028ACD4AE6AFF4BFAA0D396
+
+
+References
+
+Normative References
+
+   [AES]      FIPS-197, "Advanced Encryption Standard (AES)", National
+              Institute of Standards and Technology, 2001.
+
+   [GPL]      Free Software Foundation, "GNU General Public License",
+              Version 2, http://www.gnu.org/copyleft/gpl.html, 1991.
+
+   [Irred]    G. Seroussi, "Table of low-weight binary irreducible
+              polynomials", HP Labs Technical Report HPL-98-135, 1998.
+
+Informative References
+
+   [Jutla]    C. Jutla,  "Encryption modes with almost free message
+              integrity", Advances in Cryptology - EUROCRYPT 2001,
+              Lecture Notes in Computer Science, vol. 2045, Springer,
+              pp. 529-544, 2001.
+
+   [OCB1]     P. Rogaway, M. Bellare, and J. Black, "OCB: A block-cipher
+              mode of operation for efficient authenticated encryption",
+              ACM Transactions on Information and System Security,  vol.
+              6, no. 3, pp. 365-403, 2003.
+
+   [Offsets]  P. Rogaway, "Efficient instantiations of tweakable
+              blockciphers and refinements to modes OCB and PMAC",
+              Advances in Cryptology - ASIACRYPT 2004.  Lecture notes in
+              Computer Science, vol. 3329, Springer, pp. 16-31, 2004.
+
+
+Author Contact Information
+
+   Authors' Addresses
+
+     Ted Krovetz
+     Department of Computer Science
+     California State University
+     Sacramento CA 95819
+     USA
+
+
+
+
+Krovetz, Rogaway         Expires September 2005               [Page 13]
+
+INTERNET-DRAFT                     OCB                        March 2005
+
+
+     EMail: tdk@acm.org
+
+     Phillip Rogaway
+     Department of Computer Science
+     University of California
+     Davis CA 95616
+     USA
+     and
+     Department of Computer Science
+     Faculty of Science
+     Chiang Mai University
+     Chiang Mai 50200
+     THAILAND
+
+     EMail: rogaway@cs.ucdavis.edu
+     WWW: www.cs.ucdavis.edu/~rogaway
+
+
+Full Copyright Statement
+
+   Copyright (C) The Internet Society (2005).  This document is subject
+   to the rights, licenses and restrictions contained in BCP 78, and
+   except as set forth therein, the authors retain all their rights.
+
+   This document and the information contained herein are provided on an
+   "AS IS" basis and THE CONTRIBUTOR, THE ORGANIZATION HE/SHE REPRESENTS
+   OR IS SPONSORED BY (IF ANY), THE INTERNET SOCIETY AND THE INTERNET
+   ENGINEERING TASK FORCE DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED,
+   INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE
+   INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED
+   WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Krovetz, Rogaway         Expires September 2005               [Page 14]
+
