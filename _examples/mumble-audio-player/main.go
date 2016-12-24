@@ -1,4 +1,4 @@
-package main
+package main // import "layeh.com/gumble/_examples/mumble-audio-player"
 
 import (
 	"flag"
