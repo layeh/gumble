@@ -1,7 +1,7 @@
-package gumbleutil
+package gumbleutil // import "layeh.com/gumble/gumbleutil"
 
 import (
-	"github.com/layeh/gumble/gumble"
+	"layeh.com/gumble/gumble"
 )
 
 // UserGroups fetches the group names the given user belongs to in the given

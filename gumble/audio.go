@@ -1,4 +1,4 @@
-package gumble
+package gumble // import "layeh.com/gumble/gumble"
 
 import (
 	"time"

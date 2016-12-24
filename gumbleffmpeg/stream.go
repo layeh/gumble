@@ -1,4 +1,4 @@
-package gumbleffmpeg
+package gumbleffmpeg // import "layeh.com/gumble/gumbleffmpeg"
 
 import (
 	"encoding/binary"
@@ -10,7 +10,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/layeh/gumble/gumble"
+	"layeh.com/gumble/gumble"
 )
 
 // State represents the state of a Stream.

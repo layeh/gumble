@@ -1,4 +1,4 @@
-package gumble
+package gumble // import "layeh.com/gumble/gumble"
 
 // Message is data that be encoded and sent to the server. The following
 // types implement this interface:

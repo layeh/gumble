@@ -1,11 +1,11 @@
-package gumble
+package gumble // import "layeh.com/gumble/gumble"
 
 import (
 	"net"
 	"time"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/layeh/gumble/gumble/MumbleProto"
+	"layeh.com/gumble/gumble/MumbleProto"
 )
 
 // BanList is a list of server ban entries.

@@ -1,7 +1,7 @@
-package gumble
+package gumble // import "layeh.com/gumble/gumble"
 
 import (
-	"github.com/layeh/gumble/gumble/MumbleProto"
+	"layeh.com/gumble/gumble/MumbleProto"
 )
 
 // EventListener is the interface that must be implemented by a type if it

@@ -1,4 +1,4 @@
-package gumble
+package gumble // import "layeh.com/gumble/gumble"
 
 // Channels is a map of server channels.
 type Channels map[uint32]*Channel

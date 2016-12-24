@@ -1,11 +1,11 @@
-package gumbleopenal
+package gumbleopenal // import "layeh.com/gumble/gumbleopenal"
 
 import (
 	"encoding/binary"
 	"errors"
 	"time"
 
-	"github.com/layeh/gumble/gumble"
+	"layeh.com/gumble/gumble"
 	"github.com/timshannon/go-openal/openal"
 )
 

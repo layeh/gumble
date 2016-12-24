@@ -2,7 +2,7 @@
 
 ## Sub-projects
 
-- gumble [![GoDoc](https://godoc.org/github.com/layeh/gumble/gumble?status.svg)](https://godoc.org/github.com/layeh/gumble/gumble)
+- gumble [![GoDoc](https://godoc.org/layeh.com/gumble/gumble?status.svg)](https://godoc.org/layeh.com/gumble/gumble)
     - Client library
 - gumbleopenal
     - [OpenAL](http://kcat.strangesoft.net/openal.html) audio system for gumble
@@ -16,8 +16,8 @@
     package main
 
     import (
-      "github.com/layeh/gumble/gumble"
-      "github.com/layeh/gumble/gumbleutil"
+      "layeh.com/gumble/gumble"
+      "layeh.com/gumble/gumbleutil"
     )
 
     func main() {
@@ -32,9 +32,9 @@
 
 ## Related projects
 
-- [barnard](https://github.com/layeh/barnard)
+- [barnard](https://layeh.com/barnard)
     - terminal-based Mumble client
-- [piepan](https://github.com/layeh/piepan)
+- [piepan](https://layeh.com/piepan)
     - an easy to use framework for writing Mumble bots using Lua
 
 ## License
