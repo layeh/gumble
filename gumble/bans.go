@@ -15,14 +15,14 @@ import (
 type BanList []*Ban
 
 // Add creates a new ban list entry with the given parameters.
-func (bl *BanList) Add(address net.IP, mask net.IPMask, reason string, duration time.Duration) *Ban {
+func (b *BanList) Add(address net.IP, mask net.IPMask, reason string, duration time.Duration) *Ban {
 	ban := &Ban{
 		Address:  address,
 		Mask:     mask,
 		Reason:   reason,
 		Duration: duration,
 	}
-	*bl = append(*bl, ban)
+	*b = append(*b, ban)
 	return ban
 }
 
@@ -80,12 +80,12 @@ func (b *Ban) Ban() {
 	b.unban = false
 }
 
-func (bl BanList) writeMessage(client *Client) error {
+func (b BanList) writeMessage(client *Client) error {
 	packet := MumbleProto.BanList{
 		Query: proto.Bool(false),
 	}
 
-	for _, ban := range bl {
+	for _, ban := range b {
 		if !ban.unban {
 			maskSize, _ := ban.Mask.Size()
 			packet.Bans = append(packet.Bans, &MumbleProto.BanList_BanEntry{

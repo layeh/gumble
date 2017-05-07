@@ -22,27 +22,27 @@ type RegisteredUser struct {
 }
 
 // SetName sets the new name for the user.
-func (ru *RegisteredUser) SetName(name string) {
-	ru.Name = name
-	ru.changed = true
+func (r *RegisteredUser) SetName(name string) {
+	r.Name = name
+	r.changed = true
 }
 
 // Deregister will remove the registered user from the server.
-func (ru *RegisteredUser) Deregister() {
-	ru.deregister = true
+func (r *RegisteredUser) Deregister() {
+	r.deregister = true
 }
 
 // Register will keep the user registered on the server. This is only useful if
 // Deregister() was called on the registered user.
-func (ru *RegisteredUser) Register() {
-	ru.deregister = false
+func (r *RegisteredUser) Register() {
+	r.deregister = false
 }
 
 // ACLUser returns an ACLUser for the given registered user.
-func (ru *RegisteredUser) ACLUser() *ACLUser {
+func (r *RegisteredUser) ACLUser() *ACLUser {
 	return &ACLUser{
-		UserID: ru.UserID,
-		Name:   ru.Name,
+		UserID: r.UserID,
+		Name:   r.Name,
 	}
 }
 
@@ -52,10 +52,10 @@ func (ru *RegisteredUser) ACLUser() *ACLUser {
 // the registered user list is sent back to the server.
 type RegisteredUsers []*RegisteredUser
 
-func (pm RegisteredUsers) writeMessage(client *Client) error {
+func (r RegisteredUsers) writeMessage(client *Client) error {
 	packet := MumbleProto.UserList{}
 
-	for _, user := range pm {
+	for _, user := range r {
 		if user.deregister || user.changed {
 			userListUser := &MumbleProto.UserList_User{
 				UserId: &user.UserID,
