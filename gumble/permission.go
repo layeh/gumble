@@ -25,3 +25,9 @@ const (
 	PermissionRegister
 	PermissionRegisterSelf
 )
+
+// Has returns true if the Permission p contains Permission o has part of its
+// bitmask.
+func (p Permission) Has(o Permission) bool {
+	return p&o != 0
+}
