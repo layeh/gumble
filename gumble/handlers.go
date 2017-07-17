@@ -452,19 +452,20 @@ func (c *Client) handleUserRemove(buffer []byte) error {
 			c.volatileLock.Unlock()
 			return errInvalidProtobuf
 		}
+		if packet.Actor != nil {
+			event.Actor = c.Users[*packet.Actor]
+			if event.Actor == nil {
+				c.volatileLock.Unlock()
+				return errInvalidProtobuf
+			}
+			event.Type |= UserChangeKicked
+		}
+
 		event.User.client = nil
 		if event.User.Channel != nil {
 			delete(event.User.Channel.Users, session)
 		}
 		delete(c.Users, session)
-
-		if packet.Actor != nil {
-			event.Actor = c.Users[*packet.Actor]
-			if event.Actor == nil {
-				return errInvalidProtobuf
-			}
-			event.Type |= UserChangeKicked
-		}
 		if packet.Reason != nil {
 			event.String = *packet.Reason
 		}
