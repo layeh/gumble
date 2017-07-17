@@ -69,7 +69,12 @@ func (*Decoder) ID() int {
 func (d *Decoder) Decode(data []byte, frameSize int) ([]int16, error) {
 	return d.Decoder.Decode(data, frameSize, false)
 }
-
+func (d *Decoder) SampleSize(data []byte) (int, error) {
+	return gopus.GetSamplesPerFrame(data, gumble.AudioSampleRate)
+}
+func (d *Decoder) CountFrames(data []byte) (int, error) {
+	return gopus.CountFrames(data)
+}
 func (d *Decoder) Reset() {
 	d.Decoder.ResetState()
 }

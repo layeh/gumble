@@ -2,7 +2,7 @@ package gumble // import "layeh.com/gumble/gumble"
 
 import (
 	"crypto/x509"
-	"encoding/binary"
+	// "encoding/binary"
 	"errors"
 	"math"
 	"net"
@@ -100,6 +100,7 @@ func (c *Client) handleUDPTunnel(buffer []byte) error {
 	if user == nil {
 		return errInvalidProtobuf
 	}
+
 	decoder := user.decoder
 	if decoder == nil {
 		// TODO: decoder pool
@@ -114,7 +115,7 @@ func (c *Client) handleUDPTunnel(buffer []byte) error {
 
 	// Sequence
 	// TODO: use in jitter buffer
-	_, n = varint.Decode(buffer)
+	seq, n := varint.Decode(buffer)
 	if n <= 0 {
 		return errInvalidProtobuf
 	}
@@ -126,57 +127,31 @@ func (c *Client) handleUDPTunnel(buffer []byte) error {
 		return errInvalidProtobuf
 	}
 	buffer = buffer[n:]
+	// Grab terminator bit
+	isLast := int(length)&0x2000 > 0
 	// Opus audio packets set the 13th bit in the size field as the terminator.
 	audioLength := int(length) &^ 0x2000
 	if audioLength > len(buffer) {
 		return errInvalidProtobuf
 	}
-
-	pcm, err := decoder.Decode(buffer[:audioLength], AudioMaximumFrameSize)
-	if err != nil {
-		return err
+	var opusData []byte
+	if audioLength > 0 {
+		opusData = make([]byte, audioLength)
+		copy(opusData, buffer[:audioLength])
 	}
-
-	event := AudioPacket{
-		Client: c,
-		Sender: user,
+	if err := user.buffer.AddPacket(&jbAudioPacket{
+		Sequence: seq,
+		Client:   c,
+		Sender:   user,
 		Target: &VoiceTarget{
 			ID: uint32(audioTarget),
 		},
-		AudioBuffer: AudioBuffer(pcm),
+		Opus:   opusData,
+		IsLast: isLast,
+		Length: audioLength,
+	}); err != nil {
+		return err
 	}
-
-	if len(buffer)-audioLength == 3*4 {
-		// the packet has positional audio data; 3x float32
-		buffer = buffer[audioLength:]
-
-		event.X = math.Float32frombits(binary.LittleEndian.Uint32(buffer))
-		event.Y = math.Float32frombits(binary.LittleEndian.Uint32(buffer[4:]))
-		event.Z = math.Float32frombits(binary.LittleEndian.Uint32(buffer[8:]))
-		event.HasPosition = true
-	}
-
-	c.volatileLock.Lock()
-	c.volatileWg.Wait()
-	for item := c.Config.AudioListeners.head; item != nil; item = item.next {
-		c.volatileLock.Unlock()
-		ch := item.streams[user]
-		if ch == nil {
-			ch = make(chan *AudioPacket)
-			item.streams[user] = ch
-			event := AudioStreamEvent{
-				Client: c,
-				User:   user,
-				C:      ch,
-			}
-			item.listener.OnAudioStream(&event)
-		}
-		ch <- &event
-		c.volatileLock.Lock()
-		c.volatileWg.Wait()
-	}
-	c.volatileLock.Unlock()
-
 	return nil
 }
 

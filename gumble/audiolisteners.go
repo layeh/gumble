@@ -4,7 +4,7 @@ type audioEventItem struct {
 	parent     *AudioListeners
 	prev, next *audioEventItem
 	listener   AudioListener
-	streams    map[*User]chan *AudioPacket
+	//streams    map[*User]chan *AudioPacket
 }
 
 func (e *audioEventItem) Detach() {
@@ -32,7 +32,7 @@ func (e *AudioListeners) Attach(listener AudioListener) Detacher {
 		parent:   e,
 		prev:     e.tail,
 		listener: listener,
-		streams:  make(map[*User]chan *AudioPacket),
+		//streams:  make(map[*User]chan *AudioPacket),
 	}
 	if e.head == nil {
 		e.head = item
