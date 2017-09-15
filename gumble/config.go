@@ -23,6 +23,10 @@ type Config struct {
 	// AudioDataBytes is the number of bytes that an audio frame can use.
 	AudioDataBytes int
 
+	// Should audio data be always transmitted over the TCP control
+	// connection.
+	ForceTCP bool
+
 	// The event listeners used when client events are triggered.
 	Listeners      Listeners
 	AudioListeners AudioListeners

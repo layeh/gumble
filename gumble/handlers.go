@@ -1,9 +1,12 @@
 package gumble // import "layeh.com/gumble/gumble"
 
 import (
+	"crypto/aes"
+	"crypto/rand"
 	"crypto/x509"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"math"
 	"net"
 	"sync/atomic"
@@ -903,7 +906,51 @@ func (c *Client) handleQueryUsers(buffer []byte) error {
 }
 
 func (c *Client) handleCryptSetup(buffer []byte) error {
-	return errUnimplementedHandler
+	var packet MumbleProto.CryptSetup
+	if err := proto.Unmarshal(buffer, &packet); err != nil {
+		return err
+	}
+
+	fmt.Println("cryptsetup", packet)
+
+	if packet.Key == nil && packet.ClientNonce == nil && packet.ServerNonce == nil {
+		// TODO: handle resync
+		/*
+			nonce := make([]byte, 15)
+			if _, err := rand.Read(nonce); err != nil {
+				return err
+			}
+			c.udpClientNonce = nonce
+		*/
+		_ = rand.Read
+		println("SENDING RESYNC")
+
+		return nil
+	}
+
+	c.udpDataMu.Lock()
+	if packet.Key != nil {
+		var err error
+		c.udpKey = packet.Key
+		c.udpBlockCipher, err = aes.NewCipher(c.udpKey)
+		if err != nil {
+			c.udpDataMu.Unlock()
+			return err
+		}
+	}
+	if packet.ClientNonce != nil {
+		// TODO: check len
+		c.udpClientNonce = packet.ClientNonce
+	}
+	if packet.ServerNonce != nil {
+		// TODO: check len
+		c.udpServerNonce = packet.ServerNonce
+	}
+	c.udpDataMu.Unlock()
+
+	c.forcePing <- struct{}{}
+
+	return nil
 }
 
 func (c *Client) handleContextActionModify(buffer []byte) error {

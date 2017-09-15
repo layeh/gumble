@@ -1,8 +1,10 @@
 package gumble // import "layeh.com/gumble/gumble"
 
 import (
+	"crypto/cipher"
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"math"
 	"net"
 	"runtime"
@@ -12,6 +14,8 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"layeh.com/gumble/gumble/MumbleProto"
+	"layeh.com/gumble/gumble/ocb"
+	"layeh.com/gumble/gumble/varint"
 )
 
 // State is the current state of the client's connection to the server.
@@ -56,6 +60,14 @@ type Client struct {
 	tcpPingAvg         uint32
 	tcpPingVar         uint32
 
+	// UDP connection
+	udpConn        net.Conn
+	udpDataMu      sync.Mutex
+	udpBlockCipher cipher.Block
+	udpKey         []byte // TODO: required?
+	udpClientNonce []byte
+	udpServerNonce []byte
+
 	// A collection containing the server's context actions.
 	ContextActions ContextActions
 
@@ -74,6 +86,7 @@ type Client struct {
 
 	connect         chan *RejectError
 	end             chan struct{}
+	forcePing       chan struct{}
 	disconnectEvent DisconnectEvent
 }
 
@@ -98,6 +111,14 @@ func DialWithDialer(dialer *net.Dialer, addr string, config *Config, tlsConfig *
 	if err != nil {
 		return nil, err
 	}
+	var udpConn net.Conn
+	if !config.ForceTCP {
+		udpConn, err = dialer.Dial("udp", addr)
+		if err != nil {
+			conn.Close()
+			return nil, err
+		}
+	}
 
 	client := &Client{
 		Conn:     NewConn(conn),
@@ -107,13 +128,19 @@ func DialWithDialer(dialer *net.Dialer, addr string, config *Config, tlsConfig *
 
 		permissions: make(map[uint32]*Permission),
 
+		udpConn: udpConn,
+
 		state: uint32(StateConnected),
 
-		connect: make(chan *RejectError),
-		end:     make(chan struct{}),
+		connect:   make(chan *RejectError),
+		end:       make(chan struct{}),
+		forcePing: make(chan struct{}),
 	}
 
 	go client.readRoutine()
+	if !config.ForceTCP {
+		go client.udpRoutine()
+	}
 
 	// Initial packets
 	versionPacket := MumbleProto.Version{
@@ -149,16 +176,25 @@ func DialWithDialer(dialer *net.Dialer, addr string, config *Config, tlsConfig *
 		select {
 		case <-time.After(timeout):
 			client.Conn.Close()
+			if udpConn != nil {
+				udpConn.Close()
+			}
 			return nil, errors.New("gumble: synchronization timeout")
 		case err := <-client.connect:
 			if err != nil {
 				client.Conn.Close()
+				if udpConn != nil {
+					udpConn.Close()
+				}
 				return nil, err
 			}
 		}
 	} else {
 		if err := <-client.connect; err != nil {
 			client.Conn.Close()
+			if udpConn != nil {
+				udpConn.Close()
+			}
 			return nil, err
 		}
 	}
@@ -209,14 +245,36 @@ func (c *Client) pingRoutine() {
 
 	t := time.Now()
 	for {
-		timestamp = uint64(t.UnixNano())
+		nanotime := t.UnixNano()
+		timestamp = uint64(nanotime)
 		tcpPingAvg = math.Float32frombits(atomic.LoadUint32(&c.tcpPingAvg))
 		tcpPingVar = math.Float32frombits(atomic.LoadUint32(&c.tcpPingVar))
 		c.Conn.WriteProto(&packet)
 
+		c.udpDataMu.Lock()
+		if c.udpConn != nil && c.udpBlockCipher != nil && c.udpClientNonce != nil {
+			var payload [1 + varint.MaxVarintLen]byte
+			payload[0] = 0x20
+			n := varint.Encode(payload[1:], nanotime)
+			// TODO: these guys could panic? = deadlock
+
+			output := make([]byte, 3+1+n)
+
+			ocb.Encrypt(c.udpBlockCipher, output[3:], output[:3], c.udpClientNonce, nil, payload[:1+n])
+			if n, err := c.udpConn.Write(output); err != nil {
+				println("UDP PING ERROR")
+				println(err.Error())
+			} else {
+				println("UDP PING ", n)
+			}
+		}
+		c.udpDataMu.Unlock()
+
 		select {
 		case <-c.end:
 			return
+		case <-c.forcePing:
+			// continue to top of loop
 		case t = <-ticker.C:
 			// continue to top of loop
 		}
@@ -248,6 +306,24 @@ func (c *Client) readRoutine() {
 	}
 }
 
+// udpRoutine reads UDP messages from the server.
+func (c *Client) udpRoutine() {
+	var payloadArr [1020 + 4]byte
+	for {
+		println("UDP BEGING READ")
+		n, err := c.udpConn.Read(payloadArr[:])
+		println("UDP READ")
+		if err != nil {
+			// TODO
+			continue
+		}
+		payload := payloadArr[:n]
+		_ = payload
+		_ = fmt.Println
+		println("UDP message received", n)
+	}
+}
+
 // RequestUserList requests that the server's registered user list be sent to
 // the client.
 func (c *Client) RequestUserList() {
@@ -270,6 +346,9 @@ func (c *Client) Disconnect() error {
 	}
 	c.disconnectEvent.Type = DisconnectUser
 	c.Conn.Close()
+	if c.udpConn != nil {
+		c.udpConn.Close()
+	}
 	return nil
 }
 
