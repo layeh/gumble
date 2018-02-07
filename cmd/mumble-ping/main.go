@@ -1,6 +1,7 @@
 package main // import "layeh.com/gumble/cmd/mumble-ping"
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"net"
@@ -18,6 +19,7 @@ func main() {
 	}
 	interval := flag.Duration("interval", time.Second*1, "ping packet retransmission interval")
 	timeout := flag.Duration("timeout", time.Second*5, "ping timeout until failure")
+	jsonOutput := flag.Bool("json", false, "output success response as JSON")
 	flag.Parse()
 	if flag.NArg() != 1 {
 		flag.Usage()
@@ -38,10 +40,24 @@ func main() {
 		os.Exit(1)
 	}
 	major, minor, patch := resp.Version.SemanticVersion()
-	fmt.Printf("Address:         %s\n", resp.Address)
-	fmt.Printf("Ping:            %s\n", resp.Ping)
-	fmt.Printf("Version:         %d.%d.%d\n", major, minor, patch)
-	fmt.Printf("Connected Users: %d\n", resp.ConnectedUsers)
-	fmt.Printf("Maximum Users:   %d\n", resp.MaximumUsers)
-	fmt.Printf("Maximum Bitrate: %d\n", resp.MaximumBitrate)
+
+	if !*jsonOutput {
+		fmt.Printf("Address:         %s\n", resp.Address)
+		fmt.Printf("Ping:            %s\n", resp.Ping)
+		fmt.Printf("Version:         %d.%d.%d\n", major, minor, patch)
+		fmt.Printf("Connected Users: %d\n", resp.ConnectedUsers)
+		fmt.Printf("Maximum Users:   %d\n", resp.MaximumUsers)
+		fmt.Printf("Maximum Bitrate: %d\n", resp.MaximumBitrate)
+	} else {
+		output := map[string]interface{}{
+			"address":         resp.Address.String(),
+			"ping":            float64(resp.Ping) / float64(time.Millisecond),
+			"version":         fmt.Sprintf("%d.%d.%d", major, minor, patch),
+			"connected_users": resp.ConnectedUsers,
+			"maximum_users":   resp.MaximumUsers,
+			"maximum_bitrate": resp.MaximumBitrate,
+		}
+		encoder := json.NewEncoder(os.Stdout)
+		encoder.Encode(output)
+	}
 }
