@@ -45,7 +45,7 @@ const (
 
 // Has returns true if the DisconnectType has changeType part of its bitmask.
 func (d DisconnectType) Has(changeType DisconnectType) bool {
-	return d&changeType != 0
+	return d&changeType == changeType
 }
 
 // DisconnectEvent is the event that is passed to EventListener.OnDisconnect.
@@ -85,7 +85,7 @@ const (
 
 // Has returns true if the UserChangeType has changeType part of its bitmask.
 func (u UserChangeType) Has(changeType UserChangeType) bool {
-	return u&changeType != 0
+	return u&changeType == changeType
 }
 
 // UserChangeEvent is the event that is passed to EventListener.OnUserChange.
@@ -117,7 +117,7 @@ const (
 // Has returns true if the ChannelChangeType has changeType part of its
 // bitmask.
 func (c ChannelChangeType) Has(changeType ChannelChangeType) bool {
-	return c&changeType != 0
+	return c&changeType == changeType
 }
 
 // ChannelChangeEvent is the event that is passed to
@@ -149,7 +149,7 @@ const (
 // Has returns true if the PermissionDeniedType has changeType part of its
 // bitmask.
 func (p PermissionDeniedType) Has(changeType PermissionDeniedType) bool {
-	return p&changeType != 0
+	return p&changeType == changeType
 }
 
 // PermissionDeniedEvent is the event that is passed to
