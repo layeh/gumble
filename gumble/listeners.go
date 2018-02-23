@@ -43,133 +43,111 @@ func (e *Listeners) Attach(listener EventListener) Detacher {
 }
 
 func (e *Listeners) onConnect(event *ConnectEvent) {
-	event.Client.volatileLock.Lock()
-	event.Client.volatileWg.Wait()
+	event.Client.volatile.Lock()
 	for item := e.head; item != nil; item = item.next {
-		event.Client.volatileLock.Unlock()
+		event.Client.volatile.Unlock()
 		item.listener.OnConnect(event)
-		event.Client.volatileLock.Lock()
-		event.Client.volatileWg.Wait()
+		event.Client.volatile.Lock()
 	}
-	event.Client.volatileLock.Unlock()
+	event.Client.volatile.Unlock()
 }
 
 func (e *Listeners) onDisconnect(event *DisconnectEvent) {
-	event.Client.volatileLock.Lock()
-	event.Client.volatileWg.Wait()
+	event.Client.volatile.Lock()
 	for item := e.head; item != nil; item = item.next {
-		event.Client.volatileLock.Unlock()
+		event.Client.volatile.Unlock()
 		item.listener.OnDisconnect(event)
-		event.Client.volatileLock.Lock()
-		event.Client.volatileWg.Wait()
+		event.Client.volatile.Lock()
 	}
-	event.Client.volatileLock.Unlock()
+	event.Client.volatile.Unlock()
 }
 
 func (e *Listeners) onTextMessage(event *TextMessageEvent) {
-	event.Client.volatileLock.Lock()
-	event.Client.volatileWg.Wait()
+	event.Client.volatile.Lock()
 	for item := e.head; item != nil; item = item.next {
-		event.Client.volatileLock.Unlock()
+		event.Client.volatile.Unlock()
 		item.listener.OnTextMessage(event)
-		event.Client.volatileLock.Lock()
-		event.Client.volatileWg.Wait()
+		event.Client.volatile.Lock()
 	}
-	event.Client.volatileLock.Unlock()
+	event.Client.volatile.Unlock()
 }
 
 func (e *Listeners) onUserChange(event *UserChangeEvent) {
-	event.Client.volatileLock.Lock()
-	event.Client.volatileWg.Wait()
+	event.Client.volatile.Lock()
 	for item := e.head; item != nil; item = item.next {
-		event.Client.volatileLock.Unlock()
+		event.Client.volatile.Unlock()
 		item.listener.OnUserChange(event)
-		event.Client.volatileLock.Lock()
-		event.Client.volatileWg.Wait()
+		event.Client.volatile.Lock()
 	}
-	event.Client.volatileLock.Unlock()
+	event.Client.volatile.Unlock()
 }
 
 func (e *Listeners) onChannelChange(event *ChannelChangeEvent) {
-	event.Client.volatileLock.Lock()
-	event.Client.volatileWg.Wait()
+	event.Client.volatile.Lock()
 	for item := e.head; item != nil; item = item.next {
-		event.Client.volatileLock.Unlock()
+		event.Client.volatile.Unlock()
 		item.listener.OnChannelChange(event)
-		event.Client.volatileLock.Lock()
-		event.Client.volatileWg.Wait()
+		event.Client.volatile.Lock()
 	}
-	event.Client.volatileLock.Unlock()
+	event.Client.volatile.Unlock()
 }
 
 func (e *Listeners) onPermissionDenied(event *PermissionDeniedEvent) {
-	event.Client.volatileLock.Lock()
-	event.Client.volatileWg.Wait()
+	event.Client.volatile.Lock()
 	for item := e.head; item != nil; item = item.next {
-		event.Client.volatileLock.Unlock()
+		event.Client.volatile.Unlock()
 		item.listener.OnPermissionDenied(event)
-		event.Client.volatileLock.Lock()
-		event.Client.volatileWg.Wait()
+		event.Client.volatile.Lock()
 	}
-	event.Client.volatileLock.Unlock()
+	event.Client.volatile.Unlock()
 }
 
 func (e *Listeners) onUserList(event *UserListEvent) {
-	event.Client.volatileLock.Lock()
-	event.Client.volatileWg.Wait()
+	event.Client.volatile.Lock()
 	for item := e.head; item != nil; item = item.next {
-		event.Client.volatileLock.Unlock()
+		event.Client.volatile.Unlock()
 		item.listener.OnUserList(event)
-		event.Client.volatileLock.Lock()
-		event.Client.volatileWg.Wait()
+		event.Client.volatile.Lock()
 	}
-	event.Client.volatileLock.Unlock()
+	event.Client.volatile.Unlock()
 }
 
 func (e *Listeners) onACL(event *ACLEvent) {
-	event.Client.volatileLock.Lock()
-	event.Client.volatileWg.Wait()
+	event.Client.volatile.Lock()
 	for item := e.head; item != nil; item = item.next {
-		event.Client.volatileLock.Unlock()
+		event.Client.volatile.Unlock()
 		item.listener.OnACL(event)
-		event.Client.volatileLock.Lock()
-		event.Client.volatileWg.Wait()
+		event.Client.volatile.Lock()
 	}
-	event.Client.volatileLock.Unlock()
+	event.Client.volatile.Unlock()
 }
 
 func (e *Listeners) onBanList(event *BanListEvent) {
-	event.Client.volatileLock.Lock()
-	event.Client.volatileWg.Wait()
+	event.Client.volatile.Lock()
 	for item := e.head; item != nil; item = item.next {
-		event.Client.volatileLock.Unlock()
+		event.Client.volatile.Unlock()
 		item.listener.OnBanList(event)
-		event.Client.volatileLock.Lock()
-		event.Client.volatileWg.Wait()
+		event.Client.volatile.Lock()
 	}
-	event.Client.volatileLock.Unlock()
+	event.Client.volatile.Unlock()
 }
 
 func (e *Listeners) onContextActionChange(event *ContextActionChangeEvent) {
-	event.Client.volatileLock.Lock()
-	event.Client.volatileWg.Wait()
+	event.Client.volatile.Lock()
 	for item := e.head; item != nil; item = item.next {
-		event.Client.volatileLock.Unlock()
+		event.Client.volatile.Unlock()
 		item.listener.OnContextActionChange(event)
-		event.Client.volatileLock.Lock()
-		event.Client.volatileWg.Wait()
+		event.Client.volatile.Lock()
 	}
-	event.Client.volatileLock.Unlock()
+	event.Client.volatile.Unlock()
 }
 
 func (e *Listeners) onServerConfig(event *ServerConfigEvent) {
-	event.Client.volatileLock.Lock()
-	event.Client.volatileWg.Wait()
+	event.Client.volatile.Lock()
 	for item := e.head; item != nil; item = item.next {
-		event.Client.volatileLock.Unlock()
+		event.Client.volatile.Unlock()
 		item.listener.OnServerConfig(event)
-		event.Client.volatileLock.Lock()
-		event.Client.volatileWg.Wait()
+		event.Client.volatile.Lock()
 	}
-	event.Client.volatileLock.Unlock()
+	event.Client.volatile.Unlock()
 }

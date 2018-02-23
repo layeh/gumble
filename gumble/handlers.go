@@ -156,10 +156,9 @@ func (c *Client) handleUDPTunnel(buffer []byte) error {
 		event.HasPosition = true
 	}
 
-	c.volatileLock.Lock()
-	c.volatileWg.Wait()
+	c.volatile.Lock()
 	for item := c.Config.AudioListeners.head; item != nil; item = item.next {
-		c.volatileLock.Unlock()
+		c.volatile.Unlock()
 		ch := item.streams[user]
 		if ch == nil {
 			ch = make(chan *AudioPacket)
@@ -172,10 +171,9 @@ func (c *Client) handleUDPTunnel(buffer []byte) error {
 			item.listener.OnAudioStream(&event)
 		}
 		ch <- &event
-		c.volatileLock.Lock()
-		c.volatileWg.Wait()
+		c.volatile.Lock()
 	}
-	c.volatileLock.Unlock()
+	c.volatile.Unlock()
 
 	return nil
 }
@@ -259,12 +257,11 @@ func (c *Client) handleServerSync(buffer []byte) error {
 
 	if packet.Session != nil {
 		{
-			c.volatileLock.Lock()
-			c.volatileWg.Wait()
+			c.volatile.Lock()
 
 			c.Self = c.Users[*packet.Session]
 
-			c.volatileLock.Unlock()
+			c.volatile.Unlock()
 		}
 	}
 	if packet.WelcomeText != nil {
@@ -292,13 +289,12 @@ func (c *Client) handleChannelRemove(buffer []byte) error {
 
 	var channel *Channel
 	{
-		c.volatileLock.Lock()
-		c.volatileWg.Wait()
+		c.volatile.Lock()
 
 		channelID := *packet.ChannelId
 		channel = c.Channels[channelID]
 		if channel == nil {
-			c.volatileLock.Unlock()
+			c.volatile.Unlock()
 			return errInvalidProtobuf
 		}
 		channel.client = nil
@@ -311,7 +307,7 @@ func (c *Client) handleChannelRemove(buffer []byte) error {
 			delete(link.Links, channelID)
 		}
 
-		c.volatileLock.Unlock()
+		c.volatile.Unlock()
 	}
 
 	if c.State() == StateSynced {
@@ -339,8 +335,7 @@ func (c *Client) handleChannelState(buffer []byte) error {
 	}
 
 	{
-		c.volatileLock.Lock()
-		c.volatileWg.Wait()
+		c.volatile.Lock()
 
 		channelID := *packet.ChannelId
 		channel := c.Channels[channelID]
@@ -419,7 +414,7 @@ func (c *Client) handleChannelState(buffer []byte) error {
 			channel.MaxUsers = *packet.MaxUsers
 		}
 
-		c.volatileLock.Unlock()
+		c.volatile.Unlock()
 	}
 
 	if c.State() == StateSynced {
@@ -443,19 +438,18 @@ func (c *Client) handleUserRemove(buffer []byte) error {
 	}
 
 	{
-		c.volatileLock.Lock()
-		c.volatileWg.Wait()
+		c.volatile.Lock()
 
 		session := *packet.Session
 		event.User = c.Users[session]
 		if event.User == nil {
-			c.volatileLock.Unlock()
+			c.volatile.Unlock()
 			return errInvalidProtobuf
 		}
 		if packet.Actor != nil {
 			event.Actor = c.Users[*packet.Actor]
 			if event.Actor == nil {
-				c.volatileLock.Unlock()
+				c.volatile.Unlock()
 				return errInvalidProtobuf
 			}
 			event.Type |= UserChangeKicked
@@ -480,7 +474,7 @@ func (c *Client) handleUserRemove(buffer []byte) error {
 			}
 		}
 
-		c.volatileLock.Unlock()
+		c.volatile.Unlock()
 	}
 
 	if c.State() == StateSynced {
@@ -503,8 +497,7 @@ func (c *Client) handleUserState(buffer []byte) error {
 	}
 	var user, actor *User
 	{
-		c.volatileLock.Lock()
-		c.volatileWg.Wait()
+		c.volatile.Lock()
 
 		session := *packet.Session
 		user = c.Users[session]
@@ -516,7 +509,7 @@ func (c *Client) handleUserState(buffer []byte) error {
 			event.Type |= UserChangeConnected
 
 			if user.Channel == nil {
-				c.volatileLock.Unlock()
+				c.volatile.Unlock()
 				return errInvalidProtobuf
 			}
 			event.Type |= UserChangeChannel
@@ -527,7 +520,7 @@ func (c *Client) handleUserState(buffer []byte) error {
 		if packet.Actor != nil {
 			actor = c.Users[*packet.Actor]
 			if actor == nil {
-				c.volatileLock.Unlock()
+				c.volatile.Unlock()
 				return errInvalidProtobuf
 			}
 			event.Actor = actor
@@ -557,7 +550,7 @@ func (c *Client) handleUserState(buffer []byte) error {
 			}
 			newChannel := c.Channels[*packet.ChannelId]
 			if newChannel == nil {
-				c.volatileLock.Unlock()
+				c.volatile.Lock()
 				return errInvalidProtobuf
 			}
 			if newChannel != user.Channel {
@@ -634,7 +627,7 @@ func (c *Client) handleUserState(buffer []byte) error {
 			user.Recording = *packet.Recording
 		}
 
-		c.volatileLock.Unlock()
+		c.volatile.Unlock()
 	}
 
 	if c.State() == StateSynced {
@@ -921,13 +914,12 @@ func (c *Client) handleContextActionModify(buffer []byte) error {
 	}
 
 	{
-		c.volatileLock.Lock()
-		c.volatileWg.Wait()
+		c.volatile.Lock()
 
 		switch *packet.Operation {
 		case MumbleProto.ContextActionModify_Add:
 			if ca := c.ContextActions[*packet.Action]; ca != nil {
-				c.volatileLock.Unlock()
+				c.volatile.Unlock()
 				return nil
 			}
 			event.Type = ContextActionAdd
@@ -942,18 +934,18 @@ func (c *Client) handleContextActionModify(buffer []byte) error {
 		case MumbleProto.ContextActionModify_Remove:
 			contextAction := c.ContextActions[*packet.Action]
 			if contextAction == nil {
-				c.volatileLock.Unlock()
+				c.volatile.Unlock()
 				return nil
 			}
 			event.Type = ContextActionRemove
 			delete(c.ContextActions, *packet.Action)
 			event.ContextAction = contextAction
 		default:
-			c.volatileLock.Unlock()
+			c.volatile.Unlock()
 			return errInvalidProtobuf
 		}
 
-		c.volatileLock.Unlock()
+		c.volatile.Unlock()
 	}
 
 	c.Config.Listeners.onContextActionChange(&event)
@@ -1018,8 +1010,7 @@ func (c *Client) handlePermissionQuery(buffer []byte) error {
 	var changedChannels []*Channel
 
 	{
-		c.volatileLock.Lock()
-		c.volatileWg.Wait()
+		c.volatile.Lock()
 
 		if packet.GetFlush() {
 			oldPermissions := c.permissions
@@ -1036,7 +1027,7 @@ func (c *Client) handlePermissionQuery(buffer []byte) error {
 			changedChannels = append(changedChannels, singleChannel)
 		}
 
-		c.volatileLock.Unlock()
+		c.volatile.Unlock()
 	}
 
 	for _, channel := range changedChannels {
@@ -1079,12 +1070,11 @@ func (c *Client) handleCodecVersion(buffer []byte) error {
 		c.audioCodec = codec
 
 		{
-			c.volatileLock.Lock()
-			c.volatileWg.Wait()
+			c.volatile.Lock()
 
 			c.AudioEncoder = codec.NewEncoder()
 
-			c.volatileLock.Unlock()
+			c.volatile.Unlock()
 		}
 	}
 
@@ -1107,8 +1097,7 @@ func (c *Client) handleUserStats(buffer []byte) error {
 	}
 
 	{
-		c.volatileLock.Lock()
-		c.volatileWg.Wait()
+		c.volatile.Lock()
 
 		if user.Stats == nil {
 			user.Stats = &UserStats{}
@@ -1197,7 +1186,7 @@ func (c *Client) handleUserStats(buffer []byte) error {
 			stats.Opus = *packet.Opus
 		}
 
-		c.volatileLock.Unlock()
+		c.volatile.Unlock()
 	}
 
 	event := UserChangeEvent{

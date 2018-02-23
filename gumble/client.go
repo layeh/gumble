@@ -6,7 +6,6 @@ import (
 	"math"
 	"net"
 	"runtime"
-	"sync"
 	"sync/atomic"
 	"time"
 
@@ -69,8 +68,9 @@ type Client struct {
 
 	state uint32
 
-	volatileWg   sync.WaitGroup
-	volatileLock sync.Mutex
+	// volatile is held by the client when the internal data structures are being
+	// modified.
+	volatile rpwMutex
 
 	connect         chan *RejectError
 	end             chan struct{}
@@ -277,10 +277,8 @@ func (c *Client) Disconnect() error {
 // associated data will not be changed during the lifetime of the function
 // call.
 func (c *Client) Do(f func()) {
-	c.volatileLock.Lock()
-	c.volatileWg.Add(1)
-	c.volatileLock.Unlock()
-	defer c.volatileWg.Done()
+	c.volatile.RLock()
+	defer c.volatile.RUnlock()
 
 	f()
 }
