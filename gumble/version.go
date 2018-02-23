@@ -1,4 +1,4 @@
-package gumble // import "layeh.com/gumble/gumble"
+package gumble
 
 // Version represents a Mumble client or server version.
 type Version struct {

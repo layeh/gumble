@@ -1,4 +1,4 @@
-package gumble // import "layeh.com/gumble/gumble"
+package gumble
 
 type audioEventItem struct {
 	parent     *AudioListeners

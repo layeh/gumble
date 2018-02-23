@@ -1,4 +1,4 @@
-package gumble // import "layeh.com/gumble/gumble"
+package gumble
 
 // Users is a map of server users.
 //
