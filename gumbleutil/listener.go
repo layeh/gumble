@@ -20,6 +20,8 @@ type Listener struct {
 	ServerConfig        func(e *gumble.ServerConfigEvent)
 }
 
+var _ gumble.EventListener = (*Listener)(nil)
+
 // OnConnect implements gumble.EventListener.OnConnect.
 func (l Listener) OnConnect(e *gumble.ConnectEvent) {
 	if l.Connect != nil {
