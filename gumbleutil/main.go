@@ -16,7 +16,7 @@ import (
 //  --server
 //  --username
 //  --password
-//  --insecure,
+//  --insecure
 //  --certificate
 //  --key
 func Main(listeners ...gumble.EventListener) {
@@ -54,7 +54,7 @@ func Main(listeners ...gumble.EventListener) {
 			keyFile = certificateFile
 		}
 		if certificate, err := tls.LoadX509KeyPair(*certificateFile, *keyFile); err != nil {
-			fmt.Printf("%s: %s\n", os.Args[0], err)
+			fmt.Fprintf(os.Stderr, "%s: %s\n", os.Args[0], err)
 			os.Exit(1)
 		} else {
 			tlsConfig.Certificates = append(tlsConfig.Certificates, certificate)
@@ -71,7 +71,7 @@ func Main(listeners ...gumble.EventListener) {
 	})
 	_, err = gumble.DialWithDialer(new(net.Dialer), address, config, &tlsConfig)
 	if err != nil {
-		fmt.Printf("%s: %s\n", os.Args[0], err)
+		fmt.Fprintf(os.Stderr, "%s: %s\n", os.Args[0], err)
 		os.Exit(1)
 	}
 
