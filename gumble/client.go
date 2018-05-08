@@ -133,37 +133,37 @@ func DialWithDialer(dialer *net.Dialer, addr string, config *Config, tlsConfig *
 
 	go client.pingRoutine()
 
-	var deadline time.Time
-	if !dialer.Deadline.IsZero() {
-		deadline = dialer.Deadline
-	}
-	if dialer.Timeout > 0 {
-		diff := start.Add(dialer.Timeout)
-		if deadline.IsZero() || diff.Before(deadline) {
-			deadline = diff
+	var timeout <-chan time.Time
+	{
+		var deadline time.Time
+		if !dialer.Deadline.IsZero() {
+			deadline = dialer.Deadline
+		}
+		if dialer.Timeout > 0 {
+			diff := start.Add(dialer.Timeout)
+			if deadline.IsZero() || diff.Before(deadline) {
+				deadline = diff
+			}
+		}
+		if !deadline.IsZero() {
+			timer := time.NewTimer(deadline.Sub(start))
+			defer timer.Stop()
+			timeout = timer.C
 		}
 	}
 
-	if !deadline.IsZero() {
-		timeout := deadline.Sub(start)
-		select {
-		case <-time.After(timeout):
-			client.Conn.Close()
-			return nil, errors.New("gumble: synchronization timeout")
-		case err := <-client.connect:
-			if err != nil {
-				client.Conn.Close()
-				return nil, err
-			}
-		}
-	} else {
-		if err := <-client.connect; err != nil {
+	select {
+	case <-timeout:
+		client.Conn.Close()
+		return nil, errors.New("gumble: synchronization timeout")
+	case err := <-client.connect:
+		if err != nil {
 			client.Conn.Close()
 			return nil, err
 		}
-	}
 
-	return client, nil
+		return client, nil
+	}
 }
 
 // State returns the current state of the client.
