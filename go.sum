@@ -1,0 +1,8 @@
+github.com/golang/protobuf v1.3.1 h1:YF8+flBXS5eO826T4nzqPrxfhQThhXl0YzfuUPu4SBg=
+github.com/golang/protobuf v1.3.1/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
+github.com/layeh/gumble v0.0.0-20180508205105-1ea1159c4956 h1:KEnUbfPJta+JG4na6RytZ6HALJGnXwctpQxOI+addbo=
+github.com/layeh/gumble v0.0.0-20180508205105-1ea1159c4956/go.mod h1:fFNDjYExS2/KiVg9/RY+Al8mRNkmcraQ3O4ghyiYWAE=
+github.com/timshannon/go-openal v0.0.0-20170220204755-e0ed4c67cffe h1:6162m+WsONMprxr4bfYQenZTLSURuQhhCdU4d64TFKY=
+github.com/timshannon/go-openal v0.0.0-20170220204755-e0ed4c67cffe/go.mod h1:+VBbVnvHaJyvbTKlF1OCQTTJ1XLEbmCmkYAr1ytq5zc=
+layeh.com/gopus v0.0.0-20161224163843-0ebf989153aa h1:WNU4LYsgD2UHxgKgB36mL6iMAMOvr127alafSlgBbiA=
+layeh.com/gopus v0.0.0-20161224163843-0ebf989153aa/go.mod h1:AOef7vHz0+v4sWwJnr0jSyHiX/1NgsMoaxl+rEPz/I0=
