@@ -1,4 +1,4 @@
-package gumbleopenal // import "layeh.com/gumble/gumbleopenal"
+package gumbleopenal
 
 import (
 	"encoding/binary"

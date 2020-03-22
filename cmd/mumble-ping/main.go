@@ -1,4 +1,4 @@
-package main // import "layeh.com/gumble/cmd/mumble-ping"
+package main
 
 import (
 	"encoding/json"

@@ -42,4 +42,4 @@
 // (Users, Channels, Config, etc.), is thread-unsafe. Accessing or modifying
 // those structures should only be done from inside of an event listener or via
 // Client.Do.
-package gumble // import "layeh.com/gumble/gumble"
+package gumble
