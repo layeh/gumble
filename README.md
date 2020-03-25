@@ -13,22 +13,24 @@
 
 ## Example
 
-    package main
+```go
+package main
 
-    import (
-      "layeh.com/gumble/gumble"
-      "layeh.com/gumble/gumbleutil"
-    )
+import (
+  "layeh.com/gumble/gumble"
+  "layeh.com/gumble/gumbleutil"
+)
 
-    func main() {
-      gumbleutil.Main(gumbleutil.Listener{
-        UserChange: func(e *gumble.UserChangeEvent) {
-          if e.Type.Has(gumble.UserChangeConnected) {
-            e.User.Send("Welcome to the server, " + e.User.Name + "!")
-          }
-        },
-      })
-    }
+func main() {
+  gumbleutil.Main(gumbleutil.Listener{
+    UserChange: func(e *gumble.UserChangeEvent) {
+      if e.Type.Has(gumble.UserChangeConnected) {
+        e.User.Send("Welcome to the server, " + e.User.Name + "!")
+      }
+    },
+  })
+}
+```
 
 ## Related projects
 
