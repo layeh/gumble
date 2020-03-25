@@ -144,6 +144,7 @@ const (
 	PermissionDeniedInvalidUserName    PermissionDeniedType = PermissionDeniedType(MumbleProto.PermissionDenied_UserName)
 	PermissionDeniedChannelFull        PermissionDeniedType = PermissionDeniedType(MumbleProto.PermissionDenied_ChannelFull)
 	PermissionDeniedNestingLimit       PermissionDeniedType = PermissionDeniedType(MumbleProto.PermissionDenied_NestingLimit)
+	PermissionDeniedChannelCountLimit  PermissionDeniedType = PermissionDeniedType(MumbleProto.PermissionDenied_ChannelCountLimit)
 )
 
 // Has returns true if the PermissionDeniedType has changeType part of its
