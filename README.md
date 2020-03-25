@@ -1,5 +1,7 @@
 # gumble
 
+gumble is a [Mumble](https://mumble.info/) client implementation in Go
+
 ## Sub-projects
 
 - gumble [![GoDoc](https://godoc.org/layeh.com/gumble/gumble?status.svg)](https://godoc.org/layeh.com/gumble/gumble)
