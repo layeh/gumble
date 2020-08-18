@@ -1,3 +1,5 @@
+<img src="misc/gumble.svg" width="200" align="right">
+
 # gumble
 
 gumble is a [Mumble](https://mumble.info/) client implementation in Go
