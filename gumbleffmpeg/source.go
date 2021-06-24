@@ -8,9 +8,9 @@ import (
 // Source is a Stream source.
 type Source interface {
 	// must include the -i <filename>
-	arguments() []string
-	start(*exec.Cmd) error
-	done()
+	Arguments() []string
+	Start(*exec.Cmd) error
+	Done()
 }
 
 // sourceFile
@@ -22,15 +22,15 @@ func SourceFile(filename string) Source {
 	return sourceFile(filename)
 }
 
-func (s sourceFile) arguments() []string {
+func (s sourceFile) Arguments() []string {
 	return []string{"-i", string(s)}
 }
 
-func (sourceFile) start(*exec.Cmd) error {
+func (sourceFile) Start(*exec.Cmd) error {
 	return nil
 }
 
-func (sourceFile) done() {
+func (sourceFile) Done() {
 }
 
 // sourceReader
@@ -44,16 +44,16 @@ func SourceReader(r io.ReadCloser) Source {
 	return &sourceReader{r}
 }
 
-func (*sourceReader) arguments() []string {
+func (*sourceReader) Arguments() []string {
 	return []string{"-i", "-"}
 }
 
-func (s *sourceReader) start(cmd *exec.Cmd) error {
+func (s *sourceReader) Start(cmd *exec.Cmd) error {
 	cmd.Stdin = s.r
 	return nil
 }
 
-func (s *sourceReader) done() {
+func (s *sourceReader) Done() {
 	s.r.Close()
 }
 
@@ -75,11 +75,11 @@ func SourceExec(name string, arg ...string) Source {
 	}
 }
 
-func (*sourceExec) arguments() []string {
+func (*sourceExec) Arguments() []string {
 	return []string{"-i", "-"}
 }
 
-func (s *sourceExec) start(cmd *exec.Cmd) error {
+func (s *sourceExec) Start(cmd *exec.Cmd) error {
 	s.cmd = exec.Command(s.name, s.arg...)
 	r, err := s.cmd.StdoutPipe()
 	if err != nil {
@@ -93,7 +93,7 @@ func (s *sourceExec) start(cmd *exec.Cmd) error {
 	return nil
 }
 
-func (s *sourceExec) done() {
+func (s *sourceExec) Done() {
 	if s.cmd != nil {
 		if p := s.cmd.Process; p != nil {
 			p.Kill()
