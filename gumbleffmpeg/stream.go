@@ -83,7 +83,7 @@ func (s *Stream) Play() error {
 		return errors.New("gumbleffmpeg: nil source")
 	}
 
-	args := s.Source.arguments()
+	args := s.Source.Arguments()
 	if s.Offset > 0 {
 		args = append([]string{"-ss", strconv.FormatFloat(s.Offset.Seconds(), 'f', -1, 64)}, args...)
 	}
@@ -94,11 +94,11 @@ func (s *Stream) Play() error {
 	if err != nil {
 		return err
 	}
-	if err := s.Source.start(cmd); err != nil {
+	if err := s.Source.Start(cmd); err != nil {
 		return err
 	}
 	if err := cmd.Start(); err != nil {
-		s.Source.done()
+		s.Source.Done()
 		return err
 	}
 	s.wg.Add(1)
@@ -194,7 +194,7 @@ func (s *Stream) cleanup() {
 	}
 	s.cmd.Process.Kill()
 	s.cmd.Wait()
-	s.Source.done()
+	s.Source.Done()
 	for len(s.pause) > 0 {
 		<-s.pause
 	}
