@@ -115,6 +115,9 @@ func DialWithDialer(dialer *net.Dialer, addr string, config *Config, tlsConfig *
 
 	go client.readRoutine()
 
+	// If Opus support was not explicitly enabled, set Opus flag
+	// based on the presence of the Opus audio codec.
+	opus := client.Config.Opus || getAudioCodec(audioCodecIDOpus) != nil
 	// Initial packets
 	versionPacket := MumbleProto.Version{
 		Version:   proto.Uint32(ClientVersion),
@@ -125,7 +128,7 @@ func DialWithDialer(dialer *net.Dialer, addr string, config *Config, tlsConfig *
 	authenticationPacket := MumbleProto.Authenticate{
 		Username: &client.Config.Username,
 		Password: &client.Config.Password,
-		Opus:     proto.Bool(getAudioCodec(audioCodecIDOpus) != nil),
+		Opus:     proto.Bool(opus),
 		Tokens:   client.Config.Tokens,
 	}
 	client.Conn.WriteProto(&versionPacket)

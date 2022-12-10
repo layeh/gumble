@@ -26,6 +26,11 @@ type Config struct {
 	// The event listeners used when client events are triggered.
 	Listeners      Listeners
 	AudioListeners AudioListeners
+
+	// If true, explicitly signals presence of Opus support.  If
+	// false, this is determined automatically by the presence of
+	// an Opus codec implementation.
+	Opus bool
 }
 
 // NewConfig returns a new Config struct with default values set.

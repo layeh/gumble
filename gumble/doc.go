@@ -36,6 +36,12 @@
 //
 //  opusthreshold=0
 //
+// If your client is not processing audio at all, you can still claim
+// to support Opus so that the Mumble server won't force usage of the
+// legacy CELT codec:
+//
+//        config.Opus = true
+//
 // Thread safety
 //
 // As a general rule, a Client everything that is associated with it
