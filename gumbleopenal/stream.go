@@ -13,7 +13,14 @@ var (
 	ErrState = errors.New("gumbleopenal: invalid state")
 )
 
+type Config struct {
+	Deafen bool
+	Mute   bool
+}
+
 type Stream struct {
+	Config Config
+
 	client *gumble.Client
 	link   gumble.Detacher
 
@@ -25,25 +32,41 @@ type Stream struct {
 	contextSink *openal.Context
 }
 
-func New(client *gumble.Client) (*Stream, error) {
+func Setup(client *gumble.Client, conf Config) (*Stream, error) {
 	s := &Stream{
+		Config:          conf,
 		client:          client,
 		sourceFrameSize: client.Config.AudioFrameSize(),
 	}
 
-	s.deviceSource = openal.CaptureOpenDevice("", gumble.AudioSampleRate, openal.FormatMono16, uint32(s.sourceFrameSize))
+	if !conf.Mute {
+		s.deviceSource = openal.CaptureOpenDevice("", gumble.AudioSampleRate, openal.FormatMono16, uint32(s.sourceFrameSize))
+		s.StartSource()
+	}
 
-	s.deviceSink = openal.OpenDevice("")
-	s.contextSink = s.deviceSink.CreateContext()
-	s.contextSink.Activate()
+	if !conf.Deafen {
+		s.deviceSink = openal.OpenDevice("")
+		s.contextSink = s.deviceSink.CreateContext()
+		s.contextSink.Activate()
 
-	s.link = client.Config.AttachAudio(s)
+		s.link = client.Config.AttachAudio(s)
+	}
 
 	return s, nil
 }
 
+func New(client *gumble.Client) (*Stream, error) {
+	s, err := Setup(client, Config{Mute: true, Deafen: false})
+	if err == nil {
+		s.deviceSource = openal.CaptureOpenDevice("", gumble.AudioSampleRate, openal.FormatMono16, uint32(s.sourceFrameSize))
+	}
+	return s, err
+}
+
 func (s *Stream) Destroy() {
-	s.link.Detach()
+	if s.link != nil {
+		s.link.Detach()
+	}
 	if s.deviceSource != nil {
 		s.StopSource()
 		s.deviceSource.CaptureCloseDevice()
