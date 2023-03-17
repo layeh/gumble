@@ -117,7 +117,7 @@ func DialWithDialer(dialer *net.Dialer, addr string, config *Config, tlsConfig *
 
 	// Initial packets
 	versionPacket := MumbleProto.Version{
-		Version:   proto.Uint32(ClientVersion),
+		VersionV1: proto.Uint32(ClientVersion),
 		Release:   proto.String("gumble"),
 		Os:        proto.String(runtime.GOOS),
 		OsVersion: proto.String(runtime.GOARCH),
@@ -127,6 +127,7 @@ func DialWithDialer(dialer *net.Dialer, addr string, config *Config, tlsConfig *
 		Password: &client.Config.Password,
 		Opus:     proto.Bool(getAudioCodec(audioCodecIDOpus) != nil),
 		Tokens:   client.Config.Tokens,
+		ClientType: proto.Int(client.Config.ClientType | 0),
 	}
 	client.Conn.WriteProto(&versionPacket)
 	client.Conn.WriteProto(&authenticationPacket)

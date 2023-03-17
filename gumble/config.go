@@ -16,6 +16,10 @@ type Config struct {
 	// resent to the server using:
 	//  client.Send(config.Tokens)
 	Tokens AccessTokens
+	// Used to specify when a connecting client is a bot or not.
+	// If set to 0, server will determine the client as a regular client.
+	// If set to 1, server will determine the client as a bot and will be not counted on the user count.
+	ClientType int
 
 	// AudioInterval is the interval at which audio packets are sent. Valid
 	// values are: 10ms, 20ms, 40ms, and 60ms.
