@@ -31,10 +31,24 @@ func Main(listeners ...gumble.EventListener) {
 		flag.Parse()
 	}
 
-	host, port, err := net.SplitHostPort(*server)
-	if err != nil {
-		host = *server
-		port = strconv.Itoa(gumble.DefaultPort)
+	var host string
+	var port string
+
+	// try to lookup SRV records first
+	_, records, err := net.LookupSRV("mumble", "tcp", *server)
+	if err == nil {
+		// just use the first one, which probably isn't a good idea
+		for _, srv := range records {
+			host = srv.Target
+			port = strconv.Itoa(int(srv.Port))
+			break
+		}
+	} else {
+		host, port, err = net.SplitHostPort(*server)
+		if err != nil {
+			host = *server
+			port = strconv.Itoa(gumble.DefaultPort)
+		}
 	}
 
 	keepAlive := make(chan bool)
